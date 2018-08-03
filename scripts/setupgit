@@ -1,0 +1,9 @@
+#git init
+#git add ***
+#git commit -m "MESSAGE"
+
+git config --global user.name "Developer"
+git config --global user.email "kraemer@subsymbolics.com"
+git remote add origin https://github.com/kraemerew/main.git
+git push -u origin master
+
