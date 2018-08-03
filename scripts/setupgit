@@ -2,8 +2,13 @@
 #git add ***
 #git commit -m "MESSAGE"
 
-git config --global user.name "Developer"
-git config --global user.email "kraemer@subsymbolics.com"
-git remote add origin https://github.com/kraemerew/main.git
-git push -u origin master
+#git config --global user.name "Developer"
+#git config --global user.email "kraemer@subsymbolics.com"
+#git remote add origin https://github.com/kraemerew/main.git
+#git push -u origin master
+
+
+# With ssh:
+git clone git://github.com/kraemerew/main.git
+git remote set-url origin git@github.com:kraemerew/main.git
 
