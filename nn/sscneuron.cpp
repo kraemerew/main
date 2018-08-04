@@ -5,7 +5,7 @@
 class SScHiddenNeuron : public SScNeuron
 {
 public:
-    SScHiddenNeuron() : SScNeuron(), m_act(SScActivation::create(SScActivation::Act_Sigmoid))
+    SScHiddenNeuron() : SScNeuron(), m_act(SScActivation::create(SScActivation::Act_Tanh))
     {
         Q_CHECK_PTR(m_act);
     }
@@ -58,6 +58,8 @@ public:
         }
         return 0.0;
     }
+    virtual QList<SScNeuron*> inputs() const { return m_in.keys(); }
+
 private:
     QMap<SScNeuron*,double> m_in;
     QList<SScNeuron*>       m_out;
@@ -72,7 +74,7 @@ public:
     SScInputNeuron() : SScNeuron() {}
     bool addInput(SScNeuron *, double ) { return false; }
     bool delInput(SScNeuron *) { return false; }
-    bool setIO(double v) { return m_input = v; return true; }
+    bool setIO(double v) { m_input = v; return true; }
 
     virtual double deltaw(SScNeuron*) { return 0; }
     virtual double net() { return m_input; }
@@ -84,6 +86,7 @@ public:
         return ret;
     }
     virtual double dltFwd(SScNeuron*) { return 0; }
+    virtual QList<SScNeuron*> inputs() const { return QList<SScNeuron*>();  }
 
 private:
     QList<SScNeuron*>       m_out;
@@ -93,11 +96,11 @@ private:
 class SScOutputNeuron : public SScNeuron
 {
 public:
-    SScOutputNeuron() : SScNeuron(), m_act(SScActivation::create(SScActivation::Act_Sigmoid))
+    SScOutputNeuron() : SScNeuron(), m_act(SScActivation::create(SScActivation::Act_Logistic))
     {
         Q_CHECK_PTR(m_act);
     }
-    bool setIO(double v) { return m_target = v; return true; }
+    bool setIO(double v) { m_target = v; return true; }
 
     bool addInput(SScNeuron *other, double v)
     {
@@ -145,6 +148,7 @@ public:
         }
         return 0.0;
     }
+    virtual QList<SScNeuron*> inputs() const { return m_in.keys(); }
 
 private:
     QMap<SScNeuron*,double> m_in;

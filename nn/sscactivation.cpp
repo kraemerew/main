@@ -12,7 +12,7 @@ public:
     }
 
     virtual double fn() const { return m_net; }
-    virtual double dev() const { return 1.0; };
+    virtual double dev() const { return 1.0; }
     double m_net;
 };
 class SScActivationLogistic : public SScActivation

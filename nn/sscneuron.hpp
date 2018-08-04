@@ -4,14 +4,15 @@
 
 class SScNeuron
 {
+public:
 enum SSeNeuronType
 {
     NeuronType_Input,
     NeuronType_Hidden,
     NeuronType_Output
 };
-public:
     SScNeuron() {}
+    virtual ~SScNeuron() {}
     virtual bool addInput(SScNeuron* other, double v) = 0;
     virtual bool delInput(SScNeuron* other) = 0;
     virtual double out() = 0;
@@ -20,6 +21,7 @@ public:
     virtual double dltFwd(SScNeuron* n) = 0;
     virtual bool  setIO(double v) = 0;
     virtual double deltaw(SScNeuron* n) = 0;
+    virtual QList<SScNeuron*> inputs() const = 0;
     static SScNeuron* create(SSeNeuronType type);
 };
 #endif // SSCNEURON_HPP

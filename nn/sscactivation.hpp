@@ -23,6 +23,4 @@ enum SSeActivation
     static SScActivation* create(SSeActivation);
 };
 
-
-
 #endif // SSCACTIVATION_HPP
