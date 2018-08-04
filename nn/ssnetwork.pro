@@ -26,7 +26,7 @@ SOURCES += \
     sscnetwork.cpp \
     ssccycledetector.cpp \
     sscneuron.cpp \
-    ../../helpers/sscvariantmap.cpp
+    ../helpers/sscvariantmap.cpp
     ../tools/
 
 HEADERS += \
@@ -34,7 +34,7 @@ HEADERS += \
     sscnetwork_global.h \
     ssccycledetector.hpp \
     sscneuron.hpp \
-    ../../helpers/sscvariantmap.hpp
+    ../helpers/sscvariantmap.hpp
 
 unix {
     target.path = /usr/lib
