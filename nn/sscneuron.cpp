@@ -5,7 +5,7 @@
 class SScHiddenNeuron : public SScNeuron
 {
 public:
-    SScHiddenNeuron() : SScNeuron(), m_act(SScActivation::create(SScActivation::Act_Tanh))
+    SScHiddenNeuron() : SScNeuron(NeuronType_Hidden), m_act(SScActivation::create(SScActivation::Act_Tanh))
     {
         Q_CHECK_PTR(m_act);
     }
@@ -71,7 +71,7 @@ private:
 class SScInputNeuron : public SScNeuron
 {
 public:
-    SScInputNeuron() : SScNeuron() {}
+    SScInputNeuron() : SScNeuron(NeuronType_Input) {}
     bool addInput(SScNeuron *, double ) { return false; }
     bool delInput(SScNeuron *) { return false; }
     bool setIO(double v) { m_input = v; return true; }
@@ -96,7 +96,7 @@ private:
 class SScOutputNeuron : public SScNeuron
 {
 public:
-    SScOutputNeuron() : SScNeuron(), m_act(SScActivation::create(SScActivation::Act_Logistic))
+    SScOutputNeuron() : SScNeuron(NeuronType_Output), m_act(SScActivation::create(SScActivation::Act_Logistic))
     {
         Q_CHECK_PTR(m_act);
     }
@@ -157,6 +157,8 @@ private:
     double                  m_target;
 };
 
+SScNeuron::SScNeuron(SSeNeuronType type) : m_type(type) {}
+SScNeuron::~SScNeuron() {}
 
 SScNeuron* SScNeuron::create(SSeNeuronType type)
 {
