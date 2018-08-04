@@ -1,20 +1,25 @@
 #ifndef SSCNEURON_HPP
 #define SSCNEURON_HPP
-
-#include <QMap>
-#include <QVariantMap>
-
-#include "sscweight.hpp"
+#include "sscactivation.hpp"
 
 class SScNeuron
 {
-public:
-    SScNeuron();
-    bool addInput(SScNeuron* other, double v);
-    bool delInput(SScNeuron* other);
-    double out() const;
-    double net() const;
-    QMap<SScNeuron*,double>   m_in;
+enum SSeNeuronType
+{
+    NeuronType_Input,
+    NeuronType_Hidden,
+    NeuronType_Output
 };
-
+public:
+    SScNeuron() {}
+    virtual bool addInput(SScNeuron* other, double v) = 0;
+    virtual bool delInput(SScNeuron* other) = 0;
+    virtual double out() = 0;
+    virtual double net() = 0;
+    virtual double dlt() = 0;
+    virtual double dltFwd(SScNeuron* n) = 0;
+    virtual bool  setIO(double v) = 0;
+    virtual double deltaw(SScNeuron* n) = 0;
+    static SScNeuron* create(SSeNeuronType type);
+};
 #endif // SSCNEURON_HPP

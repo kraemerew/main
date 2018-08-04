@@ -5,18 +5,22 @@
 
 class SScActivation
 {
+public:
 enum SSeActivation
 {
-    Act_Sigmoid,
-    Act_Tanh
+    Act_Identity,
+    Act_Logistic,
+    Act_Tanh,
+    Act_Rbf,
+    Act_MHat,
+    Act_Softmax
 };
 
-public:
     virtual double activate(double net) = 0;
     virtual double fn() const = 0;
     virtual double dev() const = 0;
 
-    static SScActivation* create(SSeActivation);;
+    static SScActivation* create(SSeActivation);
 };
 
 

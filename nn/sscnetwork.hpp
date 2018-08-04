@@ -10,7 +10,7 @@ class SSNETWORKSHARED_EXPORT SScNetwork
 public:
     SScNetwork();
 private:
-    QMap<int,SScNeuron>  m_neurons;
+    QMap<int,SScNeuron*>  m_neurons;
 };
 
 #endif // SSNETWORK_HPP
