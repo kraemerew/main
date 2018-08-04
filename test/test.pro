@@ -13,7 +13,6 @@ SOURCES += main.cpp \
     ../nn/ssccycledetector.cpp \
     ../nn/sscnetwork.cpp \
     ../nn/sscneuron.cpp \
-    ../nn/sscweight.cpp \
     ../nn/sscactivation.cpp \
     ../nn/sscconnection.cpp
 

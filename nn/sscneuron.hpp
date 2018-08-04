@@ -1,6 +1,7 @@
 #ifndef SSCNEURON_HPP
 #define SSCNEURON_HPP
 #include "sscactivation.hpp"
+#include "sscconnection.hpp"
 
 class SScNeuron
 {

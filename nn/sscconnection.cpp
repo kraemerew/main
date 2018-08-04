@@ -24,7 +24,23 @@ public:
     SScConnectionSimple(double v, double initmin, double initmax, double eta) : SScConnectionPrivate(SScConnection::ConnectionType_Simple,v,initmin,initmax,eta) {}
     virtual void update(double dlt) { m_v += (m_eta*dlt); }
 };
+class SScConnectionMomentum : public SScConnectionPrivate
+{
+public:
+    SScConnectionMomentum(double v, double initmin, double initmax, double eta, double m = 0.5)
+        : SScConnectionPrivate(SScConnection::Connectiontype_Momentum,v,initmin,initmax,eta), m_m(m), m_lastdlt(0)
+    {}
+    virtual void trainingReset() { m_lastdlt = 0;  }
+    virtual void update(double dlt)
+    {
+        const double mdlt = dlt+(m_m*m_lastdlt);
+        m_lastdlt = mdlt;
+        m_v += (m_eta*mdlt);
+        m_lastdlt = mdlt;
+    };
 
+    double m_m, m_lastdlt;
+};
 class SScConnectionRPROP : public SScConnectionPrivate
 {
 public:
@@ -73,9 +89,10 @@ SScConnection::SScConnection(SSeConnectionType type, double v, double initmin, d
 {
     switch(type)
     {
-    case SScConnection::ConnectionType_Simple:  d_ptr = new (std::nothrow) SScConnectionSimple  (v,initmin,initmax,eta); break;
-    case SScConnection::Connectiontype_RPROP:   d_ptr = new (std::nothrow) SScConnectionRPROP   (v,initmin,initmax,eta); break;
-    case SScConnection::Connectiontype_LPEM:    d_ptr = new (std::nothrow) SScConnectionLPEM    (v,initmin,initmax,eta); break;
+    case SScConnection::ConnectionType_Simple:      d_ptr = new (std::nothrow) SScConnectionSimple  (v,initmin,initmax,eta); break;
+    case SScConnection::Connectiontype_Momentum:    d_ptr = new (std::nothrow) SScConnectionMomentum(v,initmin,initmax,eta); break;
+    case SScConnection::Connectiontype_RPROP:       d_ptr = new (std::nothrow) SScConnectionRPROP   (v,initmin,initmax,eta); break;
+    case SScConnection::Connectiontype_LPEM:        d_ptr = new (std::nothrow) SScConnectionLPEM    (v,initmin,initmax,eta); break;
     }
     Q_CHECK_PTR(d_ptr);
     if (!d_ptr) d_ptr = new (std::nothrow) SScConnectionSimple(v,initmin,initmax,eta);
