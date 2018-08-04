@@ -12,7 +12,8 @@ TEMPLATE = app
 SOURCES += main.cpp \
     ../nn/ssccycledetector.cpp \
     ../nn/sscnetwork.cpp \
-    ../nn/sscneuron.cpp
+    ../nn/sscneuron.cpp \
+    ../nn/sscweight.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -29,4 +30,5 @@ HEADERS += \
     ../nn/ssccycledetector.hpp \
     ../nn/sscnetwork.hpp \
     ../nn/sscnetwork_global.h \
-    ../nn/sscneuron.hpp
+    ../nn/sscneuron.hpp \
+    ../nn/sscweight.hpp
