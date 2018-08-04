@@ -1,6 +1,7 @@
 #ifndef SSCCONNECTION_HPP
 #define SSCCONNECTION_HPP
 
+class SScConnectionPrivate;
 
 class SScConnection
 {
@@ -12,14 +13,17 @@ public:
         Connectiontype_LPEM     //< linear increment, exp decrement
     };
 
-    explicit SScConnection(SSeConnectionType type, double value, double initmin, double initmax, double eta);
-    virtual ~SScConnection() {}
-    static SScConnection create(SSeConnectionType type, bool& ok, double v, double initmin = -1, double initmax = 1, double eta = 0.1);
+    explicit SScConnection(SSeConnectionType type, double v, double initmin, double initmax, double eta);
+    virtual ~SScConnection();
 
-    inline SSeConnectionType type() const { return m_type; }
+    void update(double dlt);
+    SSeConnectionType type() const;
     void init();
-    SSeConnectionType m_type;
-    double m_v, m_initmin, m_initmax, m_eta;
+    void trainingReset();
+    double value() const;
+
+private:
+    SScConnectionPrivate* d_ptr;
 };
 
 #endif // SSCCONNECTION_HPP

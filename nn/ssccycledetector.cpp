@@ -16,11 +16,9 @@ void SScCycleDetector::addEdge(int v, int w)
 }
 
 bool SScCycleDetector::isCyclicUtil(int v, bool visited[], bool *recStack)
-
 {
     if (visited[v] == false)
     {
-
         visited[v] = true;
         recStack[v] = true;
         list<int>::iterator i;
@@ -32,7 +30,6 @@ bool SScCycleDetector::isCyclicUtil(int v, bool visited[], bool *recStack)
                 return true;
         }
     }
-
     recStack[v] = false;
     return false;
 }
