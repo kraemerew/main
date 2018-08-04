@@ -13,7 +13,8 @@ SOURCES += main.cpp \
     ../nn/ssccycledetector.cpp \
     ../nn/sscnetwork.cpp \
     ../nn/sscneuron.cpp \
-    ../nn/sscweight.cpp
+    ../nn/sscweight.cpp \
+    ../nn/sscactivation.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -31,4 +32,5 @@ HEADERS += \
     ../nn/sscnetwork.hpp \
     ../nn/sscnetwork_global.h \
     ../nn/sscneuron.hpp \
-    ../nn/sscweight.hpp
+    ../nn/sscweight.hpp \
+    ../nn/sscactivation.hpp
