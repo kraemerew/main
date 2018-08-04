@@ -95,7 +95,7 @@ public:
     }
 
     virtual double fn() const { return m_out; }
-    virtual double dev() const { return (m_exp)*(1+m_exp); }
+    virtual double dev() const { return (m_exp)/(1+m_exp); }
     double m_net, m_out, m_exp;
 };
 
@@ -103,12 +103,12 @@ SScActivation* SScActivation::create(SSeActivation type)
 {
     switch (type)
     {
-    case Act_Identity:  return new (std::nothrow) SScActivationIdentity();
-    case Act_Logistic:  return new (std::nothrow) SScActivationLogistic();
-    case Act_Tanh:      return new (std::nothrow) SScActivationTanh();
-    case Act_Rbf:       return new (std::nothrow) SScActivationRbf();
-    case Act_MHat:      return new (std::nothrow) SScActivationMHat();
-    case Act_Softmax:   return new (std::nothrow) SScActivationSoftmax();
+    case Act_Identity:  return new (std::nothrow) SScActivationIdentity ();
+    case Act_Logistic:  return new (std::nothrow) SScActivationLogistic ();
+    case Act_Tanh:      return new (std::nothrow) SScActivationTanh     ();
+    case Act_Rbf:       return new (std::nothrow) SScActivationRbf      ();
+    case Act_MHat:      return new (std::nothrow) SScActivationMHat     ();
+    case Act_Softmax:   return new (std::nothrow) SScActivationSoftmax  ();
     }
 return NULL;
 }
