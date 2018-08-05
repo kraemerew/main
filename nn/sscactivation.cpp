@@ -95,7 +95,7 @@ public:
     }
 
     virtual double fn() const { return m_out; }
-    virtual double dev() const { return (m_exp)/(1+m_exp); }
+    virtual double dev() const { return (m_exp)/(1.0+m_exp); }
     double m_net, m_out, m_exp;
 };
 

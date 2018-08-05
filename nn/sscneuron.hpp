@@ -24,7 +24,7 @@ enum SSeNeuronType
     virtual double dltFwd(SScNeuron* n) = 0;
     virtual bool  setInput(double) = 0;
     virtual bool  setTarget(double) = 0;
-
+    virtual bool setActivation(SScActivation::SSeActivation type);
     virtual double deltaw(SScNeuron* n) = 0;
     virtual QList<SScNeuron*> inputs() const = 0;
     static SScNeuron* create(SSeNeuronType type);
@@ -33,6 +33,7 @@ enum SSeNeuronType
     virtual bool trainingStep(bool cycleDone) = 0;
 
 protected:
-    SSeNeuronType m_type;
+    SSeNeuronType   m_type;
+    SScActivation*  m_act;
 };
 #endif // SSCNEURON_HPP

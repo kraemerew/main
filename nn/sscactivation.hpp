@@ -15,7 +15,7 @@ enum SSeActivation
     Act_MHat,
     Act_SoftPlus
 };
-
+    virtual ~SScActivation() {}
     virtual double activate(double net) = 0;
     virtual double fn() const = 0;
     virtual double dev() const = 0;

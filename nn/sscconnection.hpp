@@ -10,12 +10,12 @@ class SScConnection
 public:
     enum SSeConnectionType
     {
-        ConnectionType_Simple,  //< Fixed learning rate
-        Connectiontype_Momentum,   //< Momentum
-
+        ConnectionType_Simple,   //< Fixed learning rate
+        Connectiontype_Momentum, //< Momentum
         Connectiontype_RPROP,    //< exp increment, exp decrement = Resilient Backpropagation
         Connectiontype_LPLM,     //< linear increment, linear decrement
-        Connectiontype_LPEM      //< linear increment, exp decrement
+        Connectiontype_LPEM,     //< linear increment, exp decrement
+        Connectiontype_Adam      //< ADAM algorithm
     };
 
     explicit SScConnection(SSeConnectionType type, double v, double initmin = -1, double initmax = 1, double eta = 0.1);

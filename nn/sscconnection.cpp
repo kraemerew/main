@@ -129,6 +129,35 @@ public:
     double m_lp, m_lm, m_lastdlt, m_etainit;
 };
 
+class SScConnectionAdam: public SScConnectionPrivate
+{
+public:
+    SScConnectionAdam(double v, double initmin, double initmax, double eta, double beta1 = 0.9, double beta2 = 0.999, double epsilon = 1e-6)
+        : SScConnectionPrivate(SScConnection::Connectiontype_LPEM,v,initmin,initmax,eta),
+          m_beta1(beta1), m_beta2(beta2), m_epsilon(epsilon), m_firstorder(0), m_secorder(0), m_beta1power(1), m_beta2power(1)
+    {}
+    virtual void trainingReset() {
+        m_firstorder = 0, m_secorder = 0; m_beta1power = 1; m_beta2power=1; }
+    virtual void update(double dlt, bool cycleDone)
+    {
+        m_sumdlt += dlt;
+        if (cycleDone)
+        {
+            m_beta1power *= m_beta1;
+            m_beta2power *= m_beta2;
+
+            m_firstorder = (m_beta1*m_firstorder)+((1.0-m_beta1)*m_sumdlt);
+            m_secorder   = (m_beta2*m_secorder)  +((1.0-m_beta2)*(m_sumdlt*m_sumdlt));
+
+            const double mcorr = m_firstorder / (1.0-m_beta1power),
+                         vcorr = m_secorder   / (1.0-m_beta2power);
+            m_v+= (m_eta*mcorr)/(m_epsilon+qSqrt(vcorr));
+            m_sumdlt = 0;
+        }
+    }
+
+    double  m_beta1, m_beta2, m_epsilon, m_firstorder, m_secorder, m_beta1power, m_beta2power;
+};
 
 
 
@@ -143,6 +172,7 @@ SScConnection::SScConnection(SSeConnectionType type, double v, double initmin, d
     case SScConnection::Connectiontype_RPROP:       d_ptr = new (std::nothrow) SScConnectionRPROP   (v,initmin,initmax,eta); break;
     case SScConnection::Connectiontype_LPEM:        d_ptr = new (std::nothrow) SScConnectionLPEM    (v,initmin,initmax,eta); break;
     case SScConnection::Connectiontype_LPLM:        d_ptr = new (std::nothrow) SScConnectionLPLM    (v,initmin,initmax,eta); break;
+    case SScConnection::Connectiontype_Adam:        d_ptr = new (std::nothrow) SScConnectionAdam    (v,initmin,initmax,eta); break;
     }
     Q_CHECK_PTR(d_ptr);
     if (!d_ptr) d_ptr = new (std::nothrow) SScConnectionSimple(v,initmin,initmax,eta);

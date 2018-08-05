@@ -33,7 +33,7 @@ public:
     }
     virtual double deltaw(SScNeuron* n)
     {
-        return m_in.contains(n) ? -n->out()*dlt() : 0;
+        return -n->out()*dlt();
     }
     virtual QList<SScNeuron*> inputs() const { return m_in.keys(); }
     virtual double dltFwd(SScNeuron* n)
@@ -45,7 +45,6 @@ public:
         for(QMap<SScNeuron*,QSharedPointer<SScConnection> >::iterator it = m_in.begin(); it != m_in.end(); ++it)
         {
             const double grad = deltaw(it.key());
-            //qWarning("GRADIENT %lf", grad);
             it.value()->update(grad,cycleDone);
         }
         return true;
@@ -57,9 +56,8 @@ public:
 class SScHiddenNeuron : public SScConnectedNeuron
 {
 public:
-    SScHiddenNeuron() : SScConnectedNeuron(NeuronType_Hidden), m_act(SScActivation::create(SScActivation::Act_Tanh))
+    SScHiddenNeuron() : SScConnectedNeuron(NeuronType_Hidden)
     {
-        Q_CHECK_PTR(m_act);
     }
 
     virtual bool  setInput(double) { Q_ASSERT(false); return false; }
@@ -80,7 +78,6 @@ public:
 
 private:
     QList<SScNeuron*>       m_out;
-    SScActivation*          m_act;
 };
 
 
@@ -143,9 +140,9 @@ private:
 class SScOutputNeuron : public SScConnectedNeuron
 {
 public:
-    SScOutputNeuron() : SScConnectedNeuron(NeuronType_Output), m_act(SScActivation::create(SScActivation::Act_Logistic))
+    SScOutputNeuron() : SScConnectedNeuron(NeuronType_Output)
     {
-        Q_CHECK_PTR(m_act);
+        setActivation(SScActivation::Act_Logistic);
     }
 
     virtual bool    setInput(double) { Q_ASSERT(false); return false; }
@@ -156,11 +153,27 @@ public:
     virtual void    connectForward(const QList<SScNeuron*>&) { }
 
 private:
-    SScActivation*          m_act;
     double                  m_target;
 };
 
-SScNeuron::SScNeuron(SSeNeuronType type) : m_type(type) {}
+SScNeuron::SScNeuron(SSeNeuronType type) : m_type(type), m_act(NULL)
+{
+    switch(type)
+    {
+        case NeuronType_Hidden: setActivation(SScActivation::Act_Tanh);     break;
+        case NeuronType_Output: setActivation(SScActivation::Act_Logistic); break;
+        default:                setActivation(SScActivation::Act_Identity); break;
+    }
+}
+
+bool SScNeuron::setActivation(SScActivation::SSeActivation type)
+{
+    if (m_act) delete m_act;
+    m_act = SScActivation::create(type);
+    Q_CHECK_PTR(m_act);
+    return m_act!=NULL;
+}
+
 SScNeuron::~SScNeuron() {}
 
 SScNeuron* SScNeuron::create(SSeNeuronType type)
