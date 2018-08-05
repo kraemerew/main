@@ -23,8 +23,8 @@ int main(int argc, char *argv[])
     net.connect(i2,h1,-0.3);
     net.connect(h1,o1, 0.2);
 
-    net.idx2n(o1)->setActivation(SScActivation::Act_Logistic);
-    net.idx2n(h1)->setActivation(SScActivation::Act_Logistic);
+    net.idx2n(o1)->setActivation(SScActivation::Act_SoftPlus);
+    net.idx2n(h1)->setActivation(SScActivation::Act_SoftPlus);
 
     // training preparation
     net.connectForward();

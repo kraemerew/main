@@ -13,7 +13,7 @@ public:
     {
         Q_CHECK_PTR(other);
         if ((this==other) || m_in.contains(other)) return false;
-        m_in[other]=QSharedPointer<SScConnection>(new SScConnection(SScConnection::Connectiontype_RPROP,v));
+        m_in[other]=QSharedPointer<SScConnection>(new SScConnection(SScConnection::Connectiontype_Adam,v));
         return true;
     }
 

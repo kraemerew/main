@@ -12,10 +12,14 @@ public:
     {
         ConnectionType_Simple,   //< Fixed learning rate
         Connectiontype_Momentum, //< Momentum
-        Connectiontype_RPROP,    //< exp increment, exp decrement = Resilient Backpropagation
+        Connectiontype_RPROP,    //< Resilient Backpropagation
         Connectiontype_LPLM,     //< linear increment, linear decrement
         Connectiontype_LPEM,     //< linear increment, exp decrement
-        Connectiontype_Adam      //< ADAM algorithm
+        Connectiontype_EPEM,     //< exp increment, exp decrement
+
+        Connectiontype_RMSProp,  //< RMSProp algorithm
+        Connectiontype_Adam,     //< ADAM algorithm
+        Connectiontype_AMSGrad   //< ADAM with second order using the maximum
     };
 
     explicit SScConnection(SSeConnectionType type, double v, double initmin = -1, double initmax = 1, double eta = 0.1);
