@@ -1,4 +1,5 @@
 #include <QCoreApplication>
+#include <QElapsedTimer>
 
 #include "../nn/sscnetwork.hpp"
 
@@ -6,8 +7,9 @@ int main(int argc, char *argv[])
 {
 
     QCoreApplication a(argc, argv);
-    SScNetwork net;
 
+    // Build net
+    SScNetwork net;
     const int bi = net.addNeuron(SScNeuron::NeuronType_Bias),
               i1 = net.addNeuron(SScNeuron::NeuronType_Input),
               i2 = net.addNeuron(SScNeuron::NeuronType_Input),
@@ -20,7 +22,12 @@ int main(int argc, char *argv[])
     net.connect(i1,h1,-0.1);
     net.connect(i2,h1,-0.3);
     net.connect(h1,o1, 0.2);
+
+    // training preparation
     net.connectForward();
+
+    // training
+    QElapsedTimer t; t.start();
     int c=0;
     double err = 0;
     bool done = false;
@@ -44,10 +51,12 @@ int main(int argc, char *argv[])
             qWarning("Cycle %d Error %lf", c, err);
             if (err<0.1) done = true;
         }
-            net.idx2n(o1)->trainingStep();
-            net.idx2n(h1)->trainingStep();
 
+        const bool endOfCycle = (p==3);
+        net.idx2n(o1)->trainingStep(endOfCycle);
+        net.idx2n(h1)->trainingStep(endOfCycle);
     }
     while (!done);
+    qWarning("Training took %d microsectonds", (int)t.nsecsElapsed()/1000);
     return a.exec();
 }

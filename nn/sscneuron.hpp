@@ -30,7 +30,7 @@ enum SSeNeuronType
     static SScNeuron* create(SSeNeuronType type);
     inline SSeNeuronType type() const { return m_type; }
     virtual void connectForward(const QList<SScNeuron*>& fwd) = 0;
-    virtual bool trainingStep() = 0;
+    virtual bool trainingStep(bool cycleDone) = 0;
 
 protected:
     SSeNeuronType m_type;

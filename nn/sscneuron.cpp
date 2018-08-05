@@ -13,7 +13,7 @@ public:
     {
         Q_CHECK_PTR(other);
         if ((this==other) || m_in.contains(other)) return false;
-        m_in[other]=QSharedPointer<SScConnection>(new SScConnection(SScConnection::Connectiontype_Momentum,v));
+        m_in[other]=QSharedPointer<SScConnection>(new SScConnection(SScConnection::Connectiontype_RPROP,v));
         return true;
     }
 
@@ -40,13 +40,13 @@ public:
     {
         return m_in.contains(n) ? m_in[n]->value()*dlt() : 0.0;
     }
-    virtual bool trainingStep()
+    virtual bool trainingStep(bool cycleDone)
     {
         for(QMap<SScNeuron*,QSharedPointer<SScConnection> >::iterator it = m_in.begin(); it != m_in.end(); ++it)
         {
             const double grad = deltaw(it.key());
             //qWarning("GRADIENT %lf", grad);
-            it.value()->update(grad);
+            it.value()->update(grad,cycleDone);
         }
         return true;
     }
@@ -106,7 +106,7 @@ public:
     }
     virtual double dltFwd(SScNeuron*) { return 0; }
     virtual QList<SScNeuron*> inputs() const { return QList<SScNeuron*>();  }
-    virtual bool trainingStep() { return false; }
+    virtual bool trainingStep(bool) { return false; }
     virtual void connectForward(const QList<SScNeuron*>& fwd) { m_out = fwd; }
 
 private:
@@ -133,7 +133,7 @@ public:
     }
     virtual double dltFwd(SScNeuron*) { return 0; }
     virtual QList<SScNeuron*> inputs() const { return QList<SScNeuron*>();  }
-    virtual bool trainingStep() { return false; }
+    virtual bool trainingStep(bool) { return false; }
     virtual void connectForward(const QList<SScNeuron*>& fwd) { m_out = fwd; }
 
 private:

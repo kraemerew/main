@@ -13,17 +13,18 @@ public:
         ConnectionType_Simple,  //< Fixed learning rate
         Connectiontype_Momentum,   //< Momentum
 
-        Connectiontype_RPROP,   //< Resilient Backpropagation
-        Connectiontype_LPEM     //< linear increment, exp decrement
+        Connectiontype_RPROP,    //< exp increment, exp decrement = Resilient Backpropagation
+        Connectiontype_LPLM,     //< linear increment, linear decrement
+        Connectiontype_LPEM      //< linear increment, exp decrement
     };
 
     explicit SScConnection(SSeConnectionType type, double v, double initmin = -1, double initmax = 1, double eta = 0.1);
     virtual ~SScConnection();
-
-    void update(double dlt);
+    void trainingReset();
+    void update (double dlt, bool cycleDone);
     SSeConnectionType type() const;
     void init();
-    void trainingReset();
+
     double value() const;
 
 private:
