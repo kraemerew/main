@@ -14,7 +14,9 @@ SOURCES += main.cpp \
     ../nn/sscnetwork.cpp \
     ../nn/sscneuron.cpp \
     ../nn/sscactivation.cpp \
-    ../nn/sscconnection.cpp
+    ../nn/sscconnection.cpp \
+    ../pso/psoswarm.cpp \
+    psoparticle.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -34,4 +36,6 @@ HEADERS += \
     ../nn/sscneuron.hpp \
     ../nn/sscweight.hpp \
     ../nn/sscactivation.hpp \
-    ../nn/sscconnection.hpp
+    ../nn/sscconnection.hpp \
+    ../pso/psoswarm.hpp \
+    psoparticle.hpp
