@@ -1,10 +1,10 @@
 #include "psoparticle.hpp"
 #include <QtMath>
 
-SScPSOParticle::SScPSOParticle() : m_dim(0), m_ftset(false), m_pbestft(0), m_cog(1), m_grp(1)
+SScPSOParticle::SScPSOParticle() : m_dim(0), m_ftset(false), m_pbestft(0)
 {}
 
-SScPSOParticle::SScPSOParticle(quint32 dim, double min, double max, double vperc) : m_dim(dim), m_ftset(false), m_pbestft(0), m_cog(1), m_grp(1)
+SScPSOParticle::SScPSOParticle(quint32 dim, double min, double max, double vperc) : m_dim(dim), m_ftset(false), m_pbestft(0)
 {
     Q_ASSERT(dim>0);
     m_p.reserve(dim);
@@ -57,10 +57,10 @@ QVector<double> SScPSOParticle::sub(const QVector<double>& v1, const QVector<dou
     return ret;
 }
 
-void SScPSOParticle::move(const QVector<double>& gbest)
+void SScPSOParticle::move(const QVector<double>& gbest, double cog, double grp)
 {
     const QVector<double> difflocal = sub(m_pbest,m_p), diffgrp = sub(gbest,m_p);
-    const double p1 = m_cog*rVal(0,1), p2 = m_grp*rVal(0,1);
+    const double p1 = cog*rVal(0,1), p2 = grp*rVal(0,1);
     m_p = add(difflocal,diffgrp,p1,p2);
 }
 

@@ -10,7 +10,7 @@ public:
     QVector<double> get() const;
     QVector<double> getBest() const;
 
-    void move(const QVector<double>& gbest);
+    void move(const QVector<double>& gbest, double, double);
     bool assignFitness(double value);
 
 private:
@@ -21,7 +21,7 @@ private:
 
     quint32         m_dim;
     bool            m_ftset;
-    double          m_pbestft, m_cog, m_grp;
+    double          m_pbestft;
     QVector<double> m_p, m_pbest, m_v;
 };
 

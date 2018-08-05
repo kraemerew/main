@@ -25,7 +25,7 @@ bool SScPSOSwarm::step()
     }
     for (int i=0; i<m_swarm.size(); ++i)
     {
-        m_swarm[i].move(m_gbest);
+        m_swarm[i].move(m_gbest, m_ifc->cog(),m_ifc->grp());
     }
     return ret;
 }

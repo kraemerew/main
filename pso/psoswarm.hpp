@@ -9,7 +9,10 @@ public:
     virtual quint32 size    () const { return 100; }
     virtual double  min     () const { return -1; }
     virtual double  max     () const { return  1; }
-    virtual double  vperc   () const { return 1; }
+    virtual double  vperc   () const { return  1; }
+    virtual double  cog     () const { return  1.1; }
+    virtual double  grp     () const { return  0.9; }
+
     virtual double  fitness (const SScPSOParticle& p) const = 0;
 };
 
