@@ -82,10 +82,10 @@ public:
     }
     double m_net, m_netsq, m_out;
 };
-class SScActivationSoftmax: public SScActivation
+class SScActivationSoftPlus: public SScActivation
 {
 public:
-    SScActivationSoftmax() : SScActivation(), m_net(0), m_out(0), m_exp(0) {}
+    SScActivationSoftPlus() : SScActivation(), m_net(0), m_out(0), m_exp(0) {}
     virtual double activate(double net)
     {
         m_net = net;
@@ -108,7 +108,7 @@ SScActivation* SScActivation::create(SSeActivation type)
     case Act_Tanh:      return new (std::nothrow) SScActivationTanh     ();
     case Act_Rbf:       return new (std::nothrow) SScActivationRbf      ();
     case Act_MHat:      return new (std::nothrow) SScActivationMHat     ();
-    case Act_Softmax:   return new (std::nothrow) SScActivationSoftmax  ();
+    case Act_SoftPlus:  return new (std::nothrow) SScActivationSoftPlus ();
     }
 return NULL;
 }

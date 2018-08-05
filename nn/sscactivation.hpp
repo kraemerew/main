@@ -13,7 +13,7 @@ enum SSeActivation
     Act_Tanh,
     Act_Rbf,
     Act_MHat,
-    Act_Softmax
+    Act_SoftPlus
 };
 
     virtual double activate(double net) = 0;
