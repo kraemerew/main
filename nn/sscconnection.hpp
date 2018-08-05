@@ -17,7 +17,7 @@ public:
         Connectiontype_LPEM     //< linear increment, exp decrement
     };
 
-    explicit SScConnection(SSeConnectionType type, double v, double initmin, double initmax, double eta);
+    explicit SScConnection(SSeConnectionType type, double v, double initmin = -1, double initmax = 1, double eta = 0.1);
     virtual ~SScConnection();
 
     void update(double dlt);

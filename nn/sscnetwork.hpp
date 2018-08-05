@@ -15,7 +15,7 @@ public:
     bool delNeuron(int idx);
     int n2idx(SScNeuron* n) const;
     SScNeuron* idx2n(int idx) const;
-
+void connectForward();
     bool contains(SScNeuron* n) const;
     bool connect(SScNeuron* from, SScNeuron* to, double v);
     bool disconnect(SScNeuron* from, SScNeuron* to);
