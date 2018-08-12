@@ -24,6 +24,12 @@ public:
     /*!
      * \brief Training step
      * \param v Pattern
+     * \param nr    Number of neurons to train negatively
+     */
+    void step(const QVector<double>& v, int nr);
+    /*!
+     * \brief Alternative training which will only train the winner and all the others negatively
+     * \param v
      */
     void step(const QVector<double>& v);
 

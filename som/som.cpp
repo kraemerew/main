@@ -1,5 +1,7 @@
 #include "som.hpp"
 #include <Qt>
+#include <QPair>
+#include <QtMath>
 
 QVector<double> diff(const QVector<double>& v1, const QVector<double>& v2)
 {
@@ -34,6 +36,8 @@ public:
             m_g.  append(0.0);
             m_eta.append(etaamp*(double)qrand()/(double)INT_MAX);
         }
+        m_gav  =m_g;
+        m_etaav=m_eta;
     }
     inline bool isNull() const { return m_v.isEmpty(); }
 
@@ -71,33 +75,47 @@ public:
     }
     void moveTo(const QVector<double>& v)
     {
-        update(diff(v,m_v));
+        update(diff(v,m_v),m_g,m_eta, 1.0);
     }
-    void moveAway(const QVector<double>& v)
+    void moveAway(const QVector<double>& v, double scale)
     {
-        update(diff(m_v,v));
+        update(diff(m_v,v),m_gav,m_etaav,scale);
     }
 
 private:
-    void update(const QVector<double>& g)
+    void update(const QVector<double>& g, QVector<double>& grad, QVector<double>& eta, double scale)
     {
         Q_ASSERT(g.size()==m_v.size());
         for (int i=0; i<g.size(); ++i)
         {
-            const double sgn = m_g[i]*g[i];
-            if (sgn>0) m_eta[i]*=1.2; else if (sgn<0) m_eta[i]*=0.5;
+            const double sgn = grad[i]*g[i];
+            if (sgn>0) eta[i]*=1.2; else if (sgn<0) eta[i]*=0.5;
         }
         for (int i=0; i<g.size(); ++i)
         {
-            if (g[i]>0) m_v[i]+=m_eta[i]; else
-            if (g[i]<0) m_v[i]-=m_eta[i];
+            if (g[i]>0) m_v[i]+=scale*eta[i]; else
+            if (g[i]<0) m_v[i]-=scale*eta[i];
         }
-        m_g=g;
+        grad=g;
     }
 
-    QVector<double> m_v, m_g, m_eta;
+    QVector<double> m_v, m_g, m_gav, m_eta, m_etaav;
     SScActivation* m_act;
 };
+
+class SScSortableSOMNeuron : public QPair<double,SScSOMNeuron*>
+{
+public:
+
+    explicit SScSortableSOMNeuron(SScSOMNeuron* n, double net)
+        : QPair<double,SScSOMNeuron*>(net,n) {}
+    explicit SScSortableSOMNeuron(SScSOMNeuron* n, const QVector<double>& v)
+        : QPair<double,SScSOMNeuron*>(n->net(v),n) {}
+
+    bool operator <= (const SScSortableSOMNeuron& other) const { return (*this).first<=other.first; }
+
+};
+
 
 
 SScSOMNetwork::SScSOMNetwork(int elements, int dim)
@@ -133,5 +151,34 @@ void SScSOMNetwork::step(const QVector<double>& v)
             sel   = n;
         }
     }
-    foreach(SScSOMNeuron* n, m_el) if (Q_LIKELY(n!=sel)) n->moveAway(v); else n->moveTo(v);
+    foreach(SScSOMNeuron* n, m_el) if (Q_LIKELY(n!=sel)) n->moveAway(v,0.1); else n->moveTo(v);
 }
+
+
+void SScSOMNetwork::step(const QVector<double>& v, int nr)
+{
+    Q_ASSERT(nr>0);
+
+    QList<SScSortableSOMNeuron> l;
+    foreach(SScSOMNeuron* n, m_el) l << SScSortableSOMNeuron(n,v);
+
+
+    qSort(l);
+
+    l.takeLast().second->moveTo(v);
+    double min = l.first().first, max = l.first().first;
+    foreach(const SScSortableSOMNeuron& sn, l) if (sn.first<min) min=sn.first; else if (sn.first>max) max = sn.first;
+
+    if (min<max)
+    {
+        const double d = 1.0/(max-min);
+
+        foreach(const SScSortableSOMNeuron& sn, l)
+        {
+            const double scale = 1.0-(d*(sn.first-min)),
+                         rbf = exp(-scale*scale);
+            sn.second->moveAway(v,rbf);
+        }
+    }
+}
+
