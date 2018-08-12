@@ -26,15 +26,16 @@ SOURCES += \
     sscnetwork.cpp \
     ssccycledetector.cpp \
     sscneuron.cpp \
-    ../helpers/sscvariantmap.cpp
-    ../tools/
+    ../helpers/sscvariantmap.cpp \
+    ../som/som.cpp
 
 HEADERS += \
     sscnetwork.hpp \
     sscnetwork_global.h \
     ssccycledetector.hpp \
     sscneuron.hpp \
-    ../helpers/sscvariantmap.hpp
+    ../helpers/sscvariantmap.hpp \
+    ../som/som.hpp
 
 unix {
     target.path = /usr/lib
