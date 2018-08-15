@@ -28,8 +28,9 @@ public:
     {
         Q_ASSERT(m_w*m_h>0);
         m_data.resize(w*h);
-        m_data.fill(fillvalue,w*h);
+        fill(fillvalue);
     }
+    inline void                     fill(T fillvalue){ m_data.fill(fillvalue,len()); }
     inline bool                     isEmpty () const { return m_data.isEmpty(); }
     inline quint32                  len     () const { return m_data.size(); }
     inline quint32                  width   () const { return m_w; }

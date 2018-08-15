@@ -6,10 +6,16 @@
 
 int main(int argc, char *argv[])
 {
-    SScImage* im = new SScImage();
+    auto im = new SScImage();
     im->load("/home/developer/alpha.jpg");
-    im->grey();
-//delete im;
+    qWarning("loaded %dx%d",im->width(),im->height());
+    QElapsedTimer t; t.start();
+    auto r = im->red(), g = im->blue(), b = im->green();
+    SScImage im2(r,g,b);
+    qWarning("Elapsed %d ms", (int)t.elapsed());
+    im2.save("/home/developer/out.jpg");
+    qWarning("SAVED %dx%d",im2.width(),im2.height());
+    //delete im;
     QCoreApplication a(argc, argv);
 
    /* // Build net

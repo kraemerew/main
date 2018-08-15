@@ -16,7 +16,7 @@ SOURCES += main.cpp \
     ../nn/sscactivation.cpp \
     ../nn/sscconnection.cpp \
     ../pso/psoswarm.cpp \
-    psoparticle.cpp \
+    ../pso/psoparticle.cpp \
     ../som/som.cpp \
     ../image/matrix.cpp \
     ../image/image.cpp
@@ -41,7 +41,7 @@ HEADERS += \
     ../nn/sscactivation.hpp \
     ../nn/sscconnection.hpp \
     ../pso/psoswarm.hpp \
-    psoparticle.hpp \
+    ../pso/psoparticle.hpp \
     ../som/som.hpp \
     ../image/matrix.hpp \
     ../image/image.hpp

@@ -5,13 +5,18 @@
 #include <QImage>
 class SScImage : public QImage
 {
+
 public:
+
+
+
     SScImage() : QImage() {}
     SScImage(const QImage& im) : QImage(converted(im))
     {}
     SScImage(const SScMatrix<uchar>& m) : QImage(m.width(),m.height(),QImage::Format_Grayscale8)
     {
     }
+
     SScImage(const SScMatrix<uchar>& r, const SScMatrix<uchar>& g, const SScMatrix<uchar>& b)
         : QImage(r.width(),r.height(),QImage::Format_RGB888)
     {
@@ -19,16 +24,8 @@ public:
         {
             for (quint32 i=0; i<r.height(); ++i)
             {
-                uchar *l = scanLine(i);
                 const uchar *rl = r.constLine(i), *gl = g.constLine(i), *bl=b.constLine(i);
-                for (quint32 j=0; j<r.width(); ++j)
-                {
-                    (*l)=qRgb(*rl,*gl,*bl);
-                    ++l;
-                    ++rl;
-                    ++gl;
-                    ++bl;
-                }
+                for (quint32 j=0; j<r.width(); ++j) setPixel(j,i,qRgb(*rl++,*gl++,*bl++));
             }
         }
     }
@@ -53,7 +50,7 @@ public:
 
     SScMatrix<uchar> red    ()
     {
-        if (!m_r.isEmpty() || format()!=QImage::Format_RGB888) return m_r;
+        if (!m_r.isEmpty()) return m_r;
 
         m_r = SScMatrix<uchar>(width(),height());
         for (int i=0; i<height(); ++i)
@@ -69,7 +66,7 @@ public:
     }
     SScMatrix<uchar> green    ()
     {
-        if (!m_g.isEmpty() || format()!=QImage::Format_RGB888) return m_g;
+        if (!m_g.isEmpty()) return m_g;
         m_g = SScMatrix<uchar>(width(),height());
         for (int i=0; i<height(); ++i)
         {
@@ -84,7 +81,7 @@ public:
     }
     SScMatrix<uchar> blue    ()
     {
-        if (!m_b.isEmpty()|| format()!=QImage::Format_RGB888) return m_b;
+        if (!m_b.isEmpty()) return m_b;
         m_b = SScMatrix<uchar>(width(),height());
         for (int i=0; i<height(); ++i)
         {
@@ -106,7 +103,7 @@ private:
     inline QImage converted(const QImage& im) const
     {
         if (im.allGray()) return im.convertToFormat(QImage::Format_Grayscale8);
-        if (im.format()==QImage::Format_RGB888) return im.convertToFormat(QImage::Format_RGB888);
+        if (im.format()!=QImage::Format_RGB888) return im.convertToFormat(QImage::Format_RGB888);
         return im;
     }
 };
