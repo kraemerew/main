@@ -10,10 +10,13 @@ int main(int argc, char *argv[])
     im->load("/home/developer/alpha.jpg");
     qWarning("loaded %dx%d",im->width(),im->height());
     QElapsedTimer t; t.start();
-    auto r = im->red(), g = im->blue(), b = im->green();
+    auto r = im->red(), b = im->blue(), g = im->green();
     SScImage im2(r,g,b);
     qWarning("Elapsed %d ms", (int)t.elapsed());
     im2.save("/home/developer/out.jpg");
+    SScImage(r).save("/home/developer/out_r.png");
+    SScImage(g).save("/home/developer/out_g.png");
+    SScImage(b).save("/home/developer/out_b.png");
     qWarning("SAVED %dx%d",im2.width(),im2.height());
     //delete im;
     QCoreApplication a(argc, argv);
