@@ -2,13 +2,17 @@
 #include <QElapsedTimer>
 
 #include "../nn/sscnetwork.hpp"
+#include "../image/image.hpp"
 
 int main(int argc, char *argv[])
 {
-
+    SScImage* im = new SScImage();
+    im->load("/home/developer/alpha.jpg");
+    im->grey();
+//delete im;
     QCoreApplication a(argc, argv);
 
-    // Build net
+   /* // Build net
     SScNetwork net;
     const int bi = net.addNeuron(SScNeuron::NeuronType_Bias),
               i1 = net.addNeuron(SScNeuron::NeuronType_Input),
@@ -61,5 +65,5 @@ int main(int argc, char *argv[])
     }
     while (!done);
     qWarning("Training took %d microseconds", (int)t.nsecsElapsed()/1000);
-    return a.exec();
+    */return a.exec();
 }

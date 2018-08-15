@@ -1,5 +1,5 @@
 QT += core
-QT -= gui
+QT += gui
 
 CONFIG += c++11
 
@@ -17,7 +17,9 @@ SOURCES += main.cpp \
     ../nn/sscconnection.cpp \
     ../pso/psoswarm.cpp \
     psoparticle.cpp \
-    ../som/som.cpp
+    ../som/som.cpp \
+    ../image/matrix.cpp \
+    ../image/image.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -40,4 +42,6 @@ HEADERS += \
     ../nn/sscconnection.hpp \
     ../pso/psoswarm.hpp \
     psoparticle.hpp \
-    ../som/som.hpp
+    ../som/som.hpp \
+    ../image/matrix.hpp \
+    ../image/image.hpp
