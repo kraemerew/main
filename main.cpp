@@ -6,12 +6,23 @@
 #include "cam/cam.hpp"
 int main(int argc, char *argv[])
 {
+    QCoreApplication a(argc, argv);
 
-    foreach(auto d, SSnCam::deviceNames()) qWarning(">>>%s", qPrintable(d));
+    SScCam cam(0,0);
+    if (cam.openStream("MJPG",320,240))
+    {
+        qWarning("OPENED");
+    }
+    else
+    {
+        qWarning("Open failed!!!!!!!!!!!!");
+    }
+    //const bool allow = SScCamCapability(0).allowed("MJPG",320,240);
+   // qWarning("RES %s", allow?"ALLOWED":"NOT ALLOWED");
 
-    SScCamCapability(0).dump();
 
-    auto im = new SScImage();
+
+    /*auto im = new SScImage();
     im->load("/home/developer/alpha.jpg");
     qWarning("loaded %dx%d",im->width(),im->height());
     QElapsedTimer t; t.start();
@@ -22,9 +33,8 @@ int main(int argc, char *argv[])
     SScImage(r).save("/home/developer/out_r.png");
     SScImage(g).save("/home/developer/out_g.png");
     SScImage(b).save("/home/developer/out_b.png");
-    qWarning("SAVED %dx%d",im2.width(),im2.height());
+    qWarning("SAVED %dx%d",im2.width(),im2.height());*/
     //delete im;
-    QCoreApplication a(argc, argv);
 
    /* // Build net
     SScNetwork net;
