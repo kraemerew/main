@@ -2,7 +2,7 @@
 #define CAM_HPP
 #include <QStringList>
 #include <QVariantMap>
-
+#include <QVector>
 class SScCamCapability : public QVariantMap
 {
 public:
@@ -75,15 +75,24 @@ private:
 
 class SScCam : public QObject, public SScCamCapability
 {
+Q_OBJECT
 public:
     explicit SScCam(QObject* parent = 0);
     explicit SScCam(quint32 device, QObject* parent = 0);
     explicit SScCam(const QString& device, QObject* parent = 0);
 
 inline bool isOpen() const  { return m_fd>=0; }
+    bool closeStream();
     bool openStream(const QString& fourcc, quint32 w, quint32 h);
+
+    void grabFrames(quint32 nr);
+
 private:
+    bool streamOn();
+    bool streamOff();
+    void package(void*);
     int m_fd;
+    QVector<void*> m_buffers;
 };
 
 

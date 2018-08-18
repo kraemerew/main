@@ -9,9 +9,10 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
 
     SScCam cam(0,0);
-    if (cam.openStream("MJPG",320,240))
+    if (cam.openStream("MJPG",1280,1024))
     {
         qWarning("OPENED");
+        cam.grabFrames(50);
     }
     else
     {
