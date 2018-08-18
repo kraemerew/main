@@ -163,7 +163,7 @@ void SScSOMNetwork::step(const QVector<double>& v, int nr)
     foreach(SScSOMNeuron* n, m_el) l << SScSortableSOMNeuron(n,v);
 
 
-    qSort(l);
+    std::sort(l.begin(),l.end());
 
     l.takeLast().second->moveTo(v);
     double min = l.first().first, max = l.first().first;

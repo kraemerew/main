@@ -47,3 +47,5 @@ HEADERS += \
     som/som.hpp \
     image/matrix.hpp \
     image/image.hpp
+
+LIBS += -lv4l1

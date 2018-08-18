@@ -8,6 +8,9 @@ int main(int argc, char *argv[])
 {
 
     foreach(auto d, SSnCam::deviceNames()) qWarning(">>>%s", qPrintable(d));
+
+    SScCamCapability(0).dump();
+
     auto im = new SScImage();
     im->load("/home/developer/alpha.jpg");
     qWarning("loaded %dx%d",im->width(),im->height());
