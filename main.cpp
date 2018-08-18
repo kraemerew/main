@@ -1,11 +1,13 @@
 #include <QCoreApplication>
 #include <QElapsedTimer>
 
-#include "../nn/sscnetwork.hpp"
-#include "../image/image.hpp"
-
+#include "nn/sscnetwork.hpp"
+#include "image/image.hpp"
+#include "cam/cam.hpp"
 int main(int argc, char *argv[])
 {
+
+    foreach(auto d, SSnCam::deviceNames()) qWarning(">>>%s", qPrintable(d));
     auto im = new SScImage();
     im->load("/home/developer/alpha.jpg");
     qWarning("loaded %dx%d",im->width(),im->height());
