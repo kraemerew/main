@@ -8,16 +8,8 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-    SScCam cam(0,0);
-    if (cam.openStream("MJPG",1280,1024))
-    {
-        qWarning("OPENED");
-        cam.grabFrames(50);
-    }
-    else
-    {
-        qWarning("Open failed!!!!!!!!!!!!");
-    }
+    SScCam cam(0,"MJPG",320,240,3);
+    cam.streamOn();
     //const bool allow = SScCamCapability(0).allowed("MJPG",320,240);
    // qWarning("RES %s", allow?"ALLOWED":"NOT ALLOWED");
 

@@ -85,7 +85,6 @@ public:
      */
     void dump() const;
 
-protected:
     static QString fourcc2String(const quint32 fourcc);
     static quint32 string2Fourcc(const QString& fourcc);
 

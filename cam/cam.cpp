@@ -3,29 +3,40 @@
 #include <QByteArray>
 #include <QFile>
 #include <QDateTime>
+#include <QImage>
+#include <QCoreApplication>
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <libv4l2.h>
 #include <libv4l2rds.h>
 #include <sys/mman.h>
+#include "camcapability.hpp"
 
-
-SScCam::SScCam(QObject* parent) : QObject(parent), SScCamCapability(), m_fd(-1)
+SScCam::SScCam(quint32 device, const QString& fourcc, quint32 w, quint32 h, quint32 buffers, QObject *parent) : QObject(parent), m_device(QString("/dev/video%1").arg(device)), m_fd(-1), m_son(false)
 {
-
+    init(fourcc,w,h,buffers);
 }
-SScCam::SScCam(quint32 device, QObject *parent) : QObject(parent), SScCamCapability(device), m_fd(-1)
-{}
-
-SScCam::SScCam(const QString &device, QObject* parent) : QObject(parent), SScCamCapability(device), m_fd(-1)
-{}
-
-bool SScCam::streamOn()
+SScCam::SScCam(const QString &device, const QString& fourcc, quint32 w, quint32 h, quint32 buffers, QObject* parent) : QObject(parent), m_device(device), m_fd(-1), m_son(false)
+{
+    init(fourcc,w,h,buffers);
+}
+SScCam::~SScCam()
 {
     if (isOpen())
     {
+        streamOff();
+        close(m_fd);
+    }
+}
+
+bool SScCam::streamOn()
+{
+    if (isOpen() && !m_son)
+    {
         int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         if(ioctl(m_fd, VIDIOC_STREAMON, &type) < 0) return false;
+        m_son=true;
+        m_timer.start(10);
         return true;
     }
     return false;
@@ -33,42 +44,34 @@ bool SScCam::streamOn()
 
 bool SScCam::streamOff()
 {
-    if (isOpen())
+    if (isOpen() && m_son)
     {
         int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         if(ioctl(m_fd, VIDIOC_STREAMON, &type) < 0) return false;
+        m_son=false;
+        m_timer.stop();
         return true;
     }
     return false;
 }
 
-bool SScCam::closeStream()
+bool SScCam::init(const QString &fourcc, quint32 w, quint32 h, quint32 buffers)
 {
-    if (isOpen())
-    {
-        streamOff();
-    close(m_fd);
-    m_fd=-1;
-    return true;
-    }
-    return false;
-}
+    m_timer.setTimerType(Qt::PreciseTimer);
+    connect(&m_timer,SIGNAL(timeout()),this,SLOT(timerSlot()), Qt::UniqueConnection);
+    SScCamCapability cap(m_device);
+    if (!cap.allowed(fourcc,w,h)) return false;
 
-bool SScCam::openStream(const QString &fourcc, quint32 w, quint32 h, quint32 buffers)
-{
     qWarning("TRYIMNG TO OPEN %s %u x %u", qPrintable(fourcc),w,h);
-    if (!isOpen() && allowed(fourcc,w,h))
+    if (!isOpen())
     {
-
-        qWarning("OPENING %s", qPrintable(fourcc2String(string2Fourcc(fourcc))));
-
         int fd;
-        if ((fd = open(device().toUtf8().constData(), O_RDWR)) < 0) return false;
+        if ((fd = open(m_device.toUtf8().constData(), O_RDWR)) < 0) return false;
 
         // Set the format
         struct v4l2_format format;
         format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        format.fmt.pix.pixelformat = string2Fourcc(fourcc);
+        format.fmt.pix.pixelformat = SScCamCapability::string2Fourcc(fourcc);
         format.fmt.pix.width = w;
         format.fmt.pix.height = h;
 
@@ -115,25 +118,10 @@ bool SScCam::openStream(const QString &fourcc, quint32 w, quint32 h, quint32 buf
 
 
         m_fd = fd;
-
+qWarning("OPENED");
         return true;
     }
     return false;
-}
-
-void SScCam::package(void* ptr, quint32 len)
-{
-   if (ptr && (len>0))
-   {
-       QString fname = QString("/home/developer/%1.jpg").arg(QDateTime::currentDateTime().toString("hhmmsszzz"));
-       QFile f(fname);
-       if (f.open(QIODevice::WriteOnly))
-       {
-            f.write(QByteArray::fromRawData((const char*)ptr, len));
-            f.close();
-            qWarning("Saved %s", qPrintable(f.fileName()));
-       }
-   }
 }
 
 bool SScCam::unqueueBuffer(void** ptr, quint32& len)
@@ -178,26 +166,26 @@ bool SScCam::queueBuffer()
     return false;
 }
 
-void SScCam::grabFrames(quint32 nr)
+void SScCam::timerSlot()
 {
-    if (isOpen())
+    m_timer.stop();
+    if (isOpen() && m_son)
     {
-        // Queue a buffer first and turn the stream on
-        bool success = queueBuffer() && streamOn();
-
-        if (success) while (nr>0)
+        quint32 len;
+        void* ptr;
+        // Try to unqueue, if successful then emit the frame
+        if (unqueueBuffer(&ptr,len) && ptr && (len>0))
         {
-            quint32 len;
-            void* ptr;
-            // Try to unqueue, if successful then package
-            if (unqueueBuffer(&ptr,len))
+            QImage im;
+            if (im.loadFromData(QByteArray::fromRawData((const char*)ptr, len)))
             {
-                package(ptr,len);
+                emit frame(im);
+                QString fname = QString("%1.jpg").arg(QDateTime::currentDateTime().toString("hhmmsszzz"));
+                if (im.save(fname,"JPG",90)) qWarning("Saved %s", qPrintable(fname));
             }
-            // Queue next buffer if possible
-            queueBuffer();
-            --nr;
         }
-        streamOff();
+        // Queue next buffer if possible
+        queueBuffer();
+        m_timer.start(10);
     }
 }
