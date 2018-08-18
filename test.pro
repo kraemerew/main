@@ -20,7 +20,8 @@ SOURCES += main.cpp \
     pso/psoparticle.cpp \
     som/som.cpp \
     image/matrix.cpp \
-    image/image.cpp
+    image/image.cpp \
+    cam/camcapability.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -46,6 +47,7 @@ HEADERS += \
     pso/psoparticle.hpp \
     som/som.hpp \
     image/matrix.hpp \
-    image/image.hpp
+    image/image.hpp \
+    cam/camcapability.hpp
 
 LIBS += -lv4l1
