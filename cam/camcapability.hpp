@@ -4,6 +4,8 @@
 #include <QVariantMap>
 #include <QStringList>
 
+#include "frameintervaldescriptor.hpp"
+
 
 class SScCamCapability : public QVariantMap
 {
@@ -84,6 +86,10 @@ public:
      * \brief Dump info to shell
      */
     void dump() const;
+
+    QList<QPair<quint32,quint32> > resolutions(const QString& fourcc) const;
+
+    static QList<SScFrameIntervalDescriptor> readFrameIntervals(int fd, const QString& fourcc, quint32 w, quint32 h);
 
     static QString fourcc2String(const quint32 fourcc);
     static quint32 string2Fourcc(const QString& fourcc);

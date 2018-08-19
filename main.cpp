@@ -1,15 +1,72 @@
-#include <QCoreApplication>
+#include <QApplication>
 #include <QElapsedTimer>
 
 #include "nn/sscnetwork.hpp"
 #include "image/image.hpp"
 #include "cam/cam.hpp"
+#include "cam/camwidget.hpp"
+#include "cam/frameintervaldescriptor.hpp"
+#include <QTimer>
+
+class SScMultiCamTester : public QObject
+{
+    Q_OBJECT
+public:
+    SScMultiCamTester() : QObject(0), m_cam(NULL)
+    {
+        QTimer::singleShot(1000,this,SLOT(addCamSlot()));
+    }
+private slots:
+    void addCamSlot()
+    {
+        qWarning(">>>>>>>>>>>>>ADDING");
+        m_cam = new (std::nothrow) SScCam("/dev/video0","MJPG",320,240);
+        Q_CHECK_PTR(m_cam);
+        m_cam->streamOn();
+
+        QTimer::singleShot(5000,this,SLOT(delCamSlot()));
+    }
+    void delCamSlot()
+    {
+        qWarning(">>>>>>>>>>>>>REMOVING");
+
+        m_cam->deleteLater();
+        m_cam = NULL;
+        QTimer::singleShot(5000,this,SLOT(addCamSlot()));
+    }
+
+private:
+    SScCam* m_cam;
+};
+
+#include "main.moc"
+
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    /*SScFrameIntervalDescriptor dd(1,2);
+    SScFrameIntervalDescriptor sd(0,1,1,1,1,3);
+    QList<SScFrameIntervalDescriptor> l;
+    l<< sd << dd;
+    qWarning("2/4 %s", (l.first().allowed(2,4)) ? "allowed":"NOT allowed");
+    qWarning("1/2 %s", (l.first().allowed(1,2)) ? "allowed":"NOT allowed");
+    qWarning("3/4 %s", (l.first().allowed(3,4)) ? "allowed":"NOT allowed");
+    qWarning("1/3 %s", (l.first().allowed(1,3)) ? "allowed":"NOT allowed");
+    qWarning("2/3 %s", (l.first().allowed(2,3)) ? "allowed":"NOT allowed");
 
-    SScCam cam(0,"MJPG",320,240,3);
-    cam.streamOn();
+
+    QPair<quint32,quint32> fit = SScFrameIntervalDescriptor::fit(1,5,l);
+    qWarning("1/5 fit %u %u", fit.first,fit.second);
+    exit(0);
+*/
+
+    QApplication a(argc, argv);
+    //SScMultiCamTester tst;
+
+
+    SScCamWidget* w = new (std::nothrow) SScCamWidget();
+    Q_CHECK_PTR(w);
+    w->show();
+
     //const bool allow = SScCamCapability(0).allowed("MJPG",320,240);
    // qWarning("RES %s", allow?"ALLOWED":"NOT ALLOWED");
 
@@ -82,5 +139,6 @@ int main(int argc, char *argv[])
     }
     while (!done);
     qWarning("Training took %d microseconds", (int)t.nsecsElapsed()/1000);
-    */return a.exec();
+    */
+    return a.exec();
 }

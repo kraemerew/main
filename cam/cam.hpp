@@ -4,6 +4,7 @@
 #include <QStringList>
 #include <QObject>
 #include <QTimer>
+#include "frameintervaldescriptor.hpp"
 
 class SScCam : public QObject
 {
@@ -14,7 +15,12 @@ public:
     virtual ~SScCam();
 
     inline bool isOpen() const  { return m_fd>=0; }
-    bool streamOn();
+    /*!
+     * \brief Switch stream on
+     * \param fps Frames per second - leave 0 to not change the parameter
+     * \return
+     */
+    bool streamOn(int fps = 0);
     bool streamOff();
 
 signals:
@@ -29,13 +35,15 @@ private:
     bool unqueueBuffer(void**,quint32&);
     void package(void*, quint32);
 
-    QString             m_device;
-    int                 m_fd;
-    bool                m_son;
-    QList<quint32>      m_unqueued, m_queued;
-    QMap<void*,quint32> m_buf2idx;
-    QMap<quint32,void*> m_idx2buf;
-    QTimer              m_timer;
+    QString                             m_device;
+    int                                 m_fd;
+    bool                                m_son;
+    QList<quint32>                      m_unqueued, m_queued;
+    QMap<void*,quint32>                 m_buf2idx;
+    QMap<quint32,void*>                 m_idx2buf;
+    QMap<void*,quint32>                 m_buf2len;
+    QTimer                              m_timer;
+    QList<SScFrameIntervalDescriptor>   m_fid;
 };
 
 #endif // CAM_HPP

@@ -25,19 +25,46 @@ SScCam::~SScCam()
     if (isOpen())
     {
         streamOff();
+        foreach(void* ptr,m_buf2len.keys())
+        {
+            const int err = munmap(ptr,m_buf2len[ptr]);
+            if (err!=0) qCritical("Error while unmapping %u bytes: ret %d", m_buf2len[ptr],err);
+        }
         close(m_fd);
     }
 }
 
-bool SScCam::streamOn()
-{
+bool SScCam::streamOn(int fps)
+{    
     if (isOpen() && !m_son)
     {
+
+        const auto p = SScFrameIntervalDescriptor::fit(1,fps,m_fid);
+        if ((p.first!=0) && (p.second!=0))
+        {
+            qWarning("Fitting FPS %u with frame interval %u/%u", fps, p.first, p.second);
+            struct v4l2_streamparm sp;
+            sp.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+            if(ioctl(m_fd, VIDIOC_G_PARM, &sp) < 0)
+                qWarning("GPARM FAILED");
+
+            sp.parm.capture.timeperframe.numerator   = p.first;
+            sp.parm.capture.timeperframe.denominator = p.second;
+            if(ioctl(m_fd, VIDIOC_S_PARM, &sp) < 0)
+                qWarning("SPARM FAILED");
+
+        }
+
         int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         if(ioctl(m_fd, VIDIOC_STREAMON, &type) < 0) return false;
         m_son=true;
         m_timer.start(10);
         return true;
+    }
+    else
+    {
+        if (!isOpen()) qWarning("NOT OPEN");
+        if (m_son) qWarning("STREAM IS ALRTEADY ON");
     }
     return false;
 }
@@ -60,13 +87,24 @@ bool SScCam::init(const QString &fourcc, quint32 w, quint32 h, quint32 buffers)
     m_timer.setTimerType(Qt::PreciseTimer);
     connect(&m_timer,SIGNAL(timeout()),this,SLOT(timerSlot()), Qt::UniqueConnection);
     SScCamCapability cap(m_device);
+    if (cap.isEmpty()) qWarning("CAP EMPTY!!!");
     if (!cap.allowed(fourcc,w,h)) return false;
-
-    qWarning("TRYIMNG TO OPEN %s %u x %u", qPrintable(fourcc),w,h);
+    qWarning("CAP ALLOWED %s %u %u", qPrintable(fourcc),w,h);
     if (!isOpen())
     {
+        qWarning("-------x0");
+
         int fd;
         if ((fd = open(m_device.toUtf8().constData(), O_RDWR)) < 0) return false;
+
+        qWarning("-------x1");
+
+        m_fid = SScCamCapability::readFrameIntervals(fd,fourcc,w,h);
+
+        qWarning("------FID %d", m_fid.size());
+
+        if (!m_fid.isEmpty()) m_fid.first().dump();
+
 
         // Set the format
         struct v4l2_format format;
@@ -75,8 +113,12 @@ bool SScCam::init(const QString &fourcc, quint32 w, quint32 h, quint32 buffers)
         format.fmt.pix.width = w;
         format.fmt.pix.height = h;
 
-        if(ioctl(fd, VIDIOC_S_FMT, &format) < 0) { close(fd); return false; }
+        qWarning("-------x3 - set format %x"
+                 "", format.fmt.pix.pixelformat);
 
+        const int err = ioctl(fd, VIDIOC_S_FMT, &format);
+        if(err< 0) { qWarning("ERR %d",err); close(fd); return false; }
+        qWarning("-------0");
         // Request the buffers
         struct v4l2_requestbuffers bufrequest;
         bufrequest.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -84,19 +126,20 @@ bool SScCam::init(const QString &fourcc, quint32 w, quint32 h, quint32 buffers)
         bufrequest.count = buffers;
 
         if(ioctl(fd, VIDIOC_REQBUFS, &bufrequest) < 0) { close(fd); return false; }
-
+        qWarning("-------1");
 
         // Memory map all buffers
         struct v4l2_buffer bufferinfo;
         memset(&bufferinfo, 0, sizeof(bufferinfo));
         bufferinfo.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         bufferinfo.memory = V4L2_MEMORY_MMAP;
+        qWarning("-------2");
 
         for (quint32 bufidx=0; bufidx<buffers; ++bufidx)
         {
             bufferinfo.index = bufidx;
             if(ioctl(fd, VIDIOC_QUERYBUF, &bufferinfo) < 0) { close(fd); return false; }
-
+qWarning("-------3");
             // MMap
             void* buffer_start = mmap(
                 NULL,
@@ -107,16 +150,19 @@ bool SScCam::init(const QString &fourcc, quint32 w, quint32 h, quint32 buffers)
                 bufferinfo.m.offset
             );
 
+
+
             if(buffer_start == MAP_FAILED) { close(fd); return false; }
             memset(buffer_start, 0, bufferinfo.length);
 
             m_unqueued << bufidx;
+            m_buf2len[buffer_start]=bufferinfo.length;
             m_buf2idx[buffer_start]=bufidx;
             m_idx2buf[bufidx]=buffer_start;
         }
 
 
-
+qWarning("-------4");
         m_fd = fd;
 qWarning("OPENED");
         return true;
@@ -141,7 +187,6 @@ bool SScCam::unqueueBuffer(void** ptr, quint32& len)
         m_unqueued << idx;
         len = bufferinfo.length;
         (*ptr)=m_idx2buf[idx];
-        qWarning("Unqueued buffer %u",idx);
         return true;
     }
     return false;
@@ -160,7 +205,6 @@ bool SScCam::queueBuffer()
         if (ioctl(m_fd, VIDIOC_QBUF, &bufferinfo) < 0) return false;
         m_unqueued.pop_front();
         m_queued << idx;
-        qWarning("Queued buffer %u",idx);
         return true;
     }
     return false;
@@ -180,8 +224,8 @@ void SScCam::timerSlot()
             if (im.loadFromData(QByteArray::fromRawData((const char*)ptr, len)))
             {
                 emit frame(im);
-                QString fname = QString("%1.jpg").arg(QDateTime::currentDateTime().toString("hhmmsszzz"));
-                if (im.save(fname,"JPG",90)) qWarning("Saved %s", qPrintable(fname));
+                //QString fname = QString("%1.jpg").arg(QDateTime::currentDateTime().toString("hhmmsszzz"));
+                //if (im.save(fname,"JPG",90)) qWarning("Saved %s", qPrintable(fname));
             }
         }
         // Queue next buffer if possible

@@ -1,5 +1,4 @@
 #include "camcapability.hpp"
-#include "cam.hpp"
 #include <QSet>
 #include <QDir>
 #include <QFileInfo>
@@ -69,7 +68,12 @@ public:
         while (true);
         return false;
     }
-
+    QList<QPair<quint32,quint32> > get() const
+    {
+        QList<QPair<quint32,quint32> > l = m_allowed.toList();
+        std::sort(l.begin(),l.end());
+        return l;
+    }
     QSet<QPair<quint32,quint32> > m_allowed;
     quint32 m_minw, m_minh, m_maxw, m_maxh, m_dltw, m_dlth;
 };
@@ -182,7 +186,7 @@ QList<quint32> pxfmts;
         frmsz.pixel_format=pxfmt;
         go_on = true;
         do
-        {
+        {            
             if (ioctl(fd, VIDIOC_ENUM_FRAMESIZES, &frmsz) < 0) go_on = false;
             else
             {
@@ -208,7 +212,6 @@ QList<quint32> pxfmts;
 
                 if (!value.isEmpty())
                 {
-                    qWarning("SUCCESS FRAMESIZE %s = %s", qPrintable(token), qPrintable(value));
                     if (!ret[token].toString().isEmpty()) ret[token] = ret[token].toString()+", "+value;
                     else ret[token]=value;
                 }
@@ -219,6 +222,44 @@ QList<quint32> pxfmts;
     }
 
     close(fd);
+    return ret;
+}
+
+QList<SScFrameIntervalDescriptor> SScCamCapability::readFrameIntervals(int fd, const QString& fourcc, quint32 w, quint32 h)
+{
+    QList<SScFrameIntervalDescriptor> ret;
+    Q_ASSERT(fd>=0);
+    v4l2_frmivalenum frmival;
+    frmival.pixel_format = string2Fourcc(fourcc);
+    frmival.width = w;
+    frmival.height = h;
+    frmival.index = 0;
+    bool go_on = true;
+    do
+    {
+        if (ioctl(fd, VIDIOC_ENUM_FRAMEINTERVALS, &frmival) < 0)
+        {
+            go_on = false;
+        }
+        else
+        {
+            switch(frmival.type)
+            {
+                case V4L2_FRMIVAL_TYPE_DISCRETE:                    
+                    ret << SScFrameIntervalDescriptor(frmival.discrete.numerator,frmival.discrete.denominator);
+                break;
+                case V4L2_FRMIVAL_TYPE_CONTINUOUS:
+                case V4L2_FRMIVAL_TYPE_STEPWISE:
+                    ret << SScFrameIntervalDescriptor(frmival.stepwise.min.numerator,frmival.stepwise.min.denominator,
+                                                      frmival.stepwise.max.numerator,frmival.stepwise.max.denominator,
+                                                      frmival.stepwise.step.numerator,frmival.stepwise.step.denominator);
+                break;
+            }
+            ++frmival.index;
+        }
+    }
+    while (go_on);
+    foreach(const SScFrameIntervalDescriptor& desc, ret) desc.dump();
     return ret;
 }
 
@@ -276,6 +317,10 @@ QString     SScCamCapability::formatDescriptor  (const QString& fourcc) const   
 QStringList SScCamCapability::frameSizes        (const QString& fourcc) const   { return (*this)[QString("FRAMESIZE_%1").arg(fourcc)].toString().split(","); }
 QStringList SScCamCapability::formatList        () const                        { return (*this)["FORMAT_LIST"].toString().split(","); }
 
+QList<QPair<quint32,quint32> > SScCamCapability::resolutions(const QString& fourcc) const
+{
+    return SScResolutionValidator(frameSizes(fourcc)).get();
+}
 void SScCamCapability::dump() const
 {
     const quint32 cap = caps(), dcap = devcaps();
@@ -311,7 +356,6 @@ QList<quint32> SScCamCapability::devices()
     std::sort(retValue.begin(),retValue.end());
     return retValue;
 }
-
 
 QStringList SScCamCapability::deviceNames()
 {
