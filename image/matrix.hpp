@@ -31,7 +31,7 @@ public:
         fill(fillvalue);
     }
     inline void                     fill(T fillvalue){ m_data.fill(fillvalue,len()); }
-    inline bool                     isEmpty () const { return m_data.isEmpty(); }
+    inline bool                     isEmpty () const { return (width()*height())==0; }
     inline quint32                  len     () const { return m_data.size(); }
     inline quint32                  width   () const { return m_w; }
     inline quint32                  height  () const { return m_h; }

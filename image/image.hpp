@@ -34,27 +34,24 @@ public:
 
     SScMatrix<uchar> grey()
     {
-        if (m_m.isEmpty()) toMatrix();
+        if (m_m.isEmpty()) toMatrix(); else qWarning("MATRIX ALREADY DONE");
         return m_m;
     }
     SScMatrix<uchar> red    ()
     {
-        if (m_r.isEmpty()) toMatrix();
+        if (m_r.isEmpty()) toMatrix(); else qWarning("MATRIX ALREADY DONE");
         return m_r;
     }
     SScMatrix<uchar> green    ()
     {
-        if (!m_g.isEmpty()) toMatrix();
+        if (m_g.isEmpty()) toMatrix(); else qWarning("MATRIX ALREADY DONE");
         return m_g;
     }
-    SScMatrix<uchar> blue    ()
+    SScMatrix<uchar> blue   ()
     {
-        if (!m_b.isEmpty()) toMatrix();
+        if (m_b.isEmpty()) toMatrix(); else qWarning("MATRIX ALREADY DONE");
         return m_b;
     }
-
-
-
 
 private:
     SScMatrix<uchar> m_r, m_g, m_b, m_m;
@@ -66,6 +63,7 @@ private:
     }
     inline void toMatrix()
     {
+        qWarning("Calculate gray");
         if (allGray())
         {
             m_m = SScMatrix<uchar>(width(),height());
@@ -95,6 +93,8 @@ private:
                     (*b++)=qBlue (c);
                 }
             }
+
+            qWarning("Converted %d %d %d %d %d %d", m_r.width(),m_r.height(),m_g.width(),m_g.height(),m_b.width(),m_b.height());
         }
     }
 };
