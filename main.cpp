@@ -19,7 +19,7 @@ public:
 private slots:
     void addCamSlot()
     {
-        qWarning(">>>>>>>>>>>>>ADDING");
+       // qWarning(">>>>>>>>>>>>>ADDING");
         m_cam = new (std::nothrow) SScCam("/dev/video0","MJPG",320,240);
         Q_CHECK_PTR(m_cam);
         m_cam->streamOn();
