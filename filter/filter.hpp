@@ -3,6 +3,23 @@
 
 #include "image/matrix.hpp"
 #include <QVector>
+#include <QMultiMap>
+
+class SScPos : public QPair<int,int>
+{
+public:
+    explicit SScPos() : QPair<int,int>(0,0) {}
+    explicit SScPos(int x, int y) : QPair<int,int>(x,y) {}
+    inline int x() const { return first ; }
+    inline int y() const { return second; }
+};
+
+class SScPosProd : public QList<SScPos>
+{
+public:
+    SScPosProd(const SScPos& p) { (*this) << p; }
+};
+
 /*!
  * \brief Time-space coordinate
  */
@@ -67,7 +84,7 @@ public:
 };
 
 
-class SScTSFilterMorphology
+/*class SScTSFilterMorphology
 {
 public:
     explicit SScTSFilterMorphology(double sel);
@@ -86,9 +103,42 @@ private:
     uchar get(const SScTSPosProd& p, quint32 x, quint32 y) const;
     uchar get(quint32 x, quint32 y) const;
 
-    double m_selector;
-    int m_buflen;
+    double                      m_selector;
+    int                         m_buflen;
     QList<SScMatrix<uchar> >    m_inputs;
-    QList<SScTSPosProd>      m_pixels, m_pixels_normalized;
+    QList<SScTSPosProd>         m_pixels, m_pixels_normalized;
+};*/
+
+class SScTSFilterMorphology
+{
+public:
+    explicit SScTSFilterMorphology(double sel = 0);
+    bool setSelection(double sel);
+    bool append(const SScMatrix<uchar>& src);
+
+    bool addPos(const SScPosProd& pp, int t = 0);
+    bool addPos(const SScPos& pos, int t = 0);
+
+    inline int tmin() const { int ret = !m_pixels.isEmpty() ? m_pixels.keys().first() : 0; foreach(auto t, m_pixels.keys()) if (t<ret) ret = t; return ret;  }
+    inline int tmax() const { int ret = !m_pixels.isEmpty() ? m_pixels.keys().first() : 0; foreach(auto t, m_pixels.keys()) if (t>ret) ret = t; return ret;  }
+
+
+    SScMatrix<uchar> get();
+
+private:
+
+    uchar get(const SScPosProd& pp, int x, int y, const SScMatrix<uchar>& im) const;
+    uchar get(int x, int y) const;
+
+    /*!
+     * \brief Transfer time index so that we have max index 0
+     */
+    void normalize();
+
+    double                      m_selector;
+    quint32                     m_w, m_h, m_buflen;
+    QList<SScMatrix<uchar> >    m_inputs;
+    QMultiMap<int,SScPosProd>   m_pixels, m_pixels_normalized;
+
 };
 #endif // FILTER_HPP

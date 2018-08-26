@@ -56,7 +56,7 @@ public:
     inline int yTor(int y) const
     {
         if (y<0) return -y; else
-        if (y>=(int)m_h) return (2*(int)m_h) -y;
+        if (y>=(int)m_h) return (2*(int)m_h) -y-1;
         else return y;
     }
     /*!
@@ -67,7 +67,7 @@ public:
     inline int xTor(int x) const
     {
         if (x<0) return -x; else
-        if (x>=(int)m_w) return (2*(int)m_w)-x;
+        if (x>=(int)m_w) return (2*(int)m_w)-x-1;
         else return x;
     }
 

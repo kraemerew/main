@@ -25,7 +25,8 @@ SOURCES += main.cpp \
     cam/camcapability.cpp \
     cam/frameintervaldescriptor.cpp \
     cam/camwidget.cpp \
-    filter/filter.cpp
+    filter/filter.cpp \
+    filter/selector.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -55,6 +56,7 @@ HEADERS += \
     cam/camcapability.hpp \
     cam/frameintervaldescriptor.hpp \
     cam/camwidget.hpp \
-    filter/filter.hpp
+    filter/filter.hpp \
+    filter/selector.hpp
 
 LIBS += -lv4l1

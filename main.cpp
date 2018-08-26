@@ -3,6 +3,7 @@
 
 #include "nn/sscnetwork.hpp"
 #include "image/image.hpp"
+#include "filter/selector.hpp"
 #include "cam/cam.hpp"
 #include "cam/camwidget.hpp"
 #include "cam/frameintervaldescriptor.hpp"
@@ -19,7 +20,7 @@ public:
 private slots:
     void addCamSlot()
     {
-       // qWarning(">>>>>>>>>>>>>ADDING");
+        // qWarning(">>>>>>>>>>>>>ADDING");
         m_cam = new (std::nothrow) SScCam("/dev/video0","MJPG",320,240);
         Q_CHECK_PTR(m_cam);
         m_cam->streamOn();
@@ -63,13 +64,14 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     //SScMultiCamTester tst;
 
-    const SScTSPos p0(0,0,-1), p1(0,0,-2), p2(0,0,-3);
 
-
+    SScSelector<uchar> sel;
+    sel << 1 << 1 << 3;
     SScTSFilterMorphology fm(0.5);
-    fm.addPos(p0);
-    fm.addPos(p1);
-    fm.addPos(p2);
+    const SScPos p0(0,0);
+    fm.addPos(p0,-2);
+    fm.addPos(p0,-1);
+    fm.addPos(p0, 0);
 
     SScCamWidget* w = new (std::nothrow) SScCamWidget();
     Q_CHECK_PTR(w);

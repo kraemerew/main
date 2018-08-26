@@ -1,4 +1,5 @@
 #include "camwidget.hpp"
+#include "filter/filter.hpp"
 #include <QComboBox>
 #include <QLabel>
 #include <QScrollArea>
@@ -33,6 +34,10 @@ public:
         Q_CHECK_PTR(m_layer);
         Q_CHECK_PTR(m_frame);
         Q_CHECK_PTR(m_fps);
+
+        m_f.setSelection(0.5);
+        for (int i=-1; i<2; ++i) for (int j=-1; j<2; ++j) for (int t = -1; t<1; ++t)
+            m_f.addPos(SScPos(i,j),t);
 
         m_layer->addItem("Color",   0);
         m_layer->addItem("Red",     1);
@@ -113,7 +118,7 @@ private:
         if (m_cam) delete m_cam;
         m_cam = NULL;
     }
-    QImage processedFrame(const QImage& im) const
+    QImage processedFrame(const QImage& im)
     {
         const int l = m_layer->itemData(m_layer->currentIndex()).toInt();
         if (l>0)
@@ -126,6 +131,11 @@ private:
                 case 3: img2 = SScImage(img.blue ());  break;img2.save("/home/developer/test_blue.jpg"); break;
             }
             qWarning("SIZE %d %d LAYER %d", img2.width(),img2.height(),l);
+            if (l!=0)
+            {
+                if (m_f.append(img.red())) {}
+                    img2 = SScImage(m_f.get());
+            }
             return img2;
         }
         return im;
@@ -213,6 +223,8 @@ private:
     SScCam*         m_cam;
     quint32         m_fctr;
     QElapsedTimer   m_ftimer;
+
+    SScTSFilterMorphology m_f;
 };
 
 #include "camwidget.moc"
