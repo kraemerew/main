@@ -121,9 +121,9 @@ private:
             SScImage img(im), img2;
             switch(l)
             {
-                case 1: img2 = SScImage(img.red  ());  img2.save("/home/developer/test_red.jpg"); break;
-                case 2: img2 = SScImage(img.green());  img2.save("/home/developer/test_green.jpg"); break;
-                case 3: img2 = SScImage(img.blue ());  img2.save("/home/developer/test_blue.jpg"); break;
+                case 1: img2 = SScImage(img.red  ());  break; //img2.save("/home/developer/test_red.jpg"); break;
+                case 2: img2 = SScImage(img.green());  break; //img2.save("/home/developer/test_green.jpg"); break;
+                case 3: img2 = SScImage(img.blue ());  break;img2.save("/home/developer/test_blue.jpg"); break;
             }
             qWarning("SIZE %d %d LAYER %d", img2.width(),img2.height(),l);
             return img2;

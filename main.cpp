@@ -40,6 +40,7 @@ private:
 };
 
 #include "main.moc"
+#include "filter/filter.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -62,10 +63,19 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     //SScMultiCamTester tst;
 
+    const SScTSPos p0(0,0,-1), p1(0,0,-2), p2(0,0,-3);
+
+
+    SScTSFilterMorphology fm(0.5);
+    fm.addPos(p0);
+    fm.addPos(p1);
+    fm.addPos(p2);
 
     SScCamWidget* w = new (std::nothrow) SScCamWidget();
     Q_CHECK_PTR(w);
     w->show();
+
+
 
     //const bool allow = SScCamCapability(0).allowed("MJPG",320,240);
    // qWarning("RES %s", allow?"ALLOWED":"NOT ALLOWED");

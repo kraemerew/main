@@ -45,8 +45,30 @@ public:
 
     T* line(quint32 nr)
     {
-        Q_ASSERT(nr<m_h);
+        Q_ASSERT(nr<m_h);        
         return m_data.data()+(m_w*nr);
+    }
+    /*!
+     * \brief Return y torus coordinate
+     * \param y
+     * \return
+     */
+    inline int yTor(int y) const
+    {
+        if (y<0) return -y; else
+        if (y>=(int)m_h) return (2*(int)m_h) -y;
+        else return y;
+    }
+    /*!
+     * \brief Return x torus coordinate
+     * \param x
+     * \return
+     */
+    inline int xTor(int x) const
+    {
+        if (x<0) return -x; else
+        if (x>=(int)m_w) return (2*(int)m_w)-x;
+        else return x;
     }
 
 private:
