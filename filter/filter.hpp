@@ -5,6 +5,8 @@
 #include <QVector>
 #include <QMultiMap>
 
+template <typename T> class SScSelectorBase;
+
 class SScPos : public QPair<int,int>
 {
 public:
@@ -83,36 +85,11 @@ public:
     }
 };
 
-
-/*class SScTSFilterMorphology
-{
-public:
-    explicit SScTSFilterMorphology(double sel);
-    bool append(const SScMatrix<uchar>& src);
-
-    bool addPos(const SScTSPosProd& pos);
-    bool addPos(const SScTSPos& pos);
-
-    inline int tmin() const { int ret = !m_pixels.isEmpty() ? m_pixels.first().tmin() : 0; foreach(const auto& p, m_pixels) if (p.tmin()<ret) ret = p.tmin(); return ret;  }
-    inline int tmax() const { int ret = !m_pixels.isEmpty() ? m_pixels.first().tmax() : 0; foreach(const auto& p, m_pixels) if (p.tmax()>ret) ret = p.tmax(); return ret;  }
-
-
-
-private:
-
-    uchar get(const SScTSPosProd& p, quint32 x, quint32 y) const;
-    uchar get(quint32 x, quint32 y) const;
-
-    double                      m_selector;
-    int                         m_buflen;
-    QList<SScMatrix<uchar> >    m_inputs;
-    QList<SScTSPosProd>         m_pixels, m_pixels_normalized;
-};*/
-
 class SScTSFilterMorphology
 {
 public:
     explicit SScTSFilterMorphology(double sel = 0);
+    virtual ~SScTSFilterMorphology();
     bool setSelection(double sel);
     bool append(const SScMatrix<uchar>& src);
 
@@ -135,7 +112,7 @@ private:
      */
     void normalize();
 
-    double                      m_selector;
+    SScSelectorBase<uchar>*     m_selector;
     quint32                     m_w, m_h, m_buflen;
     QList<SScMatrix<uchar> >    m_inputs;
     QMultiMap<int,SScPosProd>   m_pixels, m_pixels_normalized;

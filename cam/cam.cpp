@@ -12,11 +12,11 @@
 #include <sys/mman.h>
 #include "camcapability.hpp"
 
-SScCam::SScCam(quint32 device, const QString& fourcc, quint32 w, quint32 h, quint32 buffers, QObject *parent) : QObject(parent), m_device(QString("/dev/video%1").arg(device)), m_fd(-1), m_son(false)
-{
+SScCam::SScCam(quint32 device, const QString& fourcc, quint32 w, quint32 h, quint32 buffers, QObject *parent) : QObject(parent), m_device(QString("/dev/video%1").arg(device)), m_fd(-1), m_son(false), m_framereader(NULL)
+{    
     init(fourcc,w,h,buffers);
 }
-SScCam::SScCam(const QString &device, const QString& fourcc, quint32 w, quint32 h, quint32 buffers, QObject* parent) : QObject(parent), m_device(device), m_fd(-1), m_son(false)
+SScCam::SScCam(const QString &device, const QString& fourcc, quint32 w, quint32 h, quint32 buffers, QObject* parent) : QObject(parent), m_device(device), m_fd(-1), m_son(false), m_framereader(NULL)
 {
     init(fourcc,w,h,buffers);
 }
@@ -32,6 +32,7 @@ SScCam::~SScCam()
         }
         close(m_fd);
     }
+    if (m_framereader) delete m_framereader;
 }
 
 bool SScCam::streamOn(int fps)
@@ -84,24 +85,22 @@ bool SScCam::streamOff()
 
 bool SScCam::init(const QString &fourcc, quint32 w, quint32 h, quint32 buffers)
 {
+    if (m_framereader) delete m_framereader;
+    m_framereader = SScFrameReaderBase::create(fourcc,w,h);
+
     m_timer.setTimerType(Qt::PreciseTimer);
     connect(&m_timer,SIGNAL(timeout()),this,SLOT(timerSlot()), Qt::UniqueConnection);
     SScCamCapability cap(m_device);
     if (cap.isEmpty()) qWarning("CAP EMPTY!!!");
     if (!cap.allowed(fourcc,w,h)) return false;
-    qWarning("CAP ALLOWED %s %u %u", qPrintable(fourcc),w,h);
+
     if (!isOpen())
     {
-        qWarning("-------x0");
-
         int fd;
         if ((fd = open(m_device.toUtf8().constData(), O_RDWR)) < 0) return false;
 
-        qWarning("-------x1");
 
         m_fid = SScCamCapability::readFrameIntervals(fd,fourcc,w,h);
-
-        qWarning("------FID %d", m_fid.size());
 
         if (!m_fid.isEmpty()) m_fid.first().dump();
 
@@ -118,7 +117,7 @@ bool SScCam::init(const QString &fourcc, quint32 w, quint32 h, quint32 buffers)
 
         const int err = ioctl(fd, VIDIOC_S_FMT, &format);
         if(err< 0) { qWarning("ERR %d",err); close(fd); return false; }
-        qWarning("-------0");
+
         // Request the buffers
         struct v4l2_requestbuffers bufrequest;
         bufrequest.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -126,20 +125,18 @@ bool SScCam::init(const QString &fourcc, quint32 w, quint32 h, quint32 buffers)
         bufrequest.count = buffers;
 
         if(ioctl(fd, VIDIOC_REQBUFS, &bufrequest) < 0) { close(fd); return false; }
-        qWarning("-------1");
 
         // Memory map all buffers
         struct v4l2_buffer bufferinfo;
         memset(&bufferinfo, 0, sizeof(bufferinfo));
         bufferinfo.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        bufferinfo.memory = V4L2_MEMORY_MMAP;
-        qWarning("-------2");
+        bufferinfo.memory = V4L2_MEMORY_MMAP;        
 
         for (quint32 bufidx=0; bufidx<buffers; ++bufidx)
         {
             bufferinfo.index = bufidx;
             if(ioctl(fd, VIDIOC_QUERYBUF, &bufferinfo) < 0) { close(fd); return false; }
-qWarning("-------3");
+
             // MMap
             void* buffer_start = mmap(
                 NULL,
@@ -150,8 +147,6 @@ qWarning("-------3");
                 bufferinfo.m.offset
             );
 
-
-
             if(buffer_start == MAP_FAILED) { close(fd); return false; }
             memset(buffer_start, 0, bufferinfo.length);
 
@@ -161,10 +156,7 @@ qWarning("-------3");
             m_idx2buf[bufidx]=buffer_start;
         }
 
-
-qWarning("-------4");
         m_fd = fd;
-qWarning("OPENED");
         return true;
     }
     return false;
@@ -220,13 +212,7 @@ void SScCam::timerSlot()
         // Try to unqueue, if successful then emit the frame
         if (unqueueBuffer(&ptr,len) && ptr && (len>0))
         {
-            QImage im;
-            if (im.loadFromData(QByteArray::fromRawData((const char*)ptr, len)))
-            {
-                emit frame(im);
-                //QString fname = QString("%1.jpg").arg(QDateTime::currentDateTime().toString("hhmmsszzz"));
-                //if (im.save(fname,"JPG",90)) qWarning("Saved %s", qPrintable(fname));
-            }
+            if (m_framereader) emit frame(m_framereader->get(ptr,len));
         }
         // Queue next buffer if possible
         queueBuffer();

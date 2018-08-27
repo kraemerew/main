@@ -15,6 +15,7 @@
 class SScCamWidgetPrivate : public QObject
 {
     Q_OBJECT
+
 public:
     SScCamWidgetPrivate(SScCamWidget* parent)
         : QObject(parent),
@@ -35,8 +36,8 @@ public:
         Q_CHECK_PTR(m_frame);
         Q_CHECK_PTR(m_fps);
 
-        m_f.setSelection(0.5);
-        for (int i=-1; i<2; ++i) for (int j=-1; j<2; ++j) for (int t = -1; t<1; ++t)
+        m_f.setSelection(0.0);
+        for (int i=-1; i<2; ++i) for (int j=-1; j<2; ++j) for (int t = -1; t<2; ++t)
             m_f.addPos(SScPos(i,j),t);
 
         m_layer->addItem("Color",   0);
@@ -174,6 +175,12 @@ private:
             auto res = cap.resolutions("MJPG");
             foreach(auto p, res) m_res->addItem(QString("%1 x %2 MJPG").arg(p.first).arg(p.second));
         }
+        else if (s=="YUYV")
+        {
+            auto res = cap.resolutions("MJPG");
+            foreach(auto p, res) m_res->addItem(QString("%1 x %2 YUYV").arg(p.first).arg(p.second));
+        }
+        else qWarning("Detected format %s", qPrintable(s));
         m_res->blockSignals(false);
     }
 

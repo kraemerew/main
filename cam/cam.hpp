@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QTimer>
 #include "frameintervaldescriptor.hpp"
+#include "framereader.hpp"
 
 class SScCam : public QObject
 {
@@ -44,6 +45,7 @@ private:
     QMap<void*,quint32>                 m_buf2len;
     QTimer                              m_timer;
     QList<SScFrameIntervalDescriptor>   m_fid;
+    SScFrameReaderBase*                 m_framereader;
 };
 
 #endif // CAM_HPP

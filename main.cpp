@@ -65,8 +65,6 @@ int main(int argc, char *argv[])
     //SScMultiCamTester tst;
 
 
-    SScSelector<uchar> sel;
-    sel << 1 << 1 << 3;
     SScTSFilterMorphology fm(0.5);
     const SScPos p0(0,0);
     fm.addPos(p0,-2);
