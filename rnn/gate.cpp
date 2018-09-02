@@ -9,9 +9,9 @@ SScGate::SScGate(SScActivation::SSeActivation act)
 SScGate::~SScGate()
 {
     delete m_act;
-    foreach(SScRNeuron* n, m_con.keys()) delConnection(n);
+    foreach(auto n, m_con.keys()) delConnection(n);
 }
-bool SScGate::addConnection(SScRNeuron *n, double w, SScConnection::SSeConnectionType ctype)
+bool SScGate::addConnection(SScRNeuronBase *n, double w, SScConnection::SSeConnectionType ctype)
 {
     Q_CHECK_PTR(n);
     if (!m_con.contains(n))
@@ -23,12 +23,13 @@ bool SScGate::addConnection(SScRNeuron *n, double w, SScConnection::SSeConnectio
     return false;
 }
 
-bool SScGate::delConnection(SScRNeuron* n)
+bool SScGate::delConnection(SScRNeuronBase* n)
 {
     if (m_con.contains(n))
     {
         delete m_con[n];
         m_con.remove(n);
+
         return true;
     }
     return false;
@@ -40,9 +41,9 @@ double SScGate::get(int t)
     if (!m_signal.contains(t))
     {
         double sum = 0.0;
-        for (QHash<SScRNeuron*,SScConnection*>::iterator it = m_con.begin(); it!=m_con.end(); ++it)
+        for (QHash<SScRNeuronBase*,SScConnection*>::iterator it = m_con.begin(); it!=m_con.end(); ++it)
             sum+=it.key()->out(t-1)*it.value()->value();
-        m_signal[t]=m_act->activate(sum);
+        m_signal[t]=m_act->activate(sum);        
     }
     return m_signal[t];
 }

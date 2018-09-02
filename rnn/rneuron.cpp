@@ -7,8 +7,8 @@ SScRNeuron::SScRNeuron(SScActivation::SSeActivation acttype)
       m_zeroact     (m_act->activate(0.0)),
       m_isig        (NULL),
       m_tsig        (NULL),
-      m_ginput      (new (std::nothrow) SScGate(SScActivation::Act_Logistic)),
-      m_goutput     (new (std::nothrow) SScGate(SScActivation::Act_Tanh)),
+      m_ginput      (new (std::nothrow) SScGate(SScActivation::Act_Tanh)),
+      m_goutput     (new (std::nothrow) SScGate(SScActivation::Act_Logistic)),
       m_gmemory     (new (std::nothrow) SScGate(SScActivation::Act_Logistic)),
       m_gstore      (new (std::nothrow) SScGate(SScActivation::Act_Logistic))
 {
@@ -25,6 +25,16 @@ SScRNeuron::~SScRNeuron()
     delete m_goutput;
     delete m_gmemory;
     delete m_gstore;
+}
+
+void SScRNeuron::clear()
+{
+    m_osig.     clear();
+    m_msig.     clear();
+    m_ginput  ->clear();
+    m_goutput ->clear();
+    m_gmemory ->clear();
+    m_gstore  ->clear();
 }
 
 double SScRNeuron::err(int t)

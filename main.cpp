@@ -42,9 +42,35 @@ private:
 
 #include "main.moc"
 #include "filter/filter.hpp"
+#include "rnn/rneuron.hpp"
 
 int main(int argc, char *argv[])
 {
+    SScRBiasNeuron* bn = new (std::nothrow) SScRBiasNeuron();
+    QList<SScRNeuron*> nl;
+    for (int i=0; i<2; ++i) nl << new (std::nothrow) SScRNeuron();
+    foreach(SScRNeuron* n1, nl) n1->inputGate()->addConnection(bn,-1.3);
+    foreach(SScRNeuron* n1, nl) foreach(SScRNeuron* n2, nl)
+    {
+        n2->inputGate   ()->addConnection(n1,-0.1);
+        n2->outputGate  ()->addConnection(n1, 0.1);
+        n2->storeGate   ()->addConnection(n1, 0.2);
+        n2->memoryGate  ()->addConnection(n1,-0.3);
+    }
+
+    int t = 0;
+    while (t<10)
+    {
+        ++t;
+        QElapsedTimer tm; tm.start();
+        const double o = nl.last()->out(t);
+        qWarning(">>>>>>>>>>>%lf %d", o, (int)tm.elapsed());
+
+    }
+
+
+
+    std::exit(0);
     qWarning("----------------------------------------");
     SScSignal<double> *s0 = new SScStdSignal<double>();
     (*s0)[7]=7;

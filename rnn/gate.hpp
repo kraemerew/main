@@ -7,22 +7,23 @@
 #include "activation/sscconnection.hpp"
 #include "rnn/sscsignal.hpp"
 
-class SScRNeuron;
+class SScRNeuronBase;
 
 class SScGate
 {
 public:
     explicit SScGate(SScActivation::SSeActivation act = SScActivation::Act_Logistic);
     virtual ~SScGate();
-    bool addConnection(SScRNeuron*, double w, SScConnection::SSeConnectionType ctype = SScConnection::Connectiontype_RPROP);
-    bool delConnection(SScRNeuron*);
+    bool addConnection(SScRNeuronBase*, double w, SScConnection::SSeConnectionType ctype = SScConnection::Connectiontype_RPROP);
+    bool delConnection(SScRNeuronBase*);
     double get(int t);
+    void clear() { m_signal.clear(); }
 
 private:
-    QHash<SScRNeuron*,SScConnection*>   m_con;
-    SScActivation*                      m_act;
-    double                              m_zeroact;
-    SScStdSignal<double>                m_signal;
+    QHash<SScRNeuronBase*,SScConnection*>   m_con;
+    SScActivation*                          m_act;
+    double                                  m_zeroact;
+    SScStdSignal<double>                    m_signal;
 };
 
 #endif // GATE_HPP

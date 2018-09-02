@@ -16,6 +16,7 @@ public:
     virtual double err(int) = 0;
     virtual double in (int) = 0;
     virtual double mem(int) = 0;
+    virtual void   clear () {};
 };
 
 class SScRBiasNeuron : public SScRNeuronBase
@@ -37,9 +38,11 @@ public:
     virtual double out(int t);
     virtual double in (int t);
     virtual double mem(int t);
+    virtual void   clear ();
 
     void  setInput(SScSignal<double>* s) { m_isig=s; }
     void  setTarget(SScSignal<double>* s) { m_tsig=s; }
+
 
     inline SScGate* inputGate  () const { return m_ginput;  }
     inline SScGate* outputGate () const { return m_goutput; }

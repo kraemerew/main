@@ -32,6 +32,10 @@ public:
      * \return
      */
     virtual bool contains(int t) const = 0;
+    /*!
+     * \brief Clear all data
+     */
+    virtual void clear() = 0;
 };
 
 /*!
@@ -54,6 +58,7 @@ public:
         return v[t];
     }
     virtual bool contains(int t) const { return (t>=0) && (t<v.size()); }
+    virtual void clear() { v.clear(); }
 
 private:
     T dummy;
@@ -70,6 +75,7 @@ public:
     virtual T operator [] (int t) const { return  (m.contains(t)) ? m[t] : 0; }
     virtual T& operator[] (int t) { return m[t]; }
     virtual bool contains(int t) const { return m.contains(t); }
+    virtual void clear() { m.clear(); }
 
 private:
     QMap<int,T> m;
@@ -85,6 +91,7 @@ public:
     virtual T operator [] (int t) const { return (h.contains(t)) ? h[t] : 0; }
     virtual T& operator[] (int t) { return h[t]; }
     virtual bool contains(int t) const { return h.contains(t); }
+    virtual void clear() { h.clear(); }
 
 private:
     QHash<int,T> h;
