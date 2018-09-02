@@ -12,11 +12,11 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     cam/cam.cpp \
+    activation/sscactivation.cpp \
+    activation/sscconnection.cpp \
     nn/ssccycledetector.cpp \
     nn/sscnetwork.cpp \
     nn/sscneuron.cpp \
-    nn/sscactivation.cpp \
-    nn/sscconnection.cpp \
     pso/psoswarm.cpp \
     pso/psoparticle.cpp \
     som/som.cpp \
@@ -27,7 +27,10 @@ SOURCES += main.cpp \
     cam/camwidget.cpp \
     filter/filter.cpp \
     filter/selector.cpp \
-    cam/framereader.cpp
+    cam/framereader.cpp \
+    rnn/rneuron.cpp \
+    rnn/sscsignal.cpp \
+    rnn/gate.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -59,6 +62,9 @@ HEADERS += \
     cam/camwidget.hpp \
     filter/filter.hpp \
     filter/selector.hpp \
-    cam/framereader.hpp
+    cam/framereader.hpp \
+    rnn/rneuron.hpp \
+    rnn/sscsignal.hpp \
+    rnn/gate.hpp
 
 LIBS += -lv4l1

@@ -1,6 +1,6 @@
 #include <QApplication>
 #include <QElapsedTimer>
-
+#include "rnn/sscsignal.hpp"
 #include "nn/sscnetwork.hpp"
 #include "image/image.hpp"
 #include "filter/selector.hpp"
@@ -45,6 +45,19 @@ private:
 
 int main(int argc, char *argv[])
 {
+    qWarning("----------------------------------------");
+    SScSignal<double> *s0 = new SScStdSignal<double>();
+    (*s0)[7]=7;
+    (*s0)[5]=5;
+    (*s0)[11]=11;
+    (*s0)[-10]=-10;
+
+    SScSignal<double> *s1 = new SScMapSignal<double>();
+    (*s1)[10]=5;
+    SScSignal<double> *s2 = new SScHashSignal<double>();
+    (*s2)[5]=10;
+
+    for (int i=-1; i<12; ++i) qWarning("%d %lf %lf %lf",i, s0->at(i), s1->at(i), s2->at(i));
     /*SScFrameIntervalDescriptor dd(1,2);
     SScFrameIntervalDescriptor sd(0,1,1,1,1,3);
     QList<SScFrameIntervalDescriptor> l;

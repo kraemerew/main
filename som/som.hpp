@@ -2,7 +2,7 @@
 #define SSSOM_HPP
 
 #include <QVector>
-#include "../nn/sscactivation.hpp"
+#include "activation/sscactivation.hpp"
 
 class SScSOMNeuron;
 
