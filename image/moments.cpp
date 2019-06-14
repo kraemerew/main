@@ -22,7 +22,14 @@ template<typename T> double SScMoments<T>::getM(int i, int j)
         double ret = 0;
         if (!m_mtx.isEmpty())
         {
-
+            QVector<double> xp, yp;
+            for (int k=0; k<m_mtx.width(); ++k) xp << qPow(k,i);
+            for (int l=0; l<m_mtx.height(); ++l) yp << qPow(l,j);
+            for (int l=0; l<m_mtx.height(); ++l)
+            {
+                T* line = m_mtx.line(l);
+                for (int k=0; k<m_mtx.width(); ++k) ret += xp[k]*yp[l]*line[k];
+            }
         }
         else
         {
@@ -48,15 +55,20 @@ template<typename T> double SScMoments<T>::getM(int i, int j)
 
 template<typename T> double SScMoments<T>::getMu(int i, int j)
 {
-
     QPair<int,int> c(i,j);
     if (!moment_mu.contains(c))
     {
-
         double xm = xMean(), ym = yMean(), ret = 0;
         if (!m_mtx.isEmpty())
         {
-
+            QVector<double> xp, yp;
+            for (int k=0; k<m_mtx.width (); ++k) xp << qPow(((double)k)-xm,i);
+            for (int l=0; l<m_mtx.height(); ++l) yp << qPow(((double)l)-ym,j);
+            for (int l=0; l<m_mtx.height(); ++l)
+            {
+                T* line = m_mtx.line(l);
+                for (int k=0; k<m_mtx.width(); ++k) ret += xp[k]*yp[l]*line[k];
+            }
         }
         else
         {
@@ -82,7 +94,6 @@ template<typename T> double SScMoments<T>::getMu(int i, int j)
 
 template<typename T> double SScMoments<T>::getEta(int i, int j)
 {
-
     QPair<int,int> c(i,j);
     if (!moment_eta.contains(c))
     {
