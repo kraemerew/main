@@ -36,9 +36,9 @@ public:
         Q_CHECK_PTR(m_frame);
         Q_CHECK_PTR(m_fps);
 
-        m_f.setSelection(0.0);
-        for (int i=-1; i<2; ++i) for (int j=-1; j<2; ++j) for (int t = -1; t<2; ++t)
-            m_f.addPos(SScPos(i,j),t);
+        m_filter.setSelection(0.0);
+        for (int i=-1; i<2; ++i) for (int j=-1; j<2; ++j) //for (int t = -1; t<2; ++t)
+            m_filter.addPos(SScPos(i,j),0);
 
         m_layer->addItem("Color",   0);
         m_layer->addItem("Red",     1);
@@ -133,9 +133,9 @@ private:
             }
             qWarning("SIZE %d %d LAYER %d", img2.width(),img2.height(),l);
             if (l!=0)
-            {
-                if (m_f.append(img.red())) {}
-                    img2 = SScImage(m_f.get());
+            {               
+                if (m_filter.append(img.red())) {}
+                    img2 = SScImage(m_filter.get());
             }
             return img2;
         }
@@ -231,7 +231,7 @@ private:
     quint32         m_fctr;
     QElapsedTimer   m_ftimer;
 
-    SScTSFilterMorphology m_f;
+    SScTSFilterMorphology m_filter;
 };
 
 #include "camwidget.moc"

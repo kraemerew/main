@@ -1,7 +1,7 @@
 #include <QApplication>
 #include <QElapsedTimer>
-#include "rnn/sscsignal.hpp"
-#include "nn/sscnetwork.hpp"
+//#include "rnn/sscsignal.hpp"
+//#include "nn/sscnetwork.hpp"
 #include "image/image.hpp"
 #include "filter/selector.hpp"
 #include "cam/cam.hpp"
@@ -42,11 +42,11 @@ private:
 
 #include "main.moc"
 #include "filter/filter.hpp"
-#include "rnn/rneuron.hpp"
+//#include "rnn/rneuron.hpp"
 
 int main(int argc, char *argv[])
 {
-    SScRBiasNeuron* bn = new (std::nothrow) SScRBiasNeuron();
+    /*SScRBiasNeuron* bn = new (std::nothrow) SScRBiasNeuron();
     QList<SScRNeuron*> nl;
     for (int i=0; i<2; ++i) nl << new (std::nothrow) SScRNeuron();
     foreach(SScRNeuron* n1, nl) n1->inputGate()->addConnection(bn,-1.3);
@@ -84,7 +84,8 @@ int main(int argc, char *argv[])
     (*s2)[5]=10;
 
     for (int i=-1; i<12; ++i) qWarning("%d %lf %lf %lf",i, s0->at(i), s1->at(i), s2->at(i));
-    /*SScFrameIntervalDescriptor dd(1,2);
+
+  SScFrameIntervalDescriptor dd(1,2);
     SScFrameIntervalDescriptor sd(0,1,1,1,1,3);
     QList<SScFrameIntervalDescriptor> l;
     l<< sd << dd;
@@ -101,8 +102,6 @@ int main(int argc, char *argv[])
 */
 
     QApplication a(argc, argv);
-    //SScMultiCamTester tst;
-
 
     SScTSFilterMorphology fm(0.5);
     const SScPos p0(0,0);

@@ -34,22 +34,22 @@ public:
 
     SScMatrix<uchar> grey()
     {
-        if (m_m.isEmpty()) toMatrix(); else qWarning("MATRIX ALREADY DONE");
+        if (m_m.isEmpty()) toMono(); else qWarning("MATRIX ALREADY DONE");
         return m_m;
     }
     SScMatrix<uchar> red    ()
     {
-        if (m_r.isEmpty()) toMatrix(); else qWarning("MATRIX ALREADY DONE");
+        if (m_r.isEmpty()) toRGB(); else qWarning("MATRIX ALREADY DONE");
         return m_r;
     }
     SScMatrix<uchar> green    ()
     {
-        if (m_g.isEmpty()) toMatrix(); else qWarning("MATRIX ALREADY DONE");
+        if (m_g.isEmpty()) toRGB(); else qWarning("MATRIX ALREADY DONE");
         return m_g;
     }
     SScMatrix<uchar> blue   ()
     {
-        if (m_b.isEmpty()) toMatrix(); else qWarning("MATRIX ALREADY DONE");
+        if (m_b.isEmpty()) toRGB(); else qWarning("MATRIX ALREADY DONE");
         return m_b;
     }
 
@@ -61,41 +61,38 @@ private:
         if (im.format()!=QImage::Format_RGB888) return im.convertToFormat(QImage::Format_RGB888);
         return im;
     }
-    inline void toMatrix()
-    {
-        qWarning("Calculate gray");
-        if (allGray())
-        {
-            m_m = SScMatrix<uchar>(width(),height());
-            for (int i=0; i<height(); ++i)
-            {
-                uchar* m = m_m.line(i);
-                for (int j=0; j<width(); ++j)
-                {
-                    QRgb c = pixel(j,i);
-                    (*m++)=qGray (c);
-                }
-            }
-        }
-        else
-        {
-            m_r = SScMatrix<uchar>(width(),height());
-            m_g = SScMatrix<uchar>(width(),height());
-            m_b = SScMatrix<uchar>(width(),height());
-            for (int i=0; i<height(); ++i)
-            {
-                uchar* r = m_r.line(i), *b = m_b.line(i), *g = m_g.line(i);
-                for (int j=0; j<width(); ++j)
-                {
-                    QRgb c = pixel(j,i);
-                    (*r++)=qRed  (c);
-                    (*g++)=qGreen(c);
-                    (*b++)=qBlue (c);
-                }
-            }
 
-            qWarning("Converted %d %d %d %d %d %d", m_r.width(),m_r.height(),m_g.width(),m_g.height(),m_b.width(),m_b.height());
+    inline void toMono()
+    {
+        m_m = SScMatrix<uchar>(width(),height());
+        for (int i=0; i<height(); ++i)
+        {
+            uchar* m = m_m.line(i);
+            for (int j=0; j<width(); ++j)
+            {
+                QRgb c = pixel(j,i);
+                (*m++)=qGray (c);
+            }
         }
+    }
+
+    inline void toRGB()
+    {
+        m_r = SScMatrix<uchar>(width(),height());
+        m_g = SScMatrix<uchar>(width(),height());
+        m_b = SScMatrix<uchar>(width(),height());
+        for (int i=0; i<height(); ++i)
+        {
+            uchar* r = m_r.line(i), *b = m_b.line(i), *g = m_g.line(i);
+            for (int j=0; j<width(); ++j)
+            {
+                QRgb c = pixel(j,i);
+                (*r++)=qRed  (c);
+                (*g++)=qGreen(c);
+                (*b++)=qBlue (c);
+             }
+        }
+        //qWarning("Converted %d %d %d %d %d %d", m_r.width(),m_r.height(),m_g.width(),m_g.height(),m_b.width(),m_b.height());
     }
 };
 

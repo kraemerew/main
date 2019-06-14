@@ -12,14 +12,14 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     cam/cam.cpp \
-    activation/sscactivation.cpp \
-    activation/sscconnection.cpp \
-    nn/ssccycledetector.cpp \
-    nn/sscnetwork.cpp \
-    nn/sscneuron.cpp \
-    pso/psoswarm.cpp \
-    pso/psoparticle.cpp \
-    som/som.cpp \
+    #activation/sscactivation.cpp \
+    #activation/sscconnection.cpp \
+    #nn/ssccycledetector.cpp \
+    #nn/sscnetwork.cpp \
+    #nn/sscneuron.cpp \
+    #pso/psoswarm.cpp \
+    #pso/psoparticle.cpp \
+    #som/som.cpp \
     image/matrix.cpp \
     image/image.cpp \
     cam/camcapability.cpp \
@@ -27,10 +27,10 @@ SOURCES += main.cpp \
     cam/camwidget.cpp \
     filter/filter.cpp \
     filter/selector.cpp \
-    cam/framereader.cpp \
-    rnn/rneuron.cpp \
-    rnn/sscsignal.cpp \
-    rnn/gate.cpp
+    cam/framereader.cpp
+    #rnn/rneuron.cpp \
+    #rnn/sscsignal.cpp \
+    #rnn/gate.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -45,16 +45,16 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 HEADERS += \
     cam/cam.hpp \
-    nn/ssccycledetector.hpp \
-    nn/sscnetwork.hpp \
-    nn/sscnetwork_global.h \
-    nn/sscneuron.hpp \
-    nn/sscweight.hpp \
-    nn/sscactivation.hpp \
-    nn/sscconnection.hpp \
-    pso/psoswarm.hpp \
-    pso/psoparticle.hpp \
-    som/som.hpp \
+   # nn/ssccycledetector.hpp \
+   # nn/sscnetwork.hpp \
+   # nn/sscnetwork_global.h \
+   # nn/sscneuron.hpp \
+   # nn/sscweight.hpp \
+   # nn/sscactivation.hpp \
+   # nn/sscconnection.hpp \
+   # pso/psoswarm.hpp \
+   # pso/psoparticle.hpp \
+   # som/som.hpp \
     image/matrix.hpp \
     image/image.hpp \
     cam/camcapability.hpp \
@@ -62,9 +62,9 @@ HEADERS += \
     cam/camwidget.hpp \
     filter/filter.hpp \
     filter/selector.hpp \
-    cam/framereader.hpp \
-    rnn/rneuron.hpp \
-    rnn/sscsignal.hpp \
-    rnn/gate.hpp
+    cam/framereader.hpp
+    #rnn/rneuron.hpp \
+    #rnn/sscsignal.hpp \
+    #rnn/gate.hpp
 
 LIBS += -lv4l1
