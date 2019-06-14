@@ -12,7 +12,9 @@ public:
     SScMatrix()
         : QVector<T>(), m_w(0), m_h(0)
     {}
-
+    SScMatrix(const SScMatrix<T>& other)
+        : QVector<T>(other), m_w(other.m_w), m_h(other.m_h)
+    {}
     SScMatrix(quint32 w, quint32 h, T* dta)
         : QVector<T>(), m_w(w), m_h(h)
     {

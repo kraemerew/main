@@ -26,7 +26,7 @@ public:
         {
             for (quint32 i=0; i<r.height(); ++i)
             {
-                const uchar *rl = r.constLine(i), *gl = g.constLine(i), *bl=b.constLine(i);
+                const uchar *rl = r.constLine(i), *gl = g.constLine(i), *bl=b.constLine(i);                
                 for (quint32 j=0; j<r.width(); ++j) setPixel(j,i,qRgb(*rl++,*gl++,*bl++));
             }
         }

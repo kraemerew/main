@@ -27,7 +27,8 @@ SOURCES += main.cpp \
     cam/camwidget.cpp \
     filter/filter.cpp \
     filter/selector.cpp \
-    cam/framereader.cpp
+    cam/framereader.cpp \
+    image/moments.cpp
     #rnn/rneuron.cpp \
     #rnn/sscsignal.cpp \
     #rnn/gate.cpp
@@ -62,7 +63,8 @@ HEADERS += \
     cam/camwidget.hpp \
     filter/filter.hpp \
     filter/selector.hpp \
-    cam/framereader.hpp
+    cam/framereader.hpp \
+    image/moments.hpp
     #rnn/rneuron.hpp \
     #rnn/sscsignal.hpp \
     #rnn/gate.hpp
