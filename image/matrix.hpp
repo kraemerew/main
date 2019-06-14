@@ -4,7 +4,7 @@
 #include <Qt>
 #include <QVector>
 
-template <typename T> class SScMatrix : public QVector<T>
+template <typename T> class SScMatrix :  QVector<T>
 {
 public:
     virtual ~SScMatrix() {  }
@@ -35,7 +35,9 @@ public:
     inline quint32                  width   () const { return m_w; }
     inline quint32                  height  () const { return m_h; }
     inline QPair<quint32,quint32>   size    () const { return QPair<quint32,quint32>(m_w,m_h); }
-
+    inline void swap (QVector<T>& other) { this->swap(other); qSwap(this->m_w,other.m_w);qSwap(this->m_h,other.m_h); }
+    inline void clear() { m_w=0; m_h=0; QVector<T>::clear(); }
+    inline void operator =(const QVector<T>& other) { (*this)=other; m_w=other.m_w; m_h=other.m_h; }
     const T* constLine(quint32 nr) const
     {
         Q_ASSERT(nr<m_h);
