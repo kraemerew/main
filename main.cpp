@@ -7,6 +7,7 @@
 #include "cam/cam.hpp"
 #include "cam/camwidget.hpp"
 #include "cam/frameintervaldescriptor.hpp"
+#include "image/moments.hpp"
 #include <QTimer>
 
 class SScMultiCamTester : public QObject
@@ -101,18 +102,22 @@ int main(int argc, char *argv[])
     exit(0);
 */
 
-    QApplication a(argc, argv);
+    SScImage im;
+    im.load("/home/developer/k.png");
+    SScUCMatrix m = im.grey();
+    m.negate();
+    m.binarize(128,0,1);
+    m.save("/home/developer/out.png","PNG");
 
-    SScTSFilterMorphology fm(0.5);
-    const SScPos p0(0,0);
-    fm.addPos(p0,-2);
-    fm.addPos(p0,-1);
-    fm.addPos(p0, 0);
 
+    SScMoments<uchar> x(m);
+    x.dump();
+
+/*    QApplication a(argc, argv);
     SScCamWidget* w = new (std::nothrow) SScCamWidget();
     Q_CHECK_PTR(w);
     w->show();
-
+*/
 
 
     //const bool allow = SScCamCapability(0).allowed("MJPG",320,240);
@@ -188,5 +193,5 @@ int main(int argc, char *argv[])
     while (!done);
     qWarning("Training took %d microseconds", (int)t.nsecsElapsed()/1000);
     */
-    return a.exec();
+    //return a.exec();
 }

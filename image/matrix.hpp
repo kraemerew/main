@@ -91,8 +91,14 @@ public:
     SScUCMatrix(const SScUCMatrix& other) : SScMatrix<uchar>(other) {}
     SScUCMatrix(quint32 w, quint32 h, uchar* dta) : SScMatrix<uchar>(w,h,dta) {}
     SScUCMatrix(quint32 w, quint32 h) : SScMatrix<uchar>(w,h) {}
-    inline void negate() { for (quint32 i=0; i<(m_w*m_h); ++i)
-            (*this)[i]=255-at(i); }
+    inline void binarize(uchar thr, uchar black, uchar white)
+    {
+       for (quint32 i=0; i<(m_w*m_h); ++i) if (at(i)>=thr) (*this)[i]=white; else (*this)[i]=black;
+    }
+
+    inline void negate() { for (quint32 i=0; i<(m_w*m_h); ++i) (*this)[i]=255-at(i); }
+    bool save(const QString& filename, const char* format=0);
+
 };
 
 
