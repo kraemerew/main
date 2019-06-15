@@ -65,7 +65,7 @@ public:
                     const int x = p.first, y = p.second;
                     ret = ret + (long double)m_v[k] * (long double)(qPow(x,i)*qPow(y,j));
                 }
-            }
+            }            
             moment_m[c]=ret;
         }
         return moment_m[c];
@@ -83,6 +83,7 @@ public:
         if (!moment_mu.contains(c))
         {
             if ((i==0) && (j==0)) return getM(0,0);
+
             long double xm = xMean(), ym = yMean(), ret = 0;
             if (!m_mtx.isEmpty())
             {
@@ -114,7 +115,7 @@ public:
                     const long double x = p.first, y = p.second;
                     ret = ret + (long double)m_v[k] * (long double)(qPow((x-xm),i)*qPow((y-ym),j));
                 }
-            }
+            }            
             moment_mu[c]=ret;
         }
         return moment_mu[c];
@@ -145,8 +146,8 @@ public:
      */
     long double getHu(int i)
 {
-    if (!m_hu.contains(i)) switch(i)
-    {
+        if (!m_hu.contains(i)) switch(i)
+        {
         case 1: // 20+02
                 m_hu[i]=getEta(2,0)+getEta(0,2);
         break;
@@ -168,7 +169,7 @@ public:
                             // (321-03)(21+03)
                             d3 = (3.0*getEta(2,1)-getEta(0,3))*(getEta(2,1)+getEta(0,3)),
                             // 3(30+12)^2-(21+03)^2
-                            d4 = 3.0*qPow(getEta(3,03)+getEta(1,2),2.0)-qPow(getEta(2,1)+getEta(0,3),2.0);
+                            d4 = 3.0*qPow(getEta(3,0)+getEta(1,2),2.0)-qPow(getEta(2,1)+getEta(0,3),2.0);
             m_hu[i]= (d1*d2)+(d3*d4);
         }
         break;
@@ -187,7 +188,6 @@ public:
         {
             const long double
                     //(321-03)(30+12)
-
                     d1 = (3.0*getEta(2,1)-getEta(0,3)) * (getEta(3,0)+getEta(1,2)),
                     //(30+12)^2-3(21+03)^2
                     d2 = qPow(getEta(3,0)+getEta(1,2),2.0)-3.0*qPow(getEta(2,1)+getEta(0,3),2.0),
