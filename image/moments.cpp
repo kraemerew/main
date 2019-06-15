@@ -23,12 +23,12 @@ template<typename T> double SScMoments<T>::getM(int i, int j)
         if (!m_mtx.isEmpty())
         {
             QVector<double> xp, yp;
-            for (int k=0; k<m_mtx.width(); ++k) xp << qPow(k,i);
+            for (int k=0; k<m_mtx.width(); ++k)  xp << qPow(k,i);
             for (int l=0; l<m_mtx.height(); ++l) yp << qPow(l,j);
             for (int l=0; l<m_mtx.height(); ++l)
             {
                 T* line = m_mtx.line(l);
-                for (int k=0; k<m_mtx.width(); ++k) ret += xp[k]*yp[l]*line[k];
+                for (int k=0; k<m_mtx.width(); ++k) if (line[k]!=0.0) ret += xp[k]*yp[l]*line[k];
             }
         }
         else
@@ -67,7 +67,7 @@ template<typename T> double SScMoments<T>::getMu(int i, int j)
             for (int l=0; l<m_mtx.height(); ++l)
             {
                 T* line = m_mtx.line(l);
-                for (int k=0; k<m_mtx.width(); ++k) ret += xp[k]*yp[l]*line[k];
+                for (int k=0; k<m_mtx.width(); ++k) if (line[k]!=0.0) ret += xp[k]*yp[l]*line[k];
             }
         }
         else
@@ -137,8 +137,30 @@ template<typename T> double SScMoments<T>::getHu(int i)
             m_hu[i]=(d1*d2)-(d3*d4);
         }
         break;
+        default: return 0; break;
     }
 
     return m_hu[i];
 }
 
+template<typename T> double SScMoments<T>::getNHu(int i)
+{
+    if (!m_nhu.contains(i))
+    {
+        const double hu = getHu(i);
+        if (hu==0.0) return 0.0;
+        m_nhu[i] = (hu>0) ? -log(qAbs(hu)) : log(qAbs(hu));
+    }
+    return m_nhu[i];
+}
+
+template<typename T> void SScMoments<T>::dump()
+{
+    QStringList sl;
+    QPair<int,int> p;
+    for (int i=1; i<8; ++i)        sl << QString("Hu  #%1: %2").arg(i).arg(getHu(i));
+    foreach (p, moment_m.  keys()) sl << QString("M  %1%2: %3").arg(p.first).arg(p.second).arg(moment_m[p]);
+    foreach (p, moment_mu. keys()) sl << QString("Mu %1%2: %3").arg(p.first).arg(p.second).arg(moment_mu[p]);
+    foreach (p, moment_eta.keys()) sl << QString("Eta%1%2: %3").arg(p.first).arg(p.second).arg(moment_eta[p]);
+    foreach(const QString& s, sl) qWarning("%s", qPrintable(s));
+}

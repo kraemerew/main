@@ -3,7 +3,7 @@
 
 #include "matrix.hpp"
 #include <QPair>
-#include <QHash>
+#include <QMap>
 template <typename T> class SScMoments
 {
 public:
@@ -30,17 +30,30 @@ public:
      * \return
      */
     double getEta(int i, int j);
+    /*!
+     * \brief Hu moment
+     * \param i 1..7
+     * \return
+     */
     double getHu(int i);
+    /*!
+     * \brief normalized Hu -sign(hu)log(abs(hu))
+     * \param i
+     * \return
+     */
+    double getNHu(int i);
+
+    void dump();
 
 private:
     inline double xMean() { const double m00 = getM(0,0); return (m00!=0) ? getM(1,0)/m00 : 0.0; }
     inline double yMean() { const double m00 = getM(0,0); return (m00!=0) ? getM(0,1)/m00 : 0.0; }
 
-    QHash<QPair<int,int>,double> moment_m, moment_mu, moment_eta;
-    QHash<int,double> m_hu;
+    QMap<QPair<int,int>,double> moment_m, moment_mu, moment_eta;
+    QMap<int,double> m_hu, m_nhu;
     SScMatrix<T> m_mtx;
     QVector<QPair<int,int> > m_pos;
-    QVector<T> m_v;
+    QVector<T> m_v;    
 };
 
 #endif // MOMENTS_HPP

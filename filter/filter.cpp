@@ -49,7 +49,7 @@ void SScTSFilterMorphology::normalize()
     }
 }
 
-uchar SScTSFilterMorphology::get(const SScPosProd& pp, int x, int y, const SScMatrix<uchar>& im) const
+uchar SScTSFilterMorphology::get(const SScPosProd& pp, int x, int y, const SScUCMatrix& im) const
 {
     int sh = -1;
     quint64 ret = 1;
@@ -70,10 +70,10 @@ uchar SScTSFilterMorphology::get(const SScPosProd& pp, int x, int y, const SScMa
     return qBound((quint64)0,ret,(quint64)255);
 }
 
-SScMatrix<uchar> SScTSFilterMorphology::get()
+SScUCMatrix SScTSFilterMorphology::get()
 {
     normalize();
-    SScMatrix<uchar> ret(m_w,m_h);
+    SScUCMatrix ret(m_w,m_h);
     for (int x=0; x<m_w; ++x) for (int y=0; y<m_h; ++y)
     {
         const int v = get(x,y);
@@ -97,7 +97,7 @@ uchar SScTSFilterMorphology::get(int x, int y) const
     return 0;
 }
 
-bool SScTSFilterMorphology::append(const SScMatrix<uchar> &src)
+bool SScTSFilterMorphology::append(const SScUCMatrix &src)
 {
     if (src.isEmpty()) return false;
     if (m_inputs.isEmpty())

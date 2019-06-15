@@ -4,7 +4,7 @@
 #include <Qt>
 #include <QVector>
 
-template <typename T> class SScMatrix :  QVector<T>
+template <typename T> class SScMatrix :  protected QVector<T>
 {
 public:
     virtual ~SScMatrix() {  }
@@ -23,8 +23,13 @@ public:
         this->resize(w*h);
         memcpy(this->data(),dta,w*h);
     }
-
-    SScMatrix(quint32 w, quint32 h, T fillvalue = 0)
+    SScMatrix(quint32 w, quint32 h)
+        : QVector<T>(), m_w(w), m_h(h)
+    {
+        Q_ASSERT(m_w*m_h>0);
+        this->resize(w*h);
+    }
+    SScMatrix(quint32 w, quint32 h, T fillvalue)
         : QVector<T>(), m_w(w), m_h(h)
     {
         Q_ASSERT(m_w*m_h>0);
@@ -46,7 +51,7 @@ public:
         return this->constData()+(m_w*nr);
     }
 
-    T* line(quint32 nr)
+    inline T* line(quint32 nr)
     {
         Q_ASSERT(nr<m_h);              
         return this->data()+(m_w*nr);
@@ -74,8 +79,20 @@ public:
         else return x;
     }
 
-private:
+protected:
     quint32 m_w, m_h;
+};
+
+
+class SScUCMatrix : public SScMatrix<uchar>
+{
+public:
+    SScUCMatrix() : SScMatrix<uchar>() {}
+    SScUCMatrix(const SScUCMatrix& other) : SScMatrix<uchar>(other) {}
+    SScUCMatrix(quint32 w, quint32 h, uchar* dta) : SScMatrix<uchar>(w,h,dta) {}
+    SScUCMatrix(quint32 w, quint32 h) : SScMatrix<uchar>(w,h) {}
+    inline void negate() { for (quint32 i=0; i<(m_w*m_h); ++i)
+            (*this)[i]=255-at(i); }
 };
 
 

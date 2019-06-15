@@ -91,7 +91,7 @@ public:
     explicit SScTSFilterMorphology(double sel = 0);
     virtual ~SScTSFilterMorphology();
     bool setSelection(double sel);
-    bool append(const SScMatrix<uchar>& src);
+    bool append(const SScUCMatrix& src);
 
     bool addPos(const SScPosProd& pp, int t = 0);
     bool addPos(const SScPos& pos, int t = 0);
@@ -100,11 +100,11 @@ public:
     inline int tmax() const { int ret = !m_pixels.isEmpty() ? m_pixels.keys().first() : 0; foreach(auto t, m_pixels.keys()) if (t>ret) ret = t; return ret;  }
 
 
-    SScMatrix<uchar> get();
+    SScUCMatrix get();
 
 private:
 
-    uchar get(const SScPosProd& pp, int x, int y, const SScMatrix<uchar>& im) const;
+    uchar get(const SScPosProd& pp, int x, int y, const SScUCMatrix& im) const;
     uchar get(int x, int y) const;
 
     /*!
@@ -114,7 +114,7 @@ private:
 
     SScSelectorBase<uchar>*     m_selector;
     quint32                     m_w, m_h, m_buflen;
-    QList<SScMatrix<uchar> >    m_inputs;
+    QList<SScUCMatrix >    m_inputs;
     QMultiMap<int,SScPosProd>   m_pixels, m_pixels_normalized;
 
 };
