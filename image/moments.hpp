@@ -37,8 +37,8 @@ public:
             if (!m_mtx.isEmpty())
             {
                 QVector<double> xp, yp;
-                for (quint32 k=0; k<m_mtx.width(); ++k)  xp << qPow((double)k/(double)m_mtx.width (),i);
-                for (quint32 l=0; l<m_mtx.height(); ++l) yp << qPow((double)l/(double)m_mtx.height(),j);
+                for (quint32 k=0; k<m_mtx.width(); ++k)  xp << qPow((double)k/(double)(m_mtx.width ()-1),i);
+                for (quint32 l=0; l<m_mtx.height(); ++l) yp << qPow((double)l/(double)(m_mtx.height()-1),j);
 
                 for (quint32 l=0; l<m_mtx.height(); ++l)
                 {
@@ -82,12 +82,13 @@ public:
         QPair<int,int> c(i,j);
         if (!moment_mu.contains(c))
         {
+            if ((i==0) && (j==0)) return getM(0,0);
             double xm = xMean(), ym = yMean(), ret = 0;
             if (!m_mtx.isEmpty())
             {
                 QVector<double> xp, yp;
-                for (quint32 k=0; k<m_mtx.width (); ++k) xp << qPow(((double)k/(double)m_mtx.width ())-xm,i);
-                for (quint32 l=0; l<m_mtx.height(); ++l) yp << qPow(((double)l/(double)m_mtx.height())-ym,j);
+                for (quint32 k=0; k<m_mtx.width (); ++k) xp << qPow(((double)k/(double)(m_mtx.width ()-1))-xm,i);
+                for (quint32 l=0; l<m_mtx.height(); ++l) yp << qPow(((double)l/(double)(m_mtx.height()-1))-ym,j);
                 for (quint32 l=0; l<m_mtx.height(); ++l)
                 {
                    double lsum = 0;
@@ -127,6 +128,7 @@ public:
      */
     double getEta(int i, int j)
     {
+        Q_ASSERT(i+j>=2);
         QPair<int,int> c(i,j);
         if (!moment_eta.contains(c))
         {
@@ -145,33 +147,54 @@ public:
 {
     if (!m_hu.contains(i)) switch(i)
     {
-        case 1: m_hu[i]=getEta(2,0)+getEta(0,2); break;
-        case 2: m_hu[i]=qPow(getEta(2,0)-getEta(0,2),2.0)+4*qPow(getEta(1,1),2.0);  break;
-        case 3: m_hu[i]=qPow(getEta(3,0)-3.0*getEta(1,2),2.0)+qPow(3.0*getEta(2,1)-getEta(0,3),2.0); break;
-        case 4: m_hu[i]=qPow(getEta(3,0)+getEta(1,2),2.0)+qPow(getEta(2,1)+getEta(0,3),2.0); break;
+        case 1: // 20+02
+                m_hu[i]=getEta(2,0)+getEta(0,2);
+        break;
+        case 2: // (20-02)^2+4(11)^2
+                m_hu[i]=qPow(getEta(2,0)-getEta(0,2),2.0)+4.0*qPow(getEta(1,1),2.0);
+        break;
+        case 3: // (30-312)^2+(321-03)^2
+                m_hu[i]=qPow(getEta(3,0)-3.0*getEta(1,2),2.0)+qPow(3.0*getEta(2,1)-getEta(0,3),2.0);
+        break;
+        case 4: // (30+12)^2+(21+03)^2
+                m_hu[i]=qPow(getEta(3,0)+getEta(1,2),2.0)+qPow(getEta(2,1)+getEta(0,3),2.0);
+        break;
         case 5:
         {
-            const double    d1 = (getEta(3,0)-3.0*getEta(1,2))*(getEta(3,0)+getEta(1,2)),
-                            d2 = qPow(getEta(3,0)+getEta(1,2),2.0)-3.0*qPow(getEta(1,2)+getEta(0,3),2.0),
+            const double    // (30-312)(30+12)
+                            d1 = (getEta(3,0)-3.0*getEta(1,2))*(getEta(3,0)+getEta(1,2)),
+                            // (30+12)^2-3(21+03)^2
+                            d2 = qPow(getEta(3,0)+getEta(1,2),2.0)-3.0*qPow(getEta(2,1)+getEta(0,3),2.0),
+                            // (321-03)(21+03)
                             d3 = (3.0*getEta(2,1)-getEta(0,3))*(getEta(2,1)+getEta(0,3)),
-                            d4 = 3.0*qPow(getEta(0,3)+getEta(1,2),2.0)-qPow(getEta(2,1)-getEta(0,3),2.0);
+                            // 3(30+12)^2-(21+03)^2
+                            d4 = 3.0*qPow(getEta(3,03)+getEta(1,2),2.0)-qPow(getEta(2,1)+getEta(0,3),2.0);
             m_hu[i]= (d1*d2)+(d3*d4);
         }
         break;
         case 6:
         {
-            const double    d1 = getEta(2,0)-getEta(0,2),
+            const double    // (20-02)
+                            d1 = getEta(2,0)-getEta(0,2),
+                            // (30+12)^2-(21+03)^2
                             d2 = qPow(getEta(3,0)+getEta(1,2),2.0)-qPow(getEta(2,1)+getEta(0,3),2.0),
+                            // 411(30+12)(21+03)
                             d3 = 4.0*getEta(1,1)*(getEta(3,0)+getEta(1,2))*(getEta(2,1)+getEta(0,3));
             m_hu[i]=(d1*d2)+d3;
         }
         break;
         case 7:
         {
-            const double    d1 = (3.0*getEta(2,1)-getEta(0,3)) * (getEta(3,0)+getEta(1,2)),
-                            d2 = qPow(getEta(3,0)+getEta(1,2),2.0)-3.0*qPow(getEta(2,1)+getEta(0,3),2.0),
-                            d3 = (getEta(3,0)-3.0*getEta(1,2))*(getEta(2,1)+getEta(0,3)),
-                            d4 = 3.0*qPow(getEta(3,0)+getEta(1,2),2.0)-qPow(getEta(2,1)+getEta(0,3),2.0);
+            const double
+                    //(321-03)(30+12)
+                    d1 = (3.0*getEta(2,1)-getEta(0,3)) * (getEta(3,0)+getEta(1,2)),
+                    //(30+12)^2-3(21+03)^2
+                    d2 = qPow(getEta(3,0)+getEta(1,2),2.0)-3.0*qPow(getEta(2,1)+getEta(0,3),2.0),
+                    // (30-312)(21+03)
+                    d3 = (getEta(3,0)-3.0*getEta(1,2))*(getEta(2,1)+getEta(0,3)),
+                    // (3(30+12)^2-(21+03)^2
+                    d4 = 3.0*qPow(getEta(3,0)+getEta(1,2),2.0)-qPow(getEta(2,1)+getEta(0,3),2.0);
+
             m_hu[i]=(d1*d2)-(d3*d4);
         }
         break;
@@ -192,7 +215,7 @@ public:
         {
             const double hu = getHu(i);
             if (hu==0.0) return 0.0;
-            m_nhu[i] = (hu>0) ? log(qAbs(hu)) : log(qAbs(hu));
+            m_nhu[i] = (hu>0) ? -log(qAbs(hu)) : log(qAbs(hu));
 
         }
         return m_nhu[i];
@@ -204,6 +227,7 @@ public:
         QPair<int,int> p;
         for (int i=1; i<8; ++i)        sl << QString("Hu  #%1: %2").arg(i).arg(getHu(i));
         for (int i=1; i<8; ++i)        sl << QString("NHu #%1: %2").arg(i).arg(getNHu(i));
+                                       sl << QString("Centroid %1 %2").arg(xMean()).arg(yMean());
         foreach (p, moment_m.  keys()) sl << QString("M  %1%2: %3").arg(p.first).arg(p.second).arg(moment_m[p]);
         foreach (p, moment_mu. keys()) sl << QString("Mu %1%2: %3").arg(p.first).arg(p.second).arg(moment_mu[p]);
         foreach (p, moment_eta.keys()) sl << QString("Eta%1%2: %3").arg(p.first).arg(p.second).arg(moment_eta[p]);

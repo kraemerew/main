@@ -103,9 +103,9 @@ int main(int argc, char *argv[])
 */
 
     SScImage im;
-    im.load("/home/developer/k.png");
+    im.load("/home/developer/diamond.png");
     SScUCMatrix m = im.grey();
-    m.negate();
+
     m.binarize(128,0,1);
     m.save("/home/developer/out.png","PNG");
 
