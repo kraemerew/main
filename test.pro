@@ -14,9 +14,9 @@ SOURCES += main.cpp \
     cam/cam.cpp \
     #activation/sscactivation.cpp \
     #activation/sscconnection.cpp \
-    #nn/ssccycledetector.cpp \
-    #nn/sscnetwork.cpp \
-    #nn/sscneuron.cpp \
+    nn/ssccycledetector.cpp \
+    nn/sscnetwork.cpp \
+    nn/sscneuron.cpp \
     #pso/psoswarm.cpp \
     #pso/psoparticle.cpp \
     #som/som.cpp \
@@ -46,11 +46,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 HEADERS += \
     cam/cam.hpp \
-   # nn/ssccycledetector.hpp \
-   # nn/sscnetwork.hpp \
-   # nn/sscnetwork_global.h \
-   # nn/sscneuron.hpp \
-   # nn/sscweight.hpp \
+    nn/ssccycledetector.hpp \
+    nn/sscnetwork.hpp \
+    nn/sscnetwork_global.h \
+    nn/sscneuron.hpp \
+    nn/sscweight.hpp \
    # nn/sscactivation.hpp \
    # nn/sscconnection.hpp \
    # pso/psoswarm.hpp \

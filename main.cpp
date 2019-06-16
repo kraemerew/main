@@ -1,7 +1,7 @@
 #include <QApplication>
 #include <QElapsedTimer>
 //#include "rnn/sscsignal.hpp"
-//#include "nn/sscnetwork.hpp"
+#include "nn/sscnetwork.hpp"
 #include "image/image.hpp"
 #include "filter/selector.hpp"
 #include "cam/cam.hpp"
@@ -47,6 +47,64 @@ private:
 
 int main(int argc, char *argv[])
 {
+
+    SScNetwork net;
+
+    const int bi = net.addNeuron(SScNeuron::NeuronType_Bias,    "Bias"),
+              i1 = net.addNeuron(SScNeuron::NeuronType_Input,   "In1"),
+              i2 = net.addNeuron(SScNeuron::NeuronType_Input,   "In2"),
+              h1 = net.addNeuron(SScNeuron::NeuronType_Hidden,  "Hidden"),
+              o1 = net.addNeuron(SScNeuron::NeuronType_Output,  "Out");
+    net.connect(bi,h1,-1.1);
+    net.connect(bi,o1, 1.1);
+    net.connect(i1,o1, 0.1);
+    net.connect(i2,o1, 0.2);
+    net.connect(i1,h1, 0.1);
+    net.connect(i2,h1,-0.3);
+    net.connect(h1,o1, 0.2);
+
+    net.idx2n(h1)->setActivation(SScActivation::ACT_SIGMOID);
+    net.idx2n(o1)->setActivation(SScActivation::ACT_TANH);
+
+    // training preparation
+    net.connectForward();
+
+    // training
+    QElapsedTimer t; t.start();
+    int c=0;
+    double err = 0, lasterr = 0;
+    bool done = false;
+    do
+    {
+        const int p = (++c)%4;
+        if (p==0) err = 0;
+        switch(p)
+        {
+        case 0: net.idx2n(i1)->setInput(0); net.idx2n(i2)->setInput(0); net.idx2n(o1)->setTarget( 1); break;
+        case 1: net.idx2n(i1)->setInput(0); net.idx2n(i2)->setInput(1); net.idx2n(o1)->setTarget(-1); break;
+        case 2: net.idx2n(i1)->setInput(1); net.idx2n(i2)->setInput(0); net.idx2n(o1)->setTarget(-1); break;
+        case 3: net.idx2n(i1)->setInput(1); net.idx2n(i2)->setInput(1); net.idx2n(o1)->setTarget( 1); break;
+        }
+        qWarning("Pattern %d Output %lf", p, net.idx2n(o1)->out());
+        const double perr = qAbs(net.idx2n(o1)->err());
+        err+=perr;
+        if (p==3)
+        {
+            err/=4.0;
+            qWarning("Cycle %d Error %lf Last %lf %s", c, err, lasterr, err<lasterr ? "lower":"higher");
+            if (err<0.1) done = true;
+            lasterr = err;
+
+        }
+        //if (c==100) std::exit(1);
+
+        const bool endOfCycle = (p==3);
+        net.idx2n(o1)->trainingStep(endOfCycle);
+        net.idx2n(h1)->trainingStep(endOfCycle);
+    }
+    while (!done);
+    qWarning("Training took %d microseconds", (int)t.nsecsElapsed()/1000);
+    std::exit(0);
     /*SScRBiasNeuron* bn = new (std::nothrow) SScRBiasNeuron();
     QList<SScRNeuron*> nl;
     for (int i=0; i<2; ++i) nl << new (std::nothrow) SScRNeuron();

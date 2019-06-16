@@ -3,6 +3,83 @@
 #include <QtMath>
 #include <QMap>
 
+
+class SScConnectionRProp : public SScConnection
+{
+public:
+    SScConnectionRProp(double v) : SScConnection(v), m_uval(.1), m_last(0) {}
+    virtual void update(double v, bool cycleDone)
+    {
+        m_updatesum += v;
+        if (cycleDone)
+        {
+            const bool signchange = ((m_updatesum>0) && (m_last<0)) || ((m_updatesum<0) && (m_last>0));
+            if (signchange) m_uval*=.6; else m_uval*=1.2;
+            m_uval=qBound(0.00001,m_uval,1.0);
+            //qWarning(">>>>>>>>>>>RPROP UPDATE %s DLT %lf, V %lf", signchange ?"SC":"SS",m_uval,m_value);
+            if (m_updatesum>0) m_value+=m_uval; else if (m_updatesum<0) m_value-=m_uval;
+            m_last=m_updatesum;
+            m_updatesum=0.0;
+        }
+    }
+private:
+    double m_uval, m_last;
+};
+
+SScConnection* SScConnection::create(SSeConnection type, double v)
+{
+    switch(type)
+    {
+    case CON_STD: return new SScConnection(v); break;
+    case CON_RPROP: return new SScConnectionRProp(v); break;
+    }
+    return NULL;
+}
+
+class SScActivationIdentity : public SScActivation
+{
+public:
+    SScActivationIdentity(): SScActivation() {}
+    virtual QString name() const { return "Identity"; }
+
+private:
+    virtual void priv_activate() { m_act = m_pot; }
+    virtual double priv_dev() { return 1.0; }
+};
+class SScActivationSigmoid : public SScActivation
+{
+public:
+    SScActivationSigmoid() : SScActivation() {}
+    virtual QString name() const { return "Logistic"; }
+private:
+    virtual void priv_activate() { m_act = 1.0/(1.0+exp(-m_pot)); }
+    virtual double priv_dev() { return m_act*(1.0-m_act); }
+};
+
+class SScActivationTanh : public SScActivation
+{
+public:
+    SScActivationTanh(): SScActivation() {}
+    virtual QString name() const { return "Tanh"; }
+
+private:
+    virtual void priv_activate() { m_act = tanh(m_pot); }
+    virtual double priv_dev() { return 1.0-qPow(m_act,2.0); }
+};
+
+SScActivation* SScActivation::create(SSeActivation type)
+{
+    switch (type)
+    {
+    case ACT_IDENTITY:  return new SScActivationIdentity(); break;
+    case ACT_SIGMOID:   return new SScActivationSigmoid(); break;
+    case ACT_TANH:      return new SScActivationTanh(); break;
+    }
+    return NULL;
+}
+
+
+
 class SScConnectedNeuron : public SScNeuron
 {
 public:
@@ -13,10 +90,9 @@ public:
     {
         Q_CHECK_PTR(other);
         if ((this==other) || m_in.contains(other)) return false;
-        m_in[other]=QSharedPointer<SScConnection>(new SScConnection(SScConnection::Connectiontype_Adam,v));
+        m_in[other]=QSharedPointer<SScConnection>(SScConnection::create(SScConnection::CON_RPROP,v));
         return true;
     }
-
     virtual bool delInput(SScNeuron *other)
     {
         Q_CHECK_PTR(other);
@@ -73,7 +149,12 @@ public:
         return ret;
     }
 
-    virtual void connectForward(const QList<SScNeuron*>& fwd) { m_out = fwd; }
+    virtual void connectForward(const QList<SScNeuron*>& fwd)
+    {
+        qWarning("Hidden neuron %s forwards to:", qPrintable(name()));
+        foreach (SScNeuron* to, fwd) qWarning("    -> %s", qPrintable(to->name()));
+        m_out = fwd;
+    }
 
 
 private:
@@ -104,7 +185,12 @@ public:
     virtual double dltFwd(SScNeuron*) { return 0; }
     virtual QList<SScNeuron*> inputs() const { return QList<SScNeuron*>();  }
     virtual bool trainingStep(bool) { return false; }
-    virtual void connectForward(const QList<SScNeuron*>& fwd) { m_out = fwd; }
+    virtual void connectForward(const QList<SScNeuron*>& fwd)
+    {
+        qWarning("Input neuron %s forwards to:", qPrintable(name()));
+        foreach (SScNeuron* to, fwd) qWarning("    -> %s", qPrintable(to->name()));
+        m_out = fwd;
+    }
 
 private:
     QList<SScNeuron*>       m_out;
@@ -131,7 +217,12 @@ public:
     virtual double dltFwd(SScNeuron*) { return 0; }
     virtual QList<SScNeuron*> inputs() const { return QList<SScNeuron*>();  }
     virtual bool trainingStep(bool) { return false; }
-    virtual void connectForward(const QList<SScNeuron*>& fwd) { m_out = fwd; }
+    virtual void connectForward(const QList<SScNeuron*>& fwd)
+    {
+        qWarning("Bias neuron %s forwards to:", qPrintable(name()));
+        foreach (SScNeuron* to, fwd) qWarning("    -> %s", qPrintable(to->name()));
+        m_out = fwd;
+    }
 
 private:
     QList<SScNeuron*>       m_out;
@@ -142,12 +233,12 @@ class SScOutputNeuron : public SScConnectedNeuron
 public:
     SScOutputNeuron() : SScConnectedNeuron(NeuronType_Output)
     {
-        setActivation(SScActivation::Act_Logistic);
+        setActivation(SScActivation::ACT_SIGMOID);
     }
 
     virtual bool    setInput(double) { Q_ASSERT(false); return false; }
     virtual bool    setTarget(double v) { m_target = v; return true; }
-    virtual double  err () { return out()-m_target; }
+    virtual double  err() { return out()-m_target; }
     virtual double  out() { return m_act->activate(net()); }
     virtual double  dlt() { return err()*m_act->dev(); }
     virtual void    connectForward(const QList<SScNeuron*>&) { }
@@ -160,9 +251,9 @@ SScNeuron::SScNeuron(SSeNeuronType type) : m_type(type), m_act(NULL)
 {
     switch(type)
     {
-        case NeuronType_Hidden: setActivation(SScActivation::Act_Tanh);     break;
-        case NeuronType_Output: setActivation(SScActivation::Act_Logistic); break;
-        default:                setActivation(SScActivation::Act_Identity); break;
+        case NeuronType_Hidden: setActivation(SScActivation::ACT_TANH);     break;
+        case NeuronType_Output: setActivation(SScActivation::ACT_SIGMOID); break;
+        default:                setActivation(SScActivation::ACT_IDENTITY); break;
     }
 }
 
@@ -176,14 +267,16 @@ bool SScNeuron::setActivation(SScActivation::SSeActivation type)
 
 SScNeuron::~SScNeuron() {}
 
-SScNeuron* SScNeuron::create(SSeNeuronType type)
+SScNeuron* SScNeuron::create(SSeNeuronType type, const QString& name)
 {
+    SScNeuron* ret = NULL;
     switch(type)
     {
-    case NeuronType_Hidden: return new (std::nothrow) SScHiddenNeuron();
-    case NeuronType_Input:  return new (std::nothrow) SScInputNeuron ();
-    case NeuronType_Output: return new (std::nothrow) SScOutputNeuron();
-    case NeuronType_Bias:   return new (std::nothrow) SScBiasNeuron  ();
+        case NeuronType_Hidden: ret = new (std::nothrow) SScHiddenNeuron(); break;
+        case NeuronType_Input:  ret = new (std::nothrow) SScInputNeuron (); break;
+        case NeuronType_Output: ret = new (std::nothrow) SScOutputNeuron(); break;
+        case NeuronType_Bias:   ret = new (std::nothrow) SScBiasNeuron  (); break;
     }
-    return NULL;
+    ret->setName(name);
+    return ret;
 }

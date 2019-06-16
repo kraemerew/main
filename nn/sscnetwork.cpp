@@ -11,7 +11,7 @@ SScNetwork::~SScNetwork()
     m_neurons.clear();
 }
 
-int         SScNetwork::addNeuron   (SScNeuron::SSeNeuronType type) { m_neurons << SScNeuron::create(type); return m_neurons.size()-1; }
+int         SScNetwork::addNeuron   (SScNeuron::SSeNeuronType type, const QString& name) { m_neurons << SScNeuron::create(type, name); return m_neurons.size()-1; }
 bool        SScNetwork::delNeuron   (SScNeuron* n)                  { return delNeuron(n2idx(n)); }
 int         SScNetwork::n2idx       (SScNeuron* n) const            { return m_neurons.indexOf(n); }
 SScNeuron*  SScNetwork::idx2n       (int idx) const                 { if ((idx<0) || (idx>=m_neurons.size())) return NULL; return m_neurons[idx]; }
@@ -40,7 +40,7 @@ void SScNetwork::connectForward()
     QMap<SScNeuron*,QSet<SScNeuron*> > m; //< outputs for each neuron
     foreach(SScNeuron* n, m_neurons) foreach(SScNeuron* inp, n->inputs())
     {
-        m[inp] << n;
+        m[inp] << n;    //< neuron inp feeds neuron n
     }
     foreach(SScNeuron* n, m_neurons) if (m.contains(n)) n->connectForward(m[n].toList());
 }
@@ -54,6 +54,7 @@ bool        SScNetwork::connect     (SScNeuron* from, SScNeuron* to, double v)
         (void) disconnect(from,to);
         return false;
     }
+    qWarning(">>>>connect %s -> %s", qPrintable(from->name()), qPrintable(to->name()));
     return true;
 }
 
