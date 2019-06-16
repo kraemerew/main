@@ -14,8 +14,9 @@ public:
     {
     }
 
-    SScMoments(const QVector<QPair<int,int> >& pos, const QVector<T>& v) : m_pos(pos), m_v(v)
+    SScMoments(const QVector<QPair<int,int> >& pos, const QVector<T>& v) : m_v(v)
     {
+        m_pos = normalized(pos);
         if (!v.isEmpty())
         {
             Q_ASSERT(pos.size()==v.size());
@@ -51,18 +52,18 @@ public:
             }
             else
             {
-                QPair<int,int> p;
+                QPair<double,double> p;
 
                 int k = -1;
                 if (m_v.isEmpty()) foreach(p, m_pos)
                 {
-                    const int x = p.first, y = p.second;
+                    const long double x = p.first, y = p.second;
                     ret = ret + (long double)(qPow(x,i)*qPow(y,j));
                 }
                 else foreach(p, m_pos)
                 {
                     ++k;
-                    const int x = p.first, y = p.second;
+                    const long double x = p.first, y = p.second;
                     ret = ret + (long double)m_v[k] * (long double)(qPow(x,i)*qPow(y,j));
                 }
             }            
@@ -101,7 +102,7 @@ public:
             }
             else
             {
-                QPair<int,int> p;
+                QPair<double,double> p;
 
                 int k = -1;
                 if (m_v.isEmpty()) foreach(p, m_pos)
@@ -253,10 +254,35 @@ private:
     inline long double xMean() { const long double m00 = getM(0,0); return (m00!=0) ? getM(1,0)/m00 : 0.0; }
     inline long double yMean() { const long double m00 = getM(0,0); return (m00!=0) ? getM(0,1)/m00 : 0.0; }
 
+    QVector<QPair<double,double> > normalized(const QVector<QPair<int,int> >& pos)
+    {
+        QVector<QPair<double,double> > ret;
+        if (!pos.isEmpty())
+        {
+            int xmin=pos.first().first, xmax=xmin, ymin=pos.first().second, ymax=ymin;
+            QPair<int,int> p;
+            foreach(p, pos)
+            {
+                if (p.first<xmin) xmin=p.first; else if (p.first>xmax) xmax=p.first;
+                if (p.second<ymin) ymin=p.second; else if (p.second>ymax) ymax=p.second;
+            }
+            const double xscale = xmax>xmin ? 1.0/(xmax-xmin) : 1.0,
+                         yscale = ymax>ymin ? 1.0/(ymax-ymin) : 1.0;
+            foreach(p,pos)
+            {
+                const double x = (((double)p.first)-xmin)*xscale,
+                             y = (((double)p.second)-ymin)*yscale;
+                ret << QPair<double,double>(x,y);
+            }
+        }
+        return ret;
+    }
+
+
     QMap<QPair<int,int>,long double> moment_m, moment_mu, moment_eta;
     QMap<int,long double> m_hu, m_nhu;
     SScMatrix<T> m_mtx;
-    QVector<QPair<int,int> > m_pos;
+    QVector<QPair<double,double> > m_pos;
     QVector<T> m_v;    
 };
 
