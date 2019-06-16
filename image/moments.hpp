@@ -236,6 +236,18 @@ public:
         foreach(const QString& s, sl) qWarning("%s", qPrintable(s));
     }
 
+    inline long double dist(const SScMoments<T>& other)
+    {
+        long double ret = 0;
+        for (int i=1; i<8; ++i) ret +=qAbs(getNHu(i)-other.getNHu(i));
+        return ret;
+    }
+    inline long double edist(const SScMoments<T>& other)
+    {
+        long double ret = 0;
+        for (int i=1; i<8; ++i) ret +=qPow(getNHu(i)-other.getNHu(i),2.0);
+        return qSqrt(ret);
+    }
 
 private:
     inline long double xMean() { const long double m00 = getM(0,0); return (m00!=0) ? getM(1,0)/m00 : 0.0; }
