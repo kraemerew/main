@@ -44,7 +44,10 @@ public:
     {
         ACT_IDENTITY,
         ACT_SIGMOID,
-        ACT_TANH
+        ACT_TANH,
+        ACT_RBF,
+        ACT_MHAT,
+        ACT_GDER
     };
 
     SScActivation()

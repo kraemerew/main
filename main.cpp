@@ -30,7 +30,7 @@ private slots:
     }
     void delCamSlot()
     {
-        qWarning(">>>>>>>>>>>>>REMOVING");
+      //  qWarning(">>>>>>>>>>>>>REMOVING");
 
         m_cam->deleteLater();
         m_cam = NULL;
@@ -63,8 +63,8 @@ int main(int argc, char *argv[])
     net.connect(i2,h1,-0.3);
     net.connect(h1,o1, 0.2);
 
-    net.idx2n(h1)->setActivation(SScActivation::ACT_SIGMOID);
-    net.idx2n(o1)->setActivation(SScActivation::ACT_SIGMOID);
+    net.idx2n(h1)->setActivation(SScActivation::ACT_GDER);
+    net.idx2n(o1)->setActivation(SScActivation::ACT_TANH);
 
     // training preparation
     net.connectForward();
@@ -81,18 +81,18 @@ int main(int argc, char *argv[])
         switch(p)
         {
         case 0: net.idx2n(i1)->setInput(0); net.idx2n(i2)->setInput(0); net.idx2n(o1)->setTarget( 1); break;
-        case 1: net.idx2n(i1)->setInput(0); net.idx2n(i2)->setInput(1); net.idx2n(o1)->setTarget( 0); break;
-        case 2: net.idx2n(i1)->setInput(1); net.idx2n(i2)->setInput(0); net.idx2n(o1)->setTarget( 0); break;
+        case 1: net.idx2n(i1)->setInput(0); net.idx2n(i2)->setInput(1); net.idx2n(o1)->setTarget(-1); break;
+        case 2: net.idx2n(i1)->setInput(1); net.idx2n(i2)->setInput(0); net.idx2n(o1)->setTarget(-1); break;
         case 3: net.idx2n(i1)->setInput(1); net.idx2n(i2)->setInput(1); net.idx2n(o1)->setTarget( 1); break;
         }
-       // qWarning("Pattern %d Output %lf", p, net.idx2n(o1)->out());
+        qWarning("Pattern %d Output %lf", p, net.idx2n(o1)->out());
         const double perr = net.idx2n(o1)->perr();
         err+=perr;
         if (p==3)
         {
             err/=4.0;
-            qWarning("Cycle %d Error %lf Last %lf %s", c, err, lasterr, err<lasterr ? "lower":"higher");
-            if (err<0.01) done = true;
+            if (err<0.00000001) done = true;
+            if (done) qWarning("Cycle %d Error %lf Last %lf %s", c, err, lasterr, err<lasterr ? "lower":"higher");
             lasterr = err;
 
         }

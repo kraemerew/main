@@ -67,6 +67,40 @@ private:
     virtual double priv_dev() { return 1.0-qPow(m_act,2.0); }
 };
 
+class SScActivationRbf: public SScActivation
+{
+public:
+    SScActivationRbf() : SScActivation() {}
+    virtual QString name() const { return "Rbf"; }
+private:
+    virtual void priv_activate() { m_gp = m_pot*m_gain->value(); m_act = exp(-qPow(m_gp,2.0)); }
+    virtual double priv_dev() { return -2.0*m_gp*m_act; }
+    double m_gp;
+};
+
+
+class SScActivationMHat: public SScActivation
+{
+public:
+    SScActivationMHat() : SScActivation() {}
+    virtual QString name() const { return "Rbf"; }
+private:
+    virtual void priv_activate() { m_gp = m_pot*m_gain->value(); m_gp2 = qPow(m_gp,2.0); m_act = (1.0-m_gp2)*exp(-m_gp2); }
+    virtual double priv_dev() { return (m_gp==1.0) ? -2.0/exp(1) : -2.0*m_gp*m_act*(1+1.0/(1.0-m_gp2)); }
+    double m_gp, m_gp2;
+};
+
+class SScActivationGaussianDerivative : public SScActivation
+{
+public:
+    SScActivationGaussianDerivative() : SScActivation() {}
+    virtual QString name() const { return "GDer"; }
+private:
+    virtual void priv_activate() { m_x = m_pot*m_gain->value(); m_act = -2.0*m_x*exp(-qPow(m_x,2.0)); }
+    virtual double priv_dev() { return (m_x!=0.0) ? ((1.0/m_x)-(2.0*m_x)) * m_act : -2.0; }
+    double m_x;
+};
+
 SScActivation* SScActivation::create(SSeActivation type)
 {
     switch (type)
@@ -74,6 +108,9 @@ SScActivation* SScActivation::create(SSeActivation type)
     case ACT_IDENTITY:  return new SScActivationIdentity(); break;
     case ACT_SIGMOID:   return new SScActivationSigmoid(); break;
     case ACT_TANH:      return new SScActivationTanh(); break;
+    case ACT_RBF:       return new SScActivationRbf(); break;
+    case ACT_MHAT:      return new SScActivationMHat(); break;
+    case ACT_GDER:      return new SScActivationGaussianDerivative(); break;
     }
     return NULL;
 }
