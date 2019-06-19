@@ -119,16 +119,11 @@ public:
         // = dedo()*doj/dnetj*oi
 
         return -dedo()*n->out()*m_act->dev()*m_act->gain();
-        //return -n->out()*dlt();
     }
     virtual QList<SScNeuron*> inputs() const { return m_in.keys(); }
 
     virtual double icon(SScNeuron *other) { return m_in.contains(other) ? m_in[other]->value() : 0.0; }
 
-    virtual double dltFwd(SScNeuron* n)
-    {
-        return m_in.contains(n) ? m_in[n]->value()*dlt() : 0.0;
-    }
     virtual bool trainingStep(bool cycleDone)
     {                
         for(QMap<SScNeuron*,QSharedPointer<SScConnection> >::iterator it = m_in.begin(); it != m_in.end(); ++it)        
@@ -151,16 +146,6 @@ public:
     virtual bool  setTarget(double) { Q_ASSERT(false); return false; }
 
     virtual double out() { return m_act->activate(net()); }
-
-    virtual double dlt()
-    {
-        double ret = 0;
-        foreach(SScNeuron* n, m_out) ret+=n->dltFwd(this);
-        ret*=m_act->dev();
-        return ret;
-    }
-
-
 };
 
 
@@ -179,13 +164,6 @@ public:
     virtual double deltaw(SScNeuron*) { return 0; }
     virtual double net() { return m_input; }
     virtual double out() { return net(); }
-    virtual double dlt()
-    {
-        double ret = 0;
-        foreach(SScNeuron* n, m_out) ret+=n->dltFwd(this);
-        return ret;
-    }
-    virtual double dltFwd(SScNeuron*) { return 0; }
     virtual QList<SScNeuron*> inputs() const { return QList<SScNeuron*>();  }
     virtual bool trainingStep(bool) { return false; }
 
@@ -205,13 +183,6 @@ public:
     virtual double  deltaw      (SScNeuron*)            { return 0.0; }
     virtual double  net         ()                      { return 1.0; }
     virtual double  out         ()                      { return 1.0; }
-    virtual double  dlt         ()
-    {
-        double ret = 0;
-        foreach(SScNeuron* n, m_out) ret+=n->dltFwd(this);
-        return ret;
-    }
-    virtual double dltFwd(SScNeuron*) { return 0; }
     virtual QList<SScNeuron*> inputs() const { return QList<SScNeuron*>();  }
     virtual bool trainingStep(bool) { return false; }
 
@@ -231,7 +202,6 @@ public:
     virtual bool    setTarget(double v) { m_target = v; return true; }
     virtual double  err() { return out()-m_target; }
     virtual double  out() { return m_act->activate(net()); }
-    virtual double  dlt() { return err()*m_act->dev(); }
     virtual void    connectForward(const QList<SScNeuron*>&) { }
 
 private:

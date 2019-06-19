@@ -86,7 +86,6 @@ enum SSeNeuronType
     virtual double err() { return 0.0; }
     virtual double out() = 0;
     virtual double net() = 0;
-    virtual double dlt() = 0;
     /*!
      * \brief Partial derivative or network error by this output
      * \return
@@ -105,7 +104,6 @@ enum SSeNeuronType
     virtual double icon (SScNeuron* other) { Q_UNUSED(other); return 0.0; }               //< incoming connection from other neuron
     inline  double ocon (SScNeuron* other) { return other->icon(this); }  //< outgoing connection to the other neuron
 
-    virtual double dltFwd(SScNeuron* n) = 0;
     virtual bool  setInput(double) = 0;
     virtual bool  setTarget(double) = 0;
     virtual bool setActivation(SScActivation::SSeActivation type);
