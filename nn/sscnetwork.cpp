@@ -65,3 +65,4 @@ bool SScNetwork::isFeedForward() const
     return !cdt.isCyclic();
 }
 
+

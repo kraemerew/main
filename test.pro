@@ -64,7 +64,8 @@ HEADERS += \
     filter/filter.hpp \
     filter/selector.hpp \
     cam/framereader.hpp \
-    image/moments.hpp
+    image/moments.hpp \
+    nn/sscvm.hpp
     #rnn/rneuron.hpp \
     #rnn/sscsignal.hpp \
     #rnn/gate.hpp

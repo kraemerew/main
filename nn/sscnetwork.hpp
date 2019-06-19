@@ -3,6 +3,7 @@
 
 #include "sscnetwork_global.h"
 #include "sscneuron.hpp"
+#include "sscvm.hpp"
 
 #include <QMap>
 class SSNETWORKSHARED_EXPORT SScNetwork
@@ -20,12 +21,22 @@ public:
     bool delNeuron(int idx);
     int n2idx(SScNeuron* n) const;
     SScNeuron* idx2n(int idx) const;
+    void resetDedo() { foreach(SScNeuron* n, m_neurons) n->resetDedo(); }
     void connectForward();
     bool contains(SScNeuron* n) const;
     bool connect(SScNeuron* from, SScNeuron* to, double v);
     bool disconnect(SScNeuron* from, SScNeuron* to);
     bool connect(int from, int to, double v);
     bool disconnect(int from, int to);
+
+    SScVM tpVM() const;
+    bool fromVM(const SScVM& vm);
+
+    void trainingStep(bool endOfCycle)
+    {
+        resetDedo();
+        foreach(SScNeuron* n, m_neurons) n->trainingStep(endOfCycle);
+    }
 
 private:
     bool isFeedForward() const;

@@ -15,7 +15,7 @@ public:
         {
             const bool signchange = ((m_updatesum>0) && (m_last<0)) || ((m_updatesum<0) && (m_last>0));
             if (signchange) m_uval*=.6; else m_uval*=1.2;
-            m_uval=qBound(0.00001,m_uval,1.0);
+            m_uval=qBound(0.0000001,m_uval,100.0);
             //qWarning(">>>>>>>>>>>RPROP UPDATE %s DLT %lf, V %lf", signchange ?"SC":"SS",m_uval,m_value);
             if (m_updatesum>0) m_value+=m_uval; else if (m_updatesum<0) m_value-=m_uval;
             m_last=m_updatesum;
@@ -43,8 +43,8 @@ public:
     virtual QString name() const { return "Identity"; }
 
 private:
-    virtual void priv_activate() { m_act = m_pot; }
-    virtual double priv_dev() { return 1.0; }
+    virtual void priv_activate() { m_act = m_pot*m_gain->value(); }
+    virtual double priv_dev() { return m_gain->value(); }
 };
 class SScActivationSigmoid : public SScActivation
 {
@@ -52,7 +52,7 @@ public:
     SScActivationSigmoid() : SScActivation() {}
     virtual QString name() const { return "Logistic"; }
 private:
-    virtual void priv_activate() { m_act = 1.0/(1.0+exp(-m_pot)); }
+    virtual void priv_activate() { m_act = 1.0/(1.0+exp(-m_pot*m_gain->value())); }
     virtual double priv_dev() { return m_act*(1.0-m_act); }
 };
 
@@ -63,7 +63,7 @@ public:
     virtual QString name() const { return "Tanh"; }
 
 private:
-    virtual void priv_activate() { m_act = tanh(m_pot); }
+    virtual void priv_activate() { m_act = tanh(m_pot*m_gain->value()); }
     virtual double priv_dev() { return 1.0-qPow(m_act,2.0); }
 };
 
@@ -107,22 +107,33 @@ public:
             ret += it.key()->out()*it.value()->value();
         return ret;
     }
+    virtual double deltag()
+    {
+        return -dedo()*net()*m_act->dev();
+    }
+
     virtual double deltaw(SScNeuron* n)
     {
-        return -n->out()*dlt();
+        //TODO
+        // dE/dw_ij=dE/doj*doj/dw_ij=dedo()*doj/dnetj*dnetj/dwij
+        // = dedo()*doj/dnetj*oi
+
+        return -dedo()*n->out()*m_act->dev()*m_act->gain();
+        //return -n->out()*dlt();
     }
     virtual QList<SScNeuron*> inputs() const { return m_in.keys(); }
+
+    virtual double icon(SScNeuron *other) { return m_in.contains(other) ? m_in[other]->value() : 0.0; }
+
     virtual double dltFwd(SScNeuron* n)
     {
         return m_in.contains(n) ? m_in[n]->value()*dlt() : 0.0;
     }
     virtual bool trainingStep(bool cycleDone)
-    {
-        for(QMap<SScNeuron*,QSharedPointer<SScConnection> >::iterator it = m_in.begin(); it != m_in.end(); ++it)
-        {
-            const double grad = deltaw(it.key());
-            it.value()->update(grad,cycleDone);
-        }
+    {                
+        for(QMap<SScNeuron*,QSharedPointer<SScConnection> >::iterator it = m_in.begin(); it != m_in.end(); ++it)        
+            it.value()->update(deltaw(it.key()),cycleDone);
+        m_act->updateGain(deltag(),cycleDone);
         return true;
     }
 
@@ -149,16 +160,7 @@ public:
         return ret;
     }
 
-    virtual void connectForward(const QList<SScNeuron*>& fwd)
-    {
-        qWarning("Hidden neuron %s forwards to:", qPrintable(name()));
-        foreach (SScNeuron* to, fwd) qWarning("    -> %s", qPrintable(to->name()));
-        m_out = fwd;
-    }
 
-
-private:
-    QList<SScNeuron*>       m_out;
 };
 
 
@@ -173,6 +175,7 @@ public:
     virtual bool  setInput(double v) { m_input = v; return true; }
     virtual bool  setTarget(double) { Q_ASSERT(false); return false; }
 
+    virtual double deltag() { return 0.0; }
     virtual double deltaw(SScNeuron*) { return 0; }
     virtual double net() { return m_input; }
     virtual double out() { return net(); }
@@ -185,15 +188,8 @@ public:
     virtual double dltFwd(SScNeuron*) { return 0; }
     virtual QList<SScNeuron*> inputs() const { return QList<SScNeuron*>();  }
     virtual bool trainingStep(bool) { return false; }
-    virtual void connectForward(const QList<SScNeuron*>& fwd)
-    {
-        qWarning("Input neuron %s forwards to:", qPrintable(name()));
-        foreach (SScNeuron* to, fwd) qWarning("    -> %s", qPrintable(to->name()));
-        m_out = fwd;
-    }
 
 private:
-    QList<SScNeuron*>       m_out;
     double                  m_input;
 };
 
@@ -205,6 +201,7 @@ public:
     virtual bool    delInput    (SScNeuron *)           { Q_ASSERT(false); return false; }
     virtual bool    setInput    (double)                { Q_ASSERT(false); return false; }
     virtual bool    setTarget   (double)                { Q_ASSERT(false); return false; }
+    virtual double  deltag      ()                      { return 0.0; }
     virtual double  deltaw      (SScNeuron*)            { return 0.0; }
     virtual double  net         ()                      { return 1.0; }
     virtual double  out         ()                      { return 1.0; }
@@ -217,12 +214,6 @@ public:
     virtual double dltFwd(SScNeuron*) { return 0; }
     virtual QList<SScNeuron*> inputs() const { return QList<SScNeuron*>();  }
     virtual bool trainingStep(bool) { return false; }
-    virtual void connectForward(const QList<SScNeuron*>& fwd)
-    {
-        qWarning("Bias neuron %s forwards to:", qPrintable(name()));
-        foreach (SScNeuron* to, fwd) qWarning("    -> %s", qPrintable(to->name()));
-        m_out = fwd;
-    }
 
 private:
     QList<SScNeuron*>       m_out;
@@ -244,10 +235,22 @@ public:
     virtual void    connectForward(const QList<SScNeuron*>&) { }
 
 private:
+
+    virtual double priv_dedo()
+    {        
+        // Output error derivative by this output
+        // d(out-target)^2/(d out) = 2(out-target)
+        return 2.0*err();
+    }
+
     double                  m_target;
 };
 
-SScNeuron::SScNeuron(SSeNeuronType type) : m_type(type), m_act(NULL)
+SScNeuron::SScNeuron(SSeNeuronType type)
+    : m_type    (type),
+      m_dedoset (false),
+      m_dedo    (0.0),
+      m_act     (NULL)
 {
     switch(type)
     {
