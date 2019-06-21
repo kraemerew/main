@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     net.connect(h1,o1, 0.2);
 
     net.idx2n(h1)->setActivation(SScActivation::ACT_GDER);
-    net.idx2n(o1)->setActivation(SScActivation::ACT_TANH);
+    net.idx2n(o1)->setActivation(SScActivation::ACT_SOFTPLUS);
 
     // training preparation
     net.connectForward();
@@ -81,8 +81,8 @@ int main(int argc, char *argv[])
         switch(p)
         {
         case 0: net.idx2n(i1)->setInput(0); net.idx2n(i2)->setInput(0); net.idx2n(o1)->setTarget( 1); break;
-        case 1: net.idx2n(i1)->setInput(0); net.idx2n(i2)->setInput(1); net.idx2n(o1)->setTarget(-1); break;
-        case 2: net.idx2n(i1)->setInput(1); net.idx2n(i2)->setInput(0); net.idx2n(o1)->setTarget(-1); break;
+        case 1: net.idx2n(i1)->setInput(0); net.idx2n(i2)->setInput(1); net.idx2n(o1)->setTarget( 0); break;
+        case 2: net.idx2n(i1)->setInput(1); net.idx2n(i2)->setInput(0); net.idx2n(o1)->setTarget( 0); break;
         case 3: net.idx2n(i1)->setInput(1); net.idx2n(i2)->setInput(1); net.idx2n(o1)->setTarget( 1); break;
         }
         qWarning("Pattern %d Output %lf", p, net.idx2n(o1)->out());
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
         if (p==3)
         {
             err/=4.0;
-            if (err<0.00000001) done = true;
+            if (err<0.0001) done = true;
             if (done) qWarning("Cycle %d Error %lf Last %lf %s", c, err, lasterr, err<lasterr ? "lower":"higher");
             lasterr = err;
 

@@ -51,8 +51,8 @@ HEADERS += \
     nn/sscnetwork_global.h \
     nn/sscneuron.hpp \
     nn/sscweight.hpp \
-   # nn/sscactivation.hpp \
-   # nn/sscconnection.hpp \
+   #nn/sscactivation.hpp \
+   #nn/sscconnection.hpp \
    # pso/psoswarm.hpp \
    # pso/psoparticle.hpp \
    # som/som.hpp \
