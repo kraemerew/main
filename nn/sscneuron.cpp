@@ -123,6 +123,17 @@ private:
     double m_x, m_xp;
 };
 
+class SScActivationSwish : public SScActivation
+{
+public:
+    SScActivationSwish() : SScActivation() {}
+    virtual QString name() const { return "Swish"; }
+private:
+    virtual void priv_activate() { const double m_x = m_pot*m_gain->value();  m_actsig = 1.0/(1.0+exp(-m_x)); m_act = m_x*m_actsig; }
+    virtual double priv_dev() { return m_actsig+m_x*m_actsig*(1-m_actsig); }
+    double m_x, m_actsig;
+};
+
 SScActivation* SScActivation::create(SSeActivation type)
 {
     switch (type)
@@ -132,6 +143,7 @@ SScActivation* SScActivation::create(SSeActivation type)
     case ACT_TANH:      return new SScActivationTanh(); break;
     case ACT_RBF:       return new SScActivationRbf(); break;
     case ACT_SOFTPLUS:  return new SScActivationSoftPlus(); break;
+    case ACT_SWISH:     return new SScActivationSwish(); break;
     case ACT_MHAT:      return new SScActivationMHat(); break;
     case ACT_GDER:      return new SScActivationGaussianDerivative(); break;
     case ACT_X:         return new SScActivationX(); break;

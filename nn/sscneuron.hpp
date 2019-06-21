@@ -47,6 +47,7 @@ public:
         ACT_TANH,
         ACT_RBF,
         ACT_SOFTPLUS,
+        ACT_SWISH,
         ACT_MHAT,
         ACT_GDER,
         ACT_X
