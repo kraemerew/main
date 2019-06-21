@@ -48,7 +48,8 @@ public:
         ACT_RBF,
         ACT_SOFTPLUS,
         ACT_MHAT,
-        ACT_GDER
+        ACT_GDER,
+        ACT_X
     };
 
     SScActivation()
