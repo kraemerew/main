@@ -17,6 +17,8 @@ SOURCES += main.cpp \
     nn/ssccycledetector.cpp \
     nn/sscnetwork.cpp \
     nn/sscneuron.cpp \
+    nn/sschighwaynetwork.cpp \
+    nn/sschighwayneuron.cpp \
     #pso/psoswarm.cpp \
     #pso/psoparticle.cpp \
     #som/som.cpp \
@@ -51,7 +53,9 @@ HEADERS += \
     nn/sscnetwork_global.h \
     nn/sscneuron.hpp \
     nn/sscweight.hpp \
-   #nn/sscactivation.hpp \
+    nn/sschighwaynetwork.hpp \
+    nn/sschighwayneuron.hpp \
+    #nn/sscactivation.hpp \
    #nn/sscconnection.hpp \
    # pso/psoswarm.hpp \
    # pso/psoparticle.hpp \
