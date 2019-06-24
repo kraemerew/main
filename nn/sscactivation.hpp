@@ -7,7 +7,7 @@
 class SScActivation
 {
 public:
-    enum SSeActivation
+    enum Type
     {
         ACT_IDENTITY,
         ACT_SIGMOID,
@@ -32,7 +32,7 @@ public:
     inline double dev       () { return priv_dev(); }
     inline double gain      () const { return m_gain->value(); }
     inline void   updateGain(double v, bool cycleDone) { m_gain->update(v,cycleDone); }
-    static SScActivation* create(SSeActivation type);
+    static SScActivation* create(Type type);
 
 protected:
     virtual void priv_activate() = 0;

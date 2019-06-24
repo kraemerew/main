@@ -3,17 +3,9 @@
 #include <QList>
 #include <QtMath>
 #include <QDebug>
+#include "ssineuron.hpp"
 #include "ssctrainableparameter.hpp"
 #include "sscactivation.hpp"
-
-class SSiNeuron
-{
-public:
-    inline  double perr() { return qPow(err(),2.0); }
-    virtual double err() { return 0.0; }
-    virtual double out() = 0;
-    virtual double net() = 0;
-};
 
 class SScNeuron : public SSiNeuron
 {
@@ -49,7 +41,7 @@ enum SSeNeuronType
 
     virtual bool  setInput(double) = 0;
     virtual bool  setTarget(double) = 0;
-    virtual bool setActivation(SScActivation::SSeActivation type);
+    virtual bool setActivation(SScActivation::Type type);
     virtual double deltaw(SScNeuron* n) = 0;
     virtual double deltag() = 0;
 

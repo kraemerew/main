@@ -1,4 +1,5 @@
 #include "sscneuron.hpp"
+#include "sscgate.hpp"
 #include "QSharedPointer"
 #include <QtMath>
 #include <QMap>
@@ -6,34 +7,16 @@
 class SScConnectedNeuron : public SScNeuron
 {
 public:
-    SScConnectedNeuron(SSeNeuronType type) : SScNeuron(type)
+    SScConnectedNeuron(SSeNeuronType type) : SScNeuron(type), m_in(SScGate(this))
     {
     }
-    virtual bool addInput(SScNeuron *other, double v)
-    {
-        Q_CHECK_PTR(other);
-        if ((this==other) || m_in.contains(other)) return false;
-        m_in[other]=QSharedPointer<SScTrainableParameter>(SScTrainableParameter::create(SScTrainableParameter::CON_RPROP,v));
-        return true;
-    }
-    virtual bool delInput(SScNeuron *other)
-    {
-        Q_CHECK_PTR(other);
-        if (!m_in.contains(other)) return false;
-        m_in.remove(other);
-        return true;
-    }
-    virtual double net()
-    {
-        double ret = 0;
-        for(QMap<SScNeuron*,QSharedPointer<SScTrainableParameter> >::iterator it = m_in.begin(); it != m_in.end(); ++it)
-            ret += it.key()->out()*it.value()->value();
-        return ret;
-    }
-    virtual double deltag()
-    {
-        return -dedo()*net()*m_act->dev();
-    }
+    virtual bool addInput(SScNeuron *other, double v) { return m_in.addInput(other,v); }
+    virtual bool delInput(SScNeuron *other) { return m_in.delInput(other); }
+    virtual double net() { return m_in.net(); }
+    virtual QList<SScNeuron*> inputs() const { return m_in.keys(); }
+    virtual double icon(SScNeuron *other) { return m_in.contains(other) ? m_in[other]->value() : 0.0; }
+
+    virtual double deltag() { return -dedo()*net()*m_act->dev(); }
 
     virtual double deltaw(SScNeuron* n)
     {
@@ -43,9 +26,6 @@ public:
 
         return -dedo()*n->out()*m_act->dev()*m_act->gain();
     }
-    virtual QList<SScNeuron*> inputs() const { return m_in.keys(); }
-
-    virtual double icon(SScNeuron *other) { return m_in.contains(other) ? m_in[other]->value() : 0.0; }
 
     virtual bool trainingStep(bool cycleDone)
     {                
@@ -55,7 +35,7 @@ public:
         return true;
     }
 
-    QMap<SScNeuron*,QSharedPointer<SScTrainableParameter> > m_in;
+    SScGate m_in;
 };
 
 class SScHiddenNeuron : public SScConnectedNeuron
@@ -154,7 +134,7 @@ SScNeuron::SScNeuron(SSeNeuronType type)
     }
 }
 
-bool SScNeuron::setActivation(SScActivation::SSeActivation type)
+bool SScNeuron::setActivation(SScActivation::Type type)
 {
     if (m_act) delete m_act;
     m_act = SScActivation::create(type);

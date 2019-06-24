@@ -99,7 +99,7 @@ private:
     double m_x, m_actsig;
 };
 
-SScActivation* SScActivation::create(SSeActivation type)
+SScActivation* SScActivation::create(Type type)
 {
     switch (type)
     {

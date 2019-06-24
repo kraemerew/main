@@ -27,7 +27,8 @@ SOURCES += main.cpp \
     filter/filter.cpp \
     filter/selector.cpp \
     cam/framereader.cpp \
-    image/moments.cpp
+    image/moments.cpp \
+    nn/sscgate.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -59,6 +60,8 @@ HEADERS += \
     image/moments.hpp \
     nn/sscvm.hpp \
     nn/sscactivation.hpp \
-    nn/ssctrainableparameter.hpp
+    nn/ssctrainableparameter.hpp \
+    nn/ssineuron.hpp \
+    nn/sscgate.hpp
 
 LIBS += -lv4l1
