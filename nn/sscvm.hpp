@@ -13,7 +13,7 @@ public:
     int             intToken    (const QString& t, int                  dval = 0,               bool norm = true) const { const QVariant v = token(t,norm); return v.canConvert<int>() ? v.toInt() : dval; }
     double          doubleToken (const QString& t, double               dval = 0.0,             bool norm = true) const { const QVariant v = token(t,norm); return v.canConvert<double>() ? v.toDouble() : dval; }
     QDateTime       dttToken    (const QString& t, const QDateTime&     dval = QDateTime(),     bool norm = true) const { const QVariant v = token(t,norm); return (v.type()==QVariant::DateTime) ? v.toDateTime() : dval; }
-    QString         stringToken (const QString& t, const QString&       dval = QString(),       bool norm = true) const { const QVariant v = token(t,norm); return v.toString(); }
+    QString         stringToken (const QString& t, const QString&       dval = QString(),       bool norm = true) const { const QVariant v = token(t,norm); return v.isNull() ? dval : v.toString(); }
     QVariantMap     vmToken     (const QString& t, const QVariantMap&   dval = QVariantMap(),   bool norm = true) const { const QVariant v = token(t,norm); return (v.type()==QVariant::Map) ? v.toMap() : dval; }
     QVariantList    vlToken     (const QString& t, const QVariantList&  dval = QVariantList(),  bool norm = true) const { const QVariant v = token(t,norm); return (v.type()==QVariant::List) ? v.toList() : dval; }
 

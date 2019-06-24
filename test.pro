@@ -28,7 +28,9 @@ SOURCES += main.cpp \
     filter/filter.cpp \
     filter/selector.cpp \
     cam/framereader.cpp \
-    image/moments.cpp
+    image/moments.cpp \
+    nn/sscactivation.cpp \
+    nn/ssctrainableparameter.cpp
     #rnn/rneuron.cpp \
     #rnn/sscsignal.cpp \
     #rnn/gate.cpp
@@ -50,7 +52,6 @@ HEADERS += \
     nn/sscnetwork.hpp \
     nn/sscnetwork_global.h \
     nn/sscneuron.hpp \
-    nn/sscweight.hpp \
    #nn/sscactivation.hpp \
    #nn/sscconnection.hpp \
    # pso/psoswarm.hpp \
@@ -65,7 +66,9 @@ HEADERS += \
     filter/selector.hpp \
     cam/framereader.hpp \
     image/moments.hpp \
-    nn/sscvm.hpp
+    nn/sscvm.hpp \
+    nn/sscactivation.hpp \
+    nn/ssctrainableparameter.hpp
     #rnn/rneuron.hpp \
     #rnn/sscsignal.hpp \
     #rnn/gate.hpp

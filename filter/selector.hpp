@@ -8,6 +8,7 @@ template <typename T> class SScSelectorBase : public QList<T>
 {
 public:
     explicit SScSelectorBase() {}
+    virtual ~SScSelectorBase() {}
     virtual T get() = 0;
 };
 

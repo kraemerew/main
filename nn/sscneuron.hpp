@@ -3,78 +3,19 @@
 #include <QList>
 #include <QtMath>
 #include <QDebug>
-class SScConnection
+#include "ssctrainableparameter.hpp"
+#include "sscactivation.hpp"
+
+class SSiNeuron
 {
 public:
-    enum SSeConnection
-    {
-        CON_STD,
-        CON_RPROP
-    };
-
-    SScConnection(double value) : m_ctr(0), m_eta(.1), m_updatesum(0), m_value(value) {}
-    virtual ~SScConnection() {}
-    inline double value() const { return m_value; }
-    inline void setEta(double v) { m_eta=qMax(0.000001,v); }
-    virtual void update(double v, bool cycleDone)
-    {
-        m_updatesum += v;
-        ++m_ctr;
-        if (cycleDone && (m_ctr>0))
-        {            
-            const double dlt = m_eta*(m_updatesum/(double)m_ctr);
-            m_value+=dlt;
-            m_updatesum=0.0;
-            m_ctr = 0;
-        }
-    }
-
-    static SScConnection* create(SSeConnection type, double v);
-
-protected:
-    int     m_ctr;
-    double  m_eta, m_updatesum, m_value;
+    inline  double perr() { return qPow(err(),2.0); }
+    virtual double err() { return 0.0; }
+    virtual double out() = 0;
+    virtual double net() = 0;
 };
 
-
-class SScActivation
-{
-public:
-    enum SSeActivation
-    {
-        ACT_IDENTITY,
-        ACT_SIGMOID,
-        ACT_TANH,
-        ACT_RBF,
-        ACT_SOFTPLUS,
-        ACT_SWISH,
-        ACT_MHAT,
-        ACT_GDER,
-        ACT_X
-    };
-
-    SScActivation()
-        : m_pot (0),
-          m_act (0),
-          m_gain(SScConnection::create(SScConnection::CON_RPROP,1.0))
-    {}
-    virtual ~SScActivation() { delete m_gain; }
-    virtual QString name() const = 0;
-
-    inline double activate  (double pot) { m_pot = pot; priv_activate(); return m_act; }
-    inline double dev       () { return priv_dev(); }
-    inline double gain      () const { return m_gain->value(); }
-    inline void   updateGain(double v, bool cycleDone) { m_gain->update(v,cycleDone); }
-    static SScActivation* create(SSeActivation type);
-
-protected:
-    virtual void priv_activate() = 0;
-    virtual double priv_dev() = 0;
-    double m_pot, m_act;
-    SScConnection* m_gain;
-};
-
-class SScNeuron
+class SScNeuron : public SSiNeuron
 {
 public:
 enum SSeNeuronType
@@ -88,10 +29,6 @@ enum SSeNeuronType
     virtual ~SScNeuron();
     virtual bool addInput(SScNeuron* other, double v) = 0;
     virtual bool delInput(SScNeuron* other) = 0;
-    inline  double perr() { return qPow(err(),2.0); }
-    virtual double err() { return 0.0; }
-    virtual double out() = 0;
-    virtual double net() = 0;
     /*!
      * \brief Partial derivative or network error by this output
      * \return
