@@ -12,14 +12,13 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     cam/cam.cpp \
-    #activation/sscactivation.cpp \
-    #activation/sscconnection.cpp \
+    nn/sscactivation.cpp \
+    nn/ssctrainableparameter.cpp \
     nn/ssccycledetector.cpp \
     nn/sscnetwork.cpp \
     nn/sscneuron.cpp \
-    #pso/psoswarm.cpp \
-    #pso/psoparticle.cpp \
-    #som/som.cpp \
+    nn/sschighwaynetwork.cpp \
+    nn/sschighwayneuron.cpp \
     image/matrix.cpp \
     image/image.cpp \
     cam/camcapability.cpp \
@@ -28,12 +27,7 @@ SOURCES += main.cpp \
     filter/filter.cpp \
     filter/selector.cpp \
     cam/framereader.cpp \
-    image/moments.cpp \
-    nn/sscactivation.cpp \
-    nn/ssctrainableparameter.cpp
-    #rnn/rneuron.cpp \
-    #rnn/sscsignal.cpp \
-    #rnn/gate.cpp
+    image/moments.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -52,11 +46,8 @@ HEADERS += \
     nn/sscnetwork.hpp \
     nn/sscnetwork_global.h \
     nn/sscneuron.hpp \
-   #nn/sscactivation.hpp \
-   #nn/sscconnection.hpp \
-   # pso/psoswarm.hpp \
-   # pso/psoparticle.hpp \
-   # som/som.hpp \
+    nn/sschighwaynetwork.hpp \
+    nn/sschighwayneuron.hpp \
     image/matrix.hpp \
     image/image.hpp \
     cam/camcapability.hpp \
@@ -69,8 +60,5 @@ HEADERS += \
     nn/sscvm.hpp \
     nn/sscactivation.hpp \
     nn/ssctrainableparameter.hpp
-    #rnn/rneuron.hpp \
-    #rnn/sscsignal.hpp \
-    #rnn/gate.hpp
 
 LIBS += -lv4l1
