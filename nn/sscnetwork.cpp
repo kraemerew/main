@@ -19,7 +19,7 @@ bool        SScNetwork::contains    (SScNeuron *n) const            { return m_n
 bool        SScNetwork::connect     (int from, int to, double v)    { return SScNetwork::connect   (idx2n(from), idx2n(to), v ); }
 bool        SScNetwork::disconnect  (int from, int to)              { return SScNetwork::disconnect(idx2n(from), idx2n(to)); }
 
-bool        SScNetwork::delNeuron   (int idx)
+bool SScNetwork::delNeuron   (int idx)
 {
     SScNeuron* n = idx2n(idx);
     if (!n) return false;
@@ -29,7 +29,7 @@ bool        SScNetwork::delNeuron   (int idx)
     return true;
 }
 
-bool        SScNetwork::disconnect  (SScNeuron* from, SScNeuron* to)
+bool SScNetwork::disconnect  (SScNeuron* from, SScNeuron* to)
 {
     if (!contains(from) || !contains(to)) return false;
     return to->delInput(from);
@@ -45,7 +45,7 @@ void SScNetwork::connectForward()
     foreach(SScNeuron* n, m_neurons) if (m.contains(n)) n->connectForward(m[n].toList());
 }
 
-bool        SScNetwork::connect     (SScNeuron* from, SScNeuron* to, double v)
+bool SScNetwork::connect(SScNeuron* from, SScNeuron* to, double v)
 {
     if (!contains(from) || !contains(to)) return false;
     to->addInput(from,v);
@@ -54,7 +54,6 @@ bool        SScNetwork::connect     (SScNeuron* from, SScNeuron* to, double v)
         (void) disconnect(from,to);
         return false;
     }
-    qWarning(">>>>connect %s -> %s", qPrintable(from->name()), qPrintable(to->name()));
     return true;
 }
 
@@ -64,5 +63,3 @@ bool SScNetwork::isFeedForward() const
     foreach(SScNeuron* to, m_neurons) foreach(SScNeuron* from, to->inputs()) cdt.addEdge(n2idx(from),n2idx(to));
     return !cdt.isCyclic();
 }
-
-

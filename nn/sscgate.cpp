@@ -21,9 +21,9 @@ bool SScGate::delInput(SScNeuron *other)
 }
 double SScGate::net()
 {
-    double ret = 0;
+    double net = 0;
     for(QMap<SScNeuron*,QSharedPointer<SScTrainableParameter> >::iterator it = begin(); it != end(); ++it)
-        ret += it.key()->out()*it.value()->value();
-    return ret;
+        net += it.key()->out()*it.value()->value();
+    return net;
 }
 

@@ -17,7 +17,7 @@ public:
     virtual double icon(SScNeuron *other) { return m_in.contains(other) ? m_in[other]->value() : 0.0; }
 
     virtual double deltag() { return -dedo()*net()*m_act->dev(); }
-
+    virtual void reset() { m_dedoset=false; }
     virtual double deltaw(SScNeuron* n)
     {
         //TODO

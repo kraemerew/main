@@ -30,7 +30,7 @@ enum SSeNeuronType
         if (!m_dedoset) { m_dedo = priv_dedo(); m_dedoset = true; }
         return m_dedo;
     }
-    inline void resetDedo()
+    virtual void reset()
     {
         m_dedoset = false;
     }

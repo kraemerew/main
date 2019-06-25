@@ -19,7 +19,7 @@ public:
     virtual double net();
 
 private:
-    SScNeuron* m_parent;
+    SScNeuron*  m_parent;    
 };
 
 #endif // SSCGATE_HPP
