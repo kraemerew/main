@@ -2,14 +2,26 @@
 #include "sschighwaynetwork.hpp"
 
 
-SScHighwayNeuron::SScHighwayNeuron(SScHighwayNetwork* nw, int layer, int nr)
+SScHighwayStdNeuron::SScHighwayStdNeuron(SScHighwayNetwork* nw, int layer, int nr)
     : SScNeuron (SScNeuron::NeuronType_Hidden),
       m_nw      (nw),
       m_layer   (layer),
       m_nr      (nr),
       m_in      (this),
+      m_act     (SScActivation::create(SScActivation::ACT_TANH))
+{
+    Q_CHECK_PTR(nw);
+}
+
+SScHighwayStdNeuron::~SScHighwayStdNeuron()
+{
+    if (m_act) delete m_act;
+    m_act=NULL;
+}
+
+SScHighwayNeuron::SScHighwayNeuron(SScHighwayNetwork* nw, int layer, int nr)
+    : SScHighwayStdNeuron(nw,layer,nr),
       m_cin     (this),
-      m_act     (SScActivation::create(SScActivation::ACT_TANH)),
       m_cact    (SScActivation::create(SScActivation::ACT_SIGMOID)),
       m_hw      (NULL)
 {
@@ -18,6 +30,7 @@ SScHighwayNeuron::SScHighwayNeuron(SScHighwayNetwork* nw, int layer, int nr)
 
 SScHighwayNeuron::~SScHighwayNeuron()
 {
-    delete m_act;
+    if (m_act) delete m_act;
+    m_act=NULL;
     delete m_cact;
 }
