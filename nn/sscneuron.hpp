@@ -45,7 +45,19 @@ enum SSeNeuronType
     virtual double deltaw(SScNeuron* n) = 0;
     virtual double deltag() = 0;
 
+    virtual bool    addInputC(SScNeuron*,double) { return false; }
+    virtual bool    delInputC(SScNeuron*) { return false; }
+    virtual double  netC() { return 0.0; }
+    virtual double deltawC(SScNeuron*) { return 0.0; }
+    virtual double deltagC() { return 0.0; }
+    virtual double outC() { return 0.0; }
+    virtual double highway() { return 0.0; }
+    virtual void setHighway(SScNeuron*) { }
+
+
     virtual QList<SScNeuron*> inputs() const = 0;
+    virtual QList<SScNeuron*> inputsC() const { return QList<SScNeuron*>(); }
+
     static SScNeuron* create(SSeNeuronType type, const QString& name = QString());
     inline SSeNeuronType type() const { return m_type; }
     virtual void connectForward(const QList<SScNeuron*>& fwd) { m_out = fwd; }

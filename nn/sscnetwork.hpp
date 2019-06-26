@@ -6,7 +6,7 @@
 #include "sscvm.hpp"
 
 #include <QMap>
-class SSNETWORKSHARED_EXPORT SScNetwork
+class SScNetwork
 {
 public:
     SScNetwork();

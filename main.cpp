@@ -1,7 +1,7 @@
 #include <QApplication>
 #include <QElapsedTimer>
 //#include "rnn/sscsignal.hpp"
-#include "nn/sscnetwork.hpp"
+#include "nn/sschighwaynetwork.hpp"
 #include "image/image.hpp"
 #include "filter/selector.hpp"
 #include "cam/cam.hpp"
@@ -48,13 +48,13 @@ private:
 int main(int argc, char *argv[])
 {
 
-    SScNetwork net;
+    SScHighwayNetwork net;
 
-    const int bi = net.addNeuron(SScNeuron::NeuronType_Bias,    "Bias"),
-              i1 = net.addNeuron(SScNeuron::NeuronType_Input,   "In1"),
-              i2 = net.addNeuron(SScNeuron::NeuronType_Input,   "In2"),
-              h1 = net.addNeuron(SScNeuron::NeuronType_Hidden,  "Hidden"),
-              o1 = net.addNeuron(SScNeuron::NeuronType_Output,  "Out");
+    const int bi = net.addBiasNeuron    ("Bias"),
+              i1 = net.addInputNeuron   ("In1"),
+              i2 = net.addInputNeuron   ("In2"),
+              h1 = net.addHiddenNeuron  ("Hidden"),
+              o1 = net.addOutputNeuron  ("Out");
     net.connect(bi,h1,-1.1);
     net.connect(bi,o1, 1.1);
     net.connect(i1,o1, 0.1);

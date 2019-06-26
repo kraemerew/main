@@ -1,91 +1,78 @@
 #include "sschighwaynetwork.hpp"
 #include "sschighwayneuron.hpp"
+#include "ssccycledetector.hpp"
+#include <QSet>
 
-SScHighwayNetwork::SScHighwayNetwork(int inr, int onr)
-    : m_lcnt(0),
-      m_bias(SScNeuron::create(SScNeuron::NeuronType_Bias))
+SScHighwayNetwork::SScHighwayNetwork()
 {
-    Q_ASSERT(inr>0);
-    Q_ASSERT(onr>0);
-    Q_CHECK_PTR(m_bias);
-    QList<SScNeuron*> il, ol;
-    for (int i=0; i<inr; ++i) il << newInputNeuron ();
-    for (int i=0; i<onr; ++i) ol << newOutputNeuron();
-    m_layers[-1]=il;
-    m_layers[-2]=ol;
 }
-
 SScHighwayNetwork::~SScHighwayNetwork()
 {
-    foreach (SScNeuron* n, allNeurons()) delete n;
+    foreach(SScNeuron*n, m_neurons) delete n;
+    m_neurons.clear();
 }
 
-QList<SScNeuron*> SScHighwayNetwork::layer(int nr) const
+int SScHighwayNetwork::addNeuron   (SScNeuron::SSeNeuronType type, const QString& name)
 {
-    QList<SScNeuron*> ret;
-    if (m_layers.contains(nr)) ret = m_layers[nr];
-    return ret;
+    m_neurons << SScNeuron::create(type,name);
+    return m_neurons.size()-1;
 }
 
-int SScHighwayNetwork::addHiddenLayer   (int nr)
+int         SScHighwayNetwork::addInputNeuron   (const QString& name)           { return addNeuron(SScNeuron::NeuronType_Input, name); }
+int         SScHighwayNetwork::addHiddenNeuron  (const QString& name)           { return addNeuron(SScNeuron::NeuronType_Hidden,name); }
+int         SScHighwayNetwork::addOutputNeuron  (const QString& name)           { return addNeuron(SScNeuron::NeuronType_Output,name); }
+int         SScHighwayNetwork::addBiasNeuron    (const QString& name)           { return addNeuron(SScNeuron::NeuronType_Output,name); }
+int         SScHighwayNetwork::addHighwayNeuron (const QString& name)           { return -1; }
+bool        SScHighwayNetwork::delNeuron        (SScNeuron* n)                  { return delNeuron(n2idx(n)); }
+int         SScHighwayNetwork::n2idx            (SScNeuron* n) const            { return m_neurons.indexOf(n); }
+SScNeuron*  SScHighwayNetwork::idx2n            (int idx) const                 { if ((idx<0) || (idx>=m_neurons.size())) return NULL; return m_neurons[idx]; }
+bool        SScHighwayNetwork::contains         (SScNeuron *n) const            { return m_neurons.contains(n); }
+bool        SScHighwayNetwork::connect          (int from, int to, double v)    { return SScHighwayNetwork::connect   (idx2n(from), idx2n(to), v ); }
+bool        SScHighwayNetwork::disconnect       (int from, int to)              { return SScHighwayNetwork::disconnect(idx2n(from), idx2n(to)); }
+
+bool SScHighwayNetwork::delNeuron   (int idx)
 {
-    QList<SScNeuron*> l;
-    for (int i=0; i<nr; ++i) l << newHiddenNeuron();
-    m_layers[m_lcnt]=l;
-    ++m_lcnt;
-    return m_lcnt-1;
+    if (idx<0) return false;// <cant delete bias
+    SScNeuron* n = idx2n(idx);
+    if (!n) return false;
+    foreach(SScNeuron* other, m_neurons) (void) disconnect(n,other);
+    m_neurons.removeAt(idx);
+    delete n;
+    return true;
 }
 
-int SScHighwayNetwork::addHighwayLayer()
+bool SScHighwayNetwork::disconnect  (SScNeuron* from, SScNeuron* to)
 {
-    QList<SScNeuron*> l;
-    const int nr = layerSize(m_lcnt-1); //< will be the size of the last layer or input layer if no layers were added
-    for (int i=0; i<nr; ++i) l << newHighwayNeuron(m_lcnt,i);
-    m_trans[m_lcnt] = newTransformNeuron();
-    m_layers[m_lcnt]=l;
-    ++m_lcnt;
-    return m_lcnt-1;
+    if (!contains(from) || !contains(to)) return false;
+    return to->delInput(from);
 }
 
-SScNeuron* SScHighwayNetwork::newHighwayNeuron(int l, int nr)
+void SScHighwayNetwork::connectForward()
 {
-    return new SScHighwayNeuron(this,l,nr);
-}
-
-SScNeuron* SScHighwayNetwork::newTransformNeuron()
-{
-    SScNeuron* n = SScNeuron::create(SScNeuron::NeuronType_Hidden);
-    n->setActivation(SScActivation::ACT_SIGMOID);
-    return n;
-}
-
-SScNeuron* SScHighwayNetwork::neuron(int l, int nr) const
-{
-    Q_ASSERT(nr>=0);
-    const QList<SScNeuron*> lay = layer(l);
-    if (lay.size()>nr) return lay[nr];
-    return NULL;
-}
-
-QList<SScNeuron*> SScHighwayNetwork::allNeurons() const
-{
-    QList<SScNeuron*> ret;
-    ret << m_bias;
-    ret << m_trans.values();
-    for (int i=0; i<layers(); ++i) ret << layer(i);
-    return ret;
-}
-
-void SScHighwayNetwork::fullyConnect(int l, double min, double max)
-{
-    QList<SScNeuron*> froml = layer(l-1), tol = layer(l);
-    froml << biasNeuron();
-    if (m_trans.contains(l)) tol << m_trans[l];
-
-
-    foreach(SScNeuron* to, tol) foreach(SScNeuron* from, froml)
+    QMap<SScNeuron*,QSet<SScNeuron*> > m; //< outputs for each neuron
+    foreach(SScNeuron* n, m_neurons) foreach(SScNeuron* inp, n->inputs())
     {
-        const double v = min+(max-min)*((double)qrand()/(double)RAND_MAX);
-        to->addInput(from,v);
+        m[inp] << n;    //< neuron inp feeds neuron n
     }
+    foreach(SScNeuron* n, m_neurons) if (m.contains(n)) n->connectForward(m[n].toList());
+}
+
+bool SScHighwayNetwork::connect(SScNeuron* from, SScNeuron* to, double v)
+{
+    if (!contains(from) || !contains(to)) return false;
+    to->addInput(from,v);
+    if (!isFeedForward())
+    {
+        (void) disconnect(from,to);
+        return false;
+    }
+    return true;
+}
+
+bool SScHighwayNetwork::isFeedForward() const
+{
+    SScCycleDetector cdt(m_neurons.size());
+    foreach(SScNeuron* to, m_neurons) foreach(SScNeuron* from, to->inputs ()) cdt.addEdge(n2idx(from),n2idx(to));
+    foreach(SScNeuron* to, m_neurons) foreach(SScNeuron* from, to->inputsC()) cdt.addEdge(n2idx(from),n2idx(to));
+    return !cdt.isCyclic();
 }

@@ -1,6 +1,5 @@
 #ifndef HIGHWAYNETWORK_HPP
 #define HIGHWAYNETWORK_HPP
-
 #include "sscneuron.hpp"
 #include "sscvm.hpp"
 
@@ -8,37 +7,41 @@
 class SScHighwayNetwork
 {
 public:
-    explicit SScHighwayNetwork(int inr, int onr);
+    SScHighwayNetwork();
     virtual ~SScHighwayNetwork();
 
-    int addHiddenLayer (int nr);
-    int addHighwayLayer();
+    int addInputNeuron   (const QString& name = QString());
+    int addHiddenNeuron  (const QString& name = QString());
+    int addOutputNeuron  (const QString& name = QString());
+    int addBiasNeuron    (const QString& name = QString());
+    int addHighwayNeuron (const QString& name = QString());
 
-    inline int layerSize    (int nr) const { return m_layers.contains(nr) ? m_layers[nr].size() : -1; }
-    inline int inputSize    () const { return layerSize(-1); }
-    inline int outputSize   () const { return layerSize(-2); }
-    inline int layers       () const { return m_lcnt; }
-    inline QList<SScNeuron*> inputLayer () const { return layer(-1); }
-    inline QList<SScNeuron*> outputLayer() const { return layer(-2); }
-    QList<SScNeuron*> layer(int nr) const;
-    inline SScNeuron* biasNeuron() const { return m_bias; }
-    inline SScNeuron* transformNeuron(int l) const { Q_ASSERT(m_trans.contains(l)); return m_trans.contains(l) ? m_trans[l] : NULL; }
-    SScNeuron* neuron(int l, int nr) const;
-    void fullyConnect(int l, double min, double max);
+    bool delNeuron(SScNeuron* n);
+    bool delNeuron(int idx);
+    int n2idx(SScNeuron* n) const;
+    SScNeuron* idx2n(int idx) const;
+    void resetDedo() { foreach(SScNeuron* n, m_neurons) n->reset(); }
+    void connectForward();
+    bool contains(SScNeuron* n) const;
+    bool connect(SScNeuron* from, SScNeuron* to, double v);
+    bool disconnect(SScNeuron* from, SScNeuron* to);
+    bool connect(int from, int to, double v);
+    bool disconnect(int from, int to);
+
+    SScVM tpVM() const;
+    bool fromVM(const SScVM& vm);
+
+    void trainingStep(bool endOfCycle)
+    {
+        resetDedo();
+        foreach(SScNeuron* n, m_neurons) n->trainingStep(endOfCycle);
+    }
 
 private:
+    bool isFeedForward() const;
+    int addNeuron(SScNeuron::SSeNeuronType type, const QString& name = QString());
 
-    QList<SScNeuron*> allNeurons() const;
-    inline SScNeuron* newHiddenNeuron  () { return SScNeuron::create(SScNeuron::NeuronType_Hidden); }
-    inline SScNeuron* newInputNeuron   () { return SScNeuron::create(SScNeuron::NeuronType_Input); }
-    inline SScNeuron* newOutputNeuron  () { return SScNeuron::create(SScNeuron::NeuronType_Output); }
-           SScNeuron* newHighwayNeuron (int l, int nr);
-           SScNeuron* newTransformNeuron();
-
-    int m_lcnt;
-    QMap<int,QList<SScNeuron*> > m_layers;
-    QMap<int,SScNeuron*>    m_trans;
-    SScNeuron* m_bias;
+    QList<SScNeuron*>  m_neurons;
 };
 
 #endif // HIGHWAYNETWORK_HPP
