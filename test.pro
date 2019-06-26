@@ -15,10 +15,11 @@ SOURCES += main.cpp \
     nnhelpers/sscactivation.cpp \
     nnhelpers/ssctrainableparameter.cpp \
     nnhelpers/ssccycledetector.cpp \
-    nn/sscnetwork.cpp \
-    nn/sscneuron.cpp \
-    nn/sschighwaynetwork.cpp \
-    nn/sschighwayneuron.cpp \
+    #nn/sscnetwork.cpp \
+    #nn/sscneuron.cpp \
+    highwaynn/sschighwaynetwork.cpp \
+    highwaynn/sschighwayneuron.cpp \
+    highwaynn/sschighwaygate.cpp \
     image/matrix.cpp \
     image/image.cpp \
     cam/camcapability.cpp \
@@ -44,11 +45,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 HEADERS += \
     cam/cam.hpp \
     nnhelpers/ssccycledetector.hpp \
-    nn/sscnetwork.hpp \
-    nn/sscnetwork_global.h \
-    nn/sscneuron.hpp \
-    nn/sschighwaynetwork.hpp \
-    nn/sschighwayneuron.hpp \
+    nnhelpers/sscvm.hpp \
+    nnhelpers/sscactivation.hpp \
+    nnhelpers/ssctrainableparameter.hpp \
+    #nn/sscnetwork.hpp \
+    #nn/sscnetwork_global.h \
+    #nn/sscneuron.hpp \
+    highwaynn/sschighwaynetwork.hpp \
+    highwaynn/sschighwayneuron.hpp \
+    highwaynn/sschighwaygate.hpp \
     image/matrix.hpp \
     image/image.hpp \
     cam/camcapability.hpp \
@@ -58,9 +63,6 @@ HEADERS += \
     filter/selector.hpp \
     cam/framereader.hpp \
     image/moments.hpp \
-    nnhelpers/sscvm.hpp \
-    nnhelpers/sscactivation.hpp \
-    nnhelpers/ssctrainableparameter.hpp \
     nn/ssineuron.hpp \
     nn/sscgate.hpp
 

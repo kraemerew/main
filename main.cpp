@@ -1,7 +1,6 @@
 #include <QApplication>
 #include <QElapsedTimer>
-//#include "rnn/sscsignal.hpp"
-#include "nn/sschighwaynetwork.hpp"
+#include "highwaynn//sschighwaynetwork.hpp"
 #include "image/image.hpp"
 #include "filter/selector.hpp"
 #include "cam/cam.hpp"

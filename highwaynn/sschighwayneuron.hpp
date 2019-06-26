@@ -1,0 +1,97 @@
+#ifndef HWNEURON_HPP
+#define HWNEURON_HPP
+
+#include "sschighwaygate.hpp"
+#include "../nnhelpers/sscactivation.hpp"
+
+#include <QMap>
+#include <QSharedPointer>
+#include <QtMath>
+
+class SSiHighwayNeuron
+{
+public:
+    enum SSeNeuronType
+    {
+        NeuronType_Input,
+        NeuronType_Hidden,
+        NeuronType_Output,
+        NeuronType_Bias,
+        NeuronType_Highway
+    };
+    explicit SSiHighwayNeuron(SSeNeuronType type, SScActivation::Type acttype = SScActivation::ACT_IDENTITY)
+        : m_type(type), m_dedoset(false), m_dedo(0.0), m_act(SScActivation::create(acttype)) {}
+    virtual ~SSiHighwayNeuron() { if (m_act) delete m_act; m_act=NULL; }
+    /*!
+     * \brief Partial derivative or network error by this output
+     * \return
+     */
+    inline double dedo()
+    {
+        if (!m_dedoset) { m_dedo = priv_dedo(); m_dedoset = true; }
+        return m_dedo;
+    }
+    virtual void    reset   () { m_dedoset = false; }
+    virtual double  err     () { return 0.0; }
+    inline double   perr    () { return qPow(err(),2.0); }
+
+    inline  SScActivation* act  () const { return m_act; }
+    virtual double icon (SSiHighwayNeuron* other) { Q_UNUSED(other); return 0.00; } //< incoming connection from other neuron
+    inline  double ocon (SSiHighwayNeuron* other) { return other->icon(this); }     //< outgoing connection to the other neuron
+
+    virtual bool  setInput(double) = 0;
+    virtual bool  setTarget(double) = 0;
+    virtual bool setActivation(SScActivation::Type type);
+    virtual double deltaw(SSiHighwayNeuron* n) = 0;
+    virtual double deltag() = 0;
+    virtual bool addInput(SSiHighwayNeuron* other, double v) = 0;
+    virtual bool delInput(SSiHighwayNeuron* other) = 0;
+    virtual bool    addInputC(SSiHighwayNeuron*,double) { return false; }
+    virtual bool    delInputC(SSiHighwayNeuron*) { return false; }
+    virtual double net() { return 0.0; }
+    virtual double  netC() { return 0.0; }
+    virtual double deltawC(SSiHighwayNeuron*) { return 0.0; }
+    virtual double deltagC() { return 0.0; }
+    virtual double out() { return 0.0; }
+    virtual double outC() { return 0.0; }
+    virtual double highway() { return 0.0; }
+    virtual void setHighway(SSiHighwayNeuron*) { }
+
+
+    virtual QList<SSiHighwayNeuron*> inputs() const { return QList<SSiHighwayNeuron*>(); }
+    virtual QList<SSiHighwayNeuron*> inputsC() const { return QList<SSiHighwayNeuron*>(); }
+
+    static SSiHighwayNeuron* create(SSeNeuronType type, const QString& name = QString());
+    virtual void connectForward(const QList<SSiHighwayNeuron*>& fwd) { m_out = fwd; }
+    virtual bool trainingStep(bool cycleDone) = 0;
+
+    inline void setName(const QString& name) { m_name=name; }
+    inline QString name() const { return m_name; }
+
+protected:
+    // Partial derivative of network error by o_j (with j being the index of this neuron)
+    // The same for all neurons with exception of output neurons where it is redefined
+    virtual double priv_dedo()
+    {
+        // dE/do_j = sum(l) dE/dnet_l * dnet_l/do_j = sum(l) dE/dnet_l wjl
+        //         = sum(l) w_jl dE/do_l do_l/dnet_l
+        //         = sum(l) w_jl dedo(l) act(l)'gain_l
+        double ret = 0;
+
+        foreach(SSiHighwayNeuron* l, m_out)
+        {
+            const double w_jl = l->icon(this);
+            ret += l->dedo()*w_jl*l->act()->dev()*l->act()->gain();
+        }
+        return ret;
+    }
+
+    SSeNeuronType               m_type;
+    bool                        m_dedoset;
+    double                      m_dedo;
+    SScActivation*              m_act;
+    QString                     m_name;
+    QList<SSiHighwayNeuron*>    m_out;
+};
+
+#endif // HWNEURON_HPP
