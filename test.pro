@@ -12,9 +12,9 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     cam/cam.cpp \
-    nn/sscactivation.cpp \
-    nn/ssctrainableparameter.cpp \
-    nn/ssccycledetector.cpp \
+    nnhelpers/sscactivation.cpp \
+    nnhelpers/ssctrainableparameter.cpp \
+    nnhelpers/ssccycledetector.cpp \
     nn/sscnetwork.cpp \
     nn/sscneuron.cpp \
     nn/sschighwaynetwork.cpp \
@@ -43,7 +43,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 HEADERS += \
     cam/cam.hpp \
-    nn/ssccycledetector.hpp \
+    nnhelpers/ssccycledetector.hpp \
     nn/sscnetwork.hpp \
     nn/sscnetwork_global.h \
     nn/sscneuron.hpp \
@@ -58,9 +58,9 @@ HEADERS += \
     filter/selector.hpp \
     cam/framereader.hpp \
     image/moments.hpp \
-    nn/sscvm.hpp \
-    nn/sscactivation.hpp \
-    nn/ssctrainableparameter.hpp \
+    nnhelpers/sscvm.hpp \
+    nnhelpers/sscactivation.hpp \
+    nnhelpers/ssctrainableparameter.hpp \
     nn/ssineuron.hpp \
     nn/sscgate.hpp
 

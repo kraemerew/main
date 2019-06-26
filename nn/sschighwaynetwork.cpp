@@ -1,6 +1,6 @@
 #include "sschighwaynetwork.hpp"
 #include "sschighwayneuron.hpp"
-#include "ssccycledetector.hpp"
+#include "../nnhelpers/ssccycledetector.hpp"
 #include <QSet>
 
 SScHighwayNetwork::SScHighwayNetwork()

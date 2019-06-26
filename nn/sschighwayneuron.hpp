@@ -3,7 +3,7 @@
 
 #include "sscneuron.hpp"
 #include "sscgate.hpp"
-#include "sscactivation.hpp"
+#include "../nnhelpers/sscactivation.hpp"
 
 #include <QMap>
 #include <QSharedPointer>

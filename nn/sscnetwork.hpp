@@ -3,7 +3,7 @@
 
 #include "sscnetwork_global.h"
 #include "sscneuron.hpp"
-#include "sscvm.hpp"
+#include "../nnhelpers/sscvm.hpp"
 
 #include <QMap>
 class SScNetwork

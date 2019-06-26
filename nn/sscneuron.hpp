@@ -4,8 +4,8 @@
 #include <QtMath>
 #include <QDebug>
 #include "ssineuron.hpp"
-#include "ssctrainableparameter.hpp"
-#include "sscactivation.hpp"
+#include "../nnhelpers/ssctrainableparameter.hpp"
+#include "../nnhelpers/sscactivation.hpp"
 
 class SScNeuron : public SSiNeuron
 {

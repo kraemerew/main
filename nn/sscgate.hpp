@@ -1,8 +1,8 @@
 #ifndef SSCGATE_HPP
 #define SSCGATE_HPP
 
-#include "ssctrainableparameter.hpp"
-#include "sscactivation.hpp"
+#include "../nnhelpers/ssctrainableparameter.hpp"
+#include "../nnhelpers/sscactivation.hpp"
 #include <QSharedPointer>
 #include <QMap>
 

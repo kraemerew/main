@@ -1,5 +1,5 @@
 #include "sscnetwork.hpp"
-#include "ssccycledetector.hpp"
+#include "../nnhelpers/ssccycledetector.hpp"
 #include <QSet>
 
 SScNetwork::SScNetwork()

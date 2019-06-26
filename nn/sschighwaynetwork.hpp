@@ -1,7 +1,7 @@
 #ifndef HIGHWAYNETWORK_HPP
 #define HIGHWAYNETWORK_HPP
 #include "sscneuron.hpp"
-#include "sscvm.hpp"
+#include "../nnhelpers/sscvm.hpp"
 
 #include <QMap>
 class SScHighwayNetwork
