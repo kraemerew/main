@@ -15,7 +15,8 @@ public:
     virtual ~SScTrainableParameter() {}
     inline double value() const { return m_value; }
     inline void setEta(double v) { m_eta=qMax(0.000001,v); }
-    virtual void update(double v, bool cycleDone);
+    virtual void update(double v);
+    virtual void endOfCycle();
     static SScTrainableParameter* create(Type type, double v);
 
 protected:

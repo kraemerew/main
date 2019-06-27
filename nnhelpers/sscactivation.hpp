@@ -31,7 +31,9 @@ public:
     inline double activate  (double pot) { m_pot = pot; priv_activate(); return m_act; }
     inline double dev       () { return priv_dev(); }
     inline double gain      () const { return m_gain->value(); }
-    inline void   updateGain(double v, bool cycleDone) { m_gain->update(v,cycleDone); }
+    inline void   update(double v) { m_gain->update(v); }
+    inline void   endOfCycle() { m_gain->endOfCycle(); }
+
     static SScActivation* create(Type type);
 
 protected:

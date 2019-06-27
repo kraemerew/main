@@ -20,7 +20,7 @@ public:
     bool delNeuron(int idx);
     int n2idx(SSiHighwayNeuron* n) const;
     SSiHighwayNeuron* idx2n(int idx) const;
-    void resetDedo() { foreach(SSiHighwayNeuron* n, m_neurons) n->reset(); }
+    void reset();
     void connectForward();
     bool contains(SSiHighwayNeuron* n) const;
     bool connect(SSiHighwayNeuron* from, SSiHighwayNeuron* to, double v);
@@ -31,11 +31,7 @@ public:
     SScVM tpVM() const;
     bool fromVM(const SScVM& vm);
 
-    void trainingStep(bool endOfCycle)
-    {
-        resetDedo();
-        foreach(SSiHighwayNeuron* n, m_neurons) n->trainingStep(endOfCycle);
-    }
+    void trainingStep(bool endOfCycle);
 
 private:
     bool isFeedForward() const;

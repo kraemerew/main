@@ -17,9 +17,11 @@ public:
     virtual bool addInput(SSiHighwayNeuron *other, double v);
     virtual bool delInput(SSiHighwayNeuron *other);
     virtual double net();
-
+    virtual void reset();
 private:
     SSiHighwayNeuron*  m_parent;
+    bool                m_dirty;
+    double  m_net;
 };
 
 #endif // SSCHWGATE_HPP
