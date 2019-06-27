@@ -79,7 +79,6 @@ bool                SScHighwayNetwork::disconnect       (int from, int to)      
 void                SScHighwayNetwork::reset            ()                              { foreach(SSiHighwayNeuron* n, m_neurons) n->reset(); }
 void                SScHighwayNetwork::trainingStep     (bool endOfCycle)
 {
-    reset();
     foreach(SSiHighwayNeuron* n, m_neurons) n->trainingStep();
-    if (endOfCycle)     foreach(SSiHighwayNeuron* n, m_neurons) n->endOfCycle();
+    if (endOfCycle) foreach(SSiHighwayNeuron* n, m_neurons) n->endOfCycle();
 }

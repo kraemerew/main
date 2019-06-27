@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     net.connect(h1,o1, 0.2);
 
     net.idx2n(h1)->setActivation(SScActivation::ACT_TANH);
-    net.idx2n(o1)->setActivation(SScActivation::ACT_TANH);
+    net.idx2n(o1)->setActivation(SScActivation::ACT_SIGMOID);
 
     // training preparation
     net.connectForward();
@@ -84,6 +84,7 @@ int main(int argc, char *argv[])
         case 2: net.idx2n(i1)->setInput(1); net.idx2n(i2)->setInput(0); net.idx2n(o1)->setTarget( 0); break;
         case 3: net.idx2n(i1)->setInput(1); net.idx2n(i2)->setInput(1); net.idx2n(o1)->setTarget( 1); break;
         }
+        net.reset();
         qWarning("Pattern %d Output %lf", p, net.idx2n(o1)->out());
         const double perr = net.idx2n(o1)->perr();
         err+=perr;

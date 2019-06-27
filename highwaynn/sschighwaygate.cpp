@@ -25,7 +25,7 @@ bool SScHighwayGate::delInput(SSiHighwayNeuron *other)
 }
 double SScHighwayGate::net()
 {
-    //if (m_dirty)
+    if (m_dirty)
     {
         m_dirty = false;
         double net = 0;
@@ -40,6 +40,5 @@ double SScHighwayGate::net()
 
 void SScHighwayGate::reset()
 {
-    qWarning("RESET GATE %s", qPrintable(m_parent->name()));
     m_dirty=true;
 }

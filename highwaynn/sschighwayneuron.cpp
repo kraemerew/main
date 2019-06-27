@@ -18,7 +18,7 @@ public:
     virtual void reset() { m_outset = false; m_dedoset=false; m_in.reset(); }
     virtual double out()
     {
-        //if (!m_outset)
+        if (!m_outset)
         {
             m_o = m_act->activate(net());
             m_outset = true;
@@ -45,6 +45,7 @@ public:
         for(QMap<SSiHighwayNeuron*,QSharedPointer<SScTrainableParameter> >::iterator it = m_in.begin(); it != m_in.end(); ++it)
             it.value()->endOfCycle();
         m_act->endOfCycle();
+        reset();
     }
 
     SScHighwayGate m_in;
