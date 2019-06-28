@@ -20,8 +20,16 @@ public:
     virtual void    reset() { m_outset = false; m_dedoset=false; m_in.reset(); }
     virtual double  carry() { return m_cn ? m_cn->out() : 0.0; }
     virtual double  highway() { return m_hwn ? m_hwn->out() : 0.0; }
-    virtual void    setHighway  (SSiHighwayNeuron* n) { m_hwn=n; }
-    virtual void    setCarry    (SSiHighwayNeuron* n) { m_cn=n; }
+    virtual bool connectHighway  (SSiHighwayNeuron* hwn, SSiHighwayNeuron* cn)
+    {
+        if ( (!hwn && !cn) || (hwn && cn && (hwn!=cn)) )
+        {
+            m_hwn=hwn;
+            m_cn=cn;
+            return true;
+        }
+        return false;
+    }
 
     virtual double out()
     {
@@ -92,8 +100,7 @@ public:
     virtual double  out         ()                  { return net(); }
     virtual double  carry       ()                  { return 0.0; }
     virtual double  highway     ()                  { return 0.0; }
-    virtual void    setHighway  (SSiHighwayNeuron*) { Q_ASSERT(false); }
-    virtual void    setCarry    (SSiHighwayNeuron*) { Q_ASSERT(false); }
+    virtual bool    connectHighway(SSiHighwayNeuron*, SSiHighwayNeuron*) { Q_ASSERT(false); return false; }
 
     virtual QList<SSiHighwayNeuron*> inputs() const { return QList<SSiHighwayNeuron*>();  }
 
@@ -115,8 +122,7 @@ public:
     virtual double  out         ()                  { return 1.0; }
     virtual double  carry       ()                  { return 0.0; }
     virtual double  highway     ()                  { return 0.0; }
-    virtual void    setHighway  (SSiHighwayNeuron*) { Q_ASSERT(false); }
-    virtual void    setCarry    (SSiHighwayNeuron*) { Q_ASSERT(false); }
+    virtual bool connectHighway(SSiHighwayNeuron*, SSiHighwayNeuron*) { Q_ASSERT(false); return false; }
 
     virtual QList<SSiHighwayNeuron*> inputs() const { return QList<SSiHighwayNeuron*>();  }
 };

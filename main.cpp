@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     net.connect(h1,o1, 0.2);
 
     net.idx2n(h1)->setActivation(SScActivation::ACT_TANH);
-    net.idx2n(o1)->setActivation(SScActivation::ACT_SIGMOID);
+    net.idx2n(o1)->setActivation(SScActivation::ACT_SWISH);
 
     // training preparation
     net.connectForward();

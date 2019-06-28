@@ -49,8 +49,7 @@ public:
     virtual double out() { return 0.0; }
     virtual double carry() = 0;
     virtual double highway() = 0;
-    virtual void setHighway(SSiHighwayNeuron*) = 0;
-    virtual void setCarry(SSiHighwayNeuron*) = 0;
+    virtual bool connectHighway(SSiHighwayNeuron* hwn, SSiHighwayNeuron* cn) = 0;
 
     virtual QList<SSiHighwayNeuron*> inputs() const { return QList<SSiHighwayNeuron*>(); }
     virtual QList<SSiHighwayNeuron*> inputsC() const { return QList<SSiHighwayNeuron*>(); }
