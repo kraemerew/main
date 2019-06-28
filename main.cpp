@@ -44,6 +44,10 @@ private:
 #include "filter/filter.hpp"
 //#include "rnn/rneuron.hpp"
 
+double getRand()
+{
+    return 2.0*((double)qrand()/(double)RAND_MAX)-1;
+}
 int main(int argc, char *argv[])
 {
 
@@ -52,17 +56,32 @@ int main(int argc, char *argv[])
     const int bi = net.addBiasNeuron    ("Bias"),
               i1 = net.addInputNeuron   ("In1"),
               i2 = net.addInputNeuron   ("In2"),
-              h1 = net.addHiddenNeuron  ("Hidden"),
-              o1 = net.addOutputNeuron  ("Out");
-    net.connect(bi,h1,-1.1);
-    net.connect(bi,o1, 1.1);
-    net.connect(i1,o1, 0.1);
-    net.connect(i2,o1, 0.2);
-    net.connect(i1,h1, 0.1);
-    net.connect(i2,h1,-0.3);
-    net.connect(h1,o1, 0.2);
+              i3 = net.addInputNeuron   ("In3"),
+              i4 = net.addInputNeuron   ("In4"),
+              h1 = net.addHiddenNeuron  ("H1"),
+              h2 = net.addHiddenNeuron  ("H2"),
+              h3 = net.addHiddenNeuron  ("H3"),
+            h4 = net.addHiddenNeuron  ("H4"),
 
-    net.idx2n(h1)->setActivation(SScActivation::ACT_TANH);
+              carry  = net.addHiddenNeuron  ("C"),      //<Carry
+              o1 = net.addOutputNeuron  ("Out");
+   QList<int> il = QList<int>() << i1 << i2 << i3 << i4,
+              hl = QList<int>() << h1 << h2 << h3 << h4;
+
+   // Bias to carry, hidden and out
+   net.connect(bi,o1,getRand());
+   net.connect(bi,carry, getRand());
+   foreach(int to, hl) net.connect(bi,to,getRand());
+
+   // Input to hidden
+   foreach(int from, il) foreach(int to, hl) net.connect(from,to,getRand());
+   /// Hidden to output
+   foreach(int from, hl) net.connect(from,o1,getRand());
+   foreach(int from, il) net.connect(from,o1,getRand());
+
+
+    foreach(int h,hl) net.idx2n(h)->setActivation(SScActivation::ACT_TANH);
+    net.idx2n(carry)->setActivation(SScActivation::ACT_SIGMOID);
     net.idx2n(o1)->setActivation(SScActivation::ACT_SWISH);
 
     // training preparation
@@ -75,31 +94,33 @@ int main(int argc, char *argv[])
     bool done = false;
     do
     {
-        const int p = (++c)%4;
+        const int p = (++c)%16;
+
         if (p==0) err = 0;
-        switch(p)
-        {
-        case 0: net.idx2n(i1)->setInput(0); net.idx2n(i2)->setInput(0); net.idx2n(o1)->setTarget( 1); break;
-        case 1: net.idx2n(i1)->setInput(0); net.idx2n(i2)->setInput(1); net.idx2n(o1)->setTarget( 0); break;
-        case 2: net.idx2n(i1)->setInput(1); net.idx2n(i2)->setInput(0); net.idx2n(o1)->setTarget( 0); break;
-        case 3: net.idx2n(i1)->setInput(1); net.idx2n(i2)->setInput(1); net.idx2n(o1)->setTarget( 1); break;
-        }
+        int bits = 0;
+        if (p&0x01) { net.idx2n(i1)->setInput(1); ++bits; } else net.idx2n(i1)->setInput(0);
+        if (p&0x02) { net.idx2n(i2)->setInput(1); ++bits; } else net.idx2n(i2)->setInput(0);
+        if (p&0x04) { net.idx2n(i3)->setInput(1); ++bits; } else net.idx2n(i3)->setInput(0);
+        if (p&0x08) { net.idx2n(i4)->setInput(1); ++bits; } else net.idx2n(i4)->setInput(0);
+
+        if (bits%2==0)net.idx2n(o1)->setTarget(0);          else net.idx2n(o1)->setTarget(1);
+
         net.reset();
         qWarning("Pattern %d Output %lf", p, net.idx2n(o1)->out());
         const double perr = net.idx2n(o1)->perr();
         err+=perr;
-        if (p==3)
+        if (p==15)
         {
-            err/=4.0;
+            err/=16.0;
             if (err<0.0001) done = true;
-            if (done) qWarning("Cycle %d Error %lf Last %lf %s", c, err, lasterr, err<lasterr ? "lower":"higher");
+            qWarning("Cycle %d Error %lf Last %lf %s", c/16, err, lasterr, err<lasterr ? "lower":"higher");
             lasterr = err;
 
         }
        // if (c==100) std::exit(1);
 
 
-        const bool endOfCycle = (p==3);
+        const bool endOfCycle = (p==15);
         net.trainingStep(endOfCycle);
     }
     while (!done);
