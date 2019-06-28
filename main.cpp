@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
               h1 = net.addHiddenNeuron  ("H1"),
               h2 = net.addHiddenNeuron  ("H2"),
               h3 = net.addHiddenNeuron  ("H3"),
-            h4 = net.addHiddenNeuron  ("H4"),
+              h4 = net.addHiddenNeuron  ("H4"),
 
               carry  = net.addHiddenNeuron  ("C"),      //<Carry
               o1 = net.addOutputNeuron  ("Out");
@@ -75,13 +75,23 @@ int main(int argc, char *argv[])
 
    // Input to hidden
    foreach(int from, il) foreach(int to, hl) net.connect(from,to,getRand());
-   /// Hidden to output
+   // Input to carry
+   foreach(int from, il) net.connect(from,carry,getRand());
+
+   // Hidden to output
    foreach(int from, hl) net.connect(from,o1,getRand());
-   foreach(int from, il) net.connect(from,o1,getRand());
+   // Carry to output
+   net.connect(carry,o1,getRand());
+   //foreach(int from, il) net.connect(from,o1,getRand());
+
+   net.setHighway(h1,i1,carry);
+   net.setHighway(h2,i2,carry);
+   net.setHighway(h3,i3,carry);
+   net.setHighway(h4,i4,carry);
 
 
-    foreach(int h,hl) net.idx2n(h)->setActivation(SScActivation::ACT_TANH);
-    net.idx2n(carry)->setActivation(SScActivation::ACT_SIGMOID);
+    foreach(int h,hl) net.idx2n(h)->setActivation(SScActivation::ACT_RBF);
+    net.idx2n(carry)->setActivation(SScActivation::ACT_RBF);
     net.idx2n(o1)->setActivation(SScActivation::ACT_SWISH);
 
     // training preparation
@@ -106,7 +116,7 @@ int main(int argc, char *argv[])
         if (bits%2==0)net.idx2n(o1)->setTarget(0);          else net.idx2n(o1)->setTarget(1);
 
         net.reset();
-        qWarning("Pattern %d Output %lf", p, net.idx2n(o1)->out());
+        //qWarning("Pattern %d Output %lf", p, net.idx2n(o1)->out());
         const double perr = net.idx2n(o1)->perr();
         err+=perr;
         if (p==15)

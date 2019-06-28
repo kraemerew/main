@@ -25,6 +25,15 @@ public:
     bool connect(SSiHighwayNeuron* from, SSiHighwayNeuron* to, double v);
     bool disconnect(SSiHighwayNeuron* from, SSiHighwayNeuron* to);
     bool connect(int from, int to, double v);
+    /*!
+     * \brief Make a highway connection
+     * \param neuron    Highway neuron (must be hidden or output)
+     * \param highway   Highway source (must be input or hiddenII
+     * \param carry     Carry signal generator (must be hidden or output, should activate in [0;1]
+     * \return
+     */
+    bool setHighway(int neuron, int highway, int carry);
+    bool delHighway(int neuron);
     bool disconnect(int from, int to);
 
     SScVM tpVM() const;

@@ -68,6 +68,26 @@ bool SScHighwayNetwork::isFeedForward() const
     return !cdt.isCyclic();
 }
 
+bool SScHighwayNetwork::setHighway(int neuron, int highway, int carry)
+{
+    SSiHighwayNeuron* n = idx2n(neuron), *hwn = idx2n(highway), *cn = idx2n(carry);
+    if (n && hwn && cn && n->connectHighway(hwn,cn))
+    {
+        if (isFeedForward()) return true;
+        delHighway(neuron);
+    }
+    return false;
+}
+bool SScHighwayNetwork::delHighway(int neuron)
+{
+     SSiHighwayNeuron* n = idx2n(neuron);
+     if (n)
+     {
+         n->connectHighway(NULL,NULL);
+         return true;
+     }
+     return false;
+}
 int                 SScHighwayNetwork::addInputNeuron   (const QString& name)           { return addNeuron(SSiHighwayNeuron::NeuronType_Input,  name); }
 int                 SScHighwayNetwork::addHiddenNeuron  (const QString& name)           { return addNeuron(SSiHighwayNeuron::NeuronType_Hidden, name); }
 int                 SScHighwayNetwork::addOutputNeuron  (const QString& name)           { return addNeuron(SSiHighwayNeuron::NeuronType_Output, name); }
