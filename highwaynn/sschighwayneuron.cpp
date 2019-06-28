@@ -29,7 +29,7 @@ public:
     virtual double  highway() { return m_hwn ? m_hwn->out() : 0.0; }
     virtual bool connectHighway  (SSiHighwayNeuron* hwn, SSiHighwayNeuron* cn)
     {
-        if ( (!hwn && !cn) || (hwn && cn && (hwn!=cn)) )
+        if ( (!hwn && !cn) || (hwn && cn && (hwn!=cn) && (hwn!=this) && (cn!=this)) )
         {
             m_hwn=hwn;
             m_cn=cn;
@@ -56,7 +56,6 @@ public:
         //TODO
         // dE/dw_ij=dE/doj*doj/dw_ij=dedo()*doj/dnetj*dnetj/dwij
         // = dedo()*doj/dnetj*oi
-
         return -dedo()*n->out()*m_act->dev()*m_act->gain()*(1.0-carry());
     }
 
@@ -134,8 +133,7 @@ class SScOutputNeuron : public SScConnectedNeuron
 {
 public:
     SScOutputNeuron() : SScConnectedNeuron(NeuronType_Output,SScActivation::ACT_MHAT)
-    {
-        //setActivation(SScActivation::ACT_SIGMOID);
+    {        
     }
 
     virtual bool    setInput(double) { Q_ASSERT(false); return false; }

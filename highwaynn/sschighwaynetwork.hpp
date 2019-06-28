@@ -29,7 +29,7 @@ public:
      * \brief Make a highway connection
      * \param neuron    Highway neuron (must be hidden or output)
      * \param highway   Highway source (must be input or hiddenII
-     * \param carry     Carry signal generator (must be hidden or output, should activate in [0;1]
+     * \param carry     Carry signal generator (must be hidden or output, should activate in [0;1])
      * \return
      */
     bool setHighway(int neuron, int highway, int carry);

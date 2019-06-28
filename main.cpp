@@ -96,7 +96,6 @@ int main(int argc, char *argv[])
 
     // training preparation
     net.connectForward();
-
     // training
     QElapsedTimer t; t.start();
     int c=0;
@@ -104,8 +103,8 @@ int main(int argc, char *argv[])
     bool done = false;
     do
     {
-        const int p = (++c)%16;
 
+        const int p = (++c)%16;
         if (p==0) err = 0;
         int bits = 0;
         if (p&0x01) { net.idx2n(i1)->setInput(1); ++bits; } else net.idx2n(i1)->setInput(0);
@@ -116,7 +115,9 @@ int main(int argc, char *argv[])
         if (bits%2==0)net.idx2n(o1)->setTarget(0);          else net.idx2n(o1)->setTarget(1);
 
         net.reset();
-        //qWarning("Pattern %d Output %lf", p, net.idx2n(o1)->out());
+
+
+        qWarning("Pattern %d Output %lf Carry %lf", p, net.idx2n(o1)->out(), net.idx2n(carry)->out());
         const double perr = net.idx2n(o1)->perr();
         err+=perr;
         if (p==15)
@@ -124,10 +125,11 @@ int main(int argc, char *argv[])
             err/=16.0;
             if (err<0.0001) done = true;
             qWarning("Cycle %d Error %lf Last %lf %s", c/16, err, lasterr, err<lasterr ? "lower":"higher");
+            if (done) qWarning("Done");
             lasterr = err;
 
+            //if (c>1000) std::exit(1);
         }
-       // if (c==100) std::exit(1);
 
 
         const bool endOfCycle = (p==15);

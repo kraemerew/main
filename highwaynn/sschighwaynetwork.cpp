@@ -38,7 +38,7 @@ bool SScHighwayNetwork::disconnect  (SSiHighwayNeuron* from, SSiHighwayNeuron* t
 void SScHighwayNetwork::connectForward()
 {
     QMap<SSiHighwayNeuron*,QSet<SSiHighwayNeuron*> > m; //< outputs for each neuron
-    foreach(SSiHighwayNeuron* n, m_neurons) foreach(SSiHighwayNeuron* inp, n->inputs())
+    foreach(SSiHighwayNeuron* n, m_neurons) foreach(SSiHighwayNeuron* inp, n->allInputs())
     {
         m[inp] << n;    //< neuron inp feeds neuron n
     }
@@ -101,6 +101,10 @@ bool                SScHighwayNetwork::disconnect       (int from, int to)      
 void                SScHighwayNetwork::reset            ()                              { foreach(SSiHighwayNeuron* n, m_neurons) n->reset(); }
 void                SScHighwayNetwork::trainingStep     (bool endOfCycle)
 {
-    foreach(SSiHighwayNeuron* n, m_neurons) n->trainingStep();
-    if (endOfCycle) foreach(SSiHighwayNeuron* n, m_neurons) n->endOfCycle();
+    //foreach(SSiHighwayNeuron* n, m_neurons)  qWarning("%s NET %lf OUT %lf", qPrintable(n->name()), n->net(),n->out());
+    //foreach(SSiHighwayNeuron* n, m_neurons) qWarning("%s CARRY %lf HW %lf OUT %lf", qPrintable(n->name()), n->carry(), n->highway(), n->out());
+QSet<QString> toTrain;
+//toTrain <<"C" << "Out";
+    foreach(SSiHighwayNeuron* n, m_neurons) if (toTrain.isEmpty() || toTrain.contains(n->name())) n->trainingStep();
+    if (endOfCycle) foreach(SSiHighwayNeuron* n, m_neurons) if (toTrain.isEmpty() || toTrain.contains(n->name())) n->endOfCycle();
 }
