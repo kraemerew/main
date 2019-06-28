@@ -16,8 +16,7 @@ public:
         NeuronType_Input,
         NeuronType_Hidden,
         NeuronType_Output,
-        NeuronType_Bias,
-        NeuronType_Highway
+        NeuronType_Bias
     };
     explicit SSiHighwayNeuron(SSeNeuronType type, SScActivation::Type acttype = SScActivation::ACT_IDENTITY)
         : m_type(type), m_dedoset(false), m_outset(false), m_o(0.0), m_dedo(0.0), m_act(SScActivation::create(acttype)) {}
@@ -46,17 +45,12 @@ public:
     virtual double deltag() = 0;
     virtual bool addInput(SSiHighwayNeuron* other, double v) = 0;
     virtual bool delInput(SSiHighwayNeuron* other) = 0;
-    virtual bool    addInputC(SSiHighwayNeuron*,double) { return false; }
-    virtual bool    delInputC(SSiHighwayNeuron*) { return false; }
     virtual double net() { return 0.0; }
-    virtual double  netC() { return 0.0; }
-    virtual double deltawC(SSiHighwayNeuron*) { return 0.0; }
-    virtual double deltagC() { return 0.0; }
     virtual double out() { return 0.0; }
-    virtual double outC() { return 0.0; }
-    virtual double highway() { return 0.0; }
-    virtual void setHighway(SSiHighwayNeuron*) { }
-
+    virtual double carry() = 0;
+    virtual double highway() = 0;
+    virtual void setHighway(SSiHighwayNeuron*) = 0;
+    virtual void setCarry(SSiHighwayNeuron*) = 0;
 
     virtual QList<SSiHighwayNeuron*> inputs() const { return QList<SSiHighwayNeuron*>(); }
     virtual QList<SSiHighwayNeuron*> inputsC() const { return QList<SSiHighwayNeuron*>(); }
@@ -81,7 +75,7 @@ protected:
         foreach(SSiHighwayNeuron* l, m_out)
         {
             const double w_jl = l->icon(this);
-            ret += l->dedo()*w_jl*l->act()->dev()*l->act()->gain();
+            ret += l->dedo()*w_jl*l->act()->dev()*l->act()->gain()*(1.0-l->carry());
         }
         return ret;
     }

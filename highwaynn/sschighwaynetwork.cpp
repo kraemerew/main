@@ -69,7 +69,6 @@ int                 SScHighwayNetwork::addInputNeuron   (const QString& name)   
 int                 SScHighwayNetwork::addHiddenNeuron  (const QString& name)           { return addNeuron(SSiHighwayNeuron::NeuronType_Hidden, name); }
 int                 SScHighwayNetwork::addOutputNeuron  (const QString& name)           { return addNeuron(SSiHighwayNeuron::NeuronType_Output, name); }
 int                 SScHighwayNetwork::addBiasNeuron    (const QString& name)           { return addNeuron(SSiHighwayNeuron::NeuronType_Bias, name); }
-int                 SScHighwayNetwork::addHighwayNeuron (const QString& name)           { return addNeuron(SSiHighwayNeuron::NeuronType_Highway,name); }
 bool                SScHighwayNetwork::delNeuron        (SSiHighwayNeuron* n)           { return delNeuron(n2idx(n)); }
 int                 SScHighwayNetwork::n2idx            (SSiHighwayNeuron* n) const     { return m_neurons.indexOf(n); }
 SSiHighwayNeuron*   SScHighwayNetwork::idx2n            (int idx) const                 { if ((idx<0) || (idx>=m_neurons.size())) return NULL; return m_neurons[idx]; }
