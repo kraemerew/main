@@ -52,7 +52,7 @@ public:
     virtual bool connectHighway(SSiHighwayNeuron* hwn, SSiHighwayNeuron* cn) = 0;
 
     virtual QList<SSiHighwayNeuron*> inputs() const { return QList<SSiHighwayNeuron*>(); }
-    virtual QList<SSiHighwayNeuron*> inputsC() const { return QList<SSiHighwayNeuron*>(); }
+    virtual QList<SSiHighwayNeuron*> allInputs() const { return inputs(); }
 
     static SSiHighwayNeuron* create(SSeNeuronType type, const QString& name = QString());
     virtual void connectForward (const QList<SSiHighwayNeuron*>& fwd) { m_out = fwd; }

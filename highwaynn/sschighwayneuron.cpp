@@ -15,6 +15,13 @@ public:
     virtual bool delInput(SSiHighwayNeuron *other) { return m_in.delInput(other); }
     virtual double net() { return m_in.net(); }
     virtual QList<SSiHighwayNeuron*> inputs() const { return m_in.keys(); }
+    virtual QList<SSiHighwayNeuron*> allInputs() const
+    {
+        QList<SSiHighwayNeuron*> ret = inputs();
+        if (m_hwn) ret << m_hwn;
+        if (m_cn) ret << m_cn;
+        return ret;
+    }
     virtual double icon(SSiHighwayNeuron *other) { return m_in.contains(other) ? m_in[other]->value() : 0.0; }
 
     virtual void    reset() { m_outset = false; m_dedoset=false; m_in.reset(); }
@@ -102,8 +109,6 @@ public:
     virtual double  highway     ()                  { return 0.0; }
     virtual bool    connectHighway(SSiHighwayNeuron*, SSiHighwayNeuron*) { Q_ASSERT(false); return false; }
 
-    virtual QList<SSiHighwayNeuron*> inputs() const { return QList<SSiHighwayNeuron*>();  }
-
 private:
     double                  m_input;
 };
@@ -123,8 +128,6 @@ public:
     virtual double  carry       ()                  { return 0.0; }
     virtual double  highway     ()                  { return 0.0; }
     virtual bool connectHighway(SSiHighwayNeuron*, SSiHighwayNeuron*) { Q_ASSERT(false); return false; }
-
-    virtual QList<SSiHighwayNeuron*> inputs() const { return QList<SSiHighwayNeuron*>();  }
 };
 
 class SScOutputNeuron : public SScConnectedNeuron

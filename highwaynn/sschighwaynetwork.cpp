@@ -60,8 +60,11 @@ bool SScHighwayNetwork::connect(SSiHighwayNeuron* from, SSiHighwayNeuron* to, do
 bool SScHighwayNetwork::isFeedForward() const
 {
     SScCycleDetector cdt(m_neurons.size());
-    foreach(SSiHighwayNeuron* to, m_neurons) foreach(SSiHighwayNeuron* from, to->inputs ()) cdt.addEdge(n2idx(from),n2idx(to));
-    foreach(SSiHighwayNeuron* to, m_neurons) foreach(SSiHighwayNeuron* from, to->inputsC()) cdt.addEdge(n2idx(from),n2idx(to));
+    foreach(SSiHighwayNeuron* to, m_neurons)
+    {
+        const int toidx = n2idx(to);
+        foreach(SSiHighwayNeuron* from, to->allInputs ()) cdt.addEdge(n2idx(from),toidx);
+    }
     return !cdt.isCyclic();
 }
 
