@@ -104,7 +104,7 @@ void                SScHighwayNetwork::trainingStep     (bool endOfCycle)
     //foreach(SSiHighwayNeuron* n, m_neurons)  qWarning("%s NET %lf OUT %lf", qPrintable(n->name()), n->net(),n->out());
     //foreach(SSiHighwayNeuron* n, m_neurons) qWarning("%s CARRY %lf HW %lf OUT %lf", qPrintable(n->name()), n->carry(), n->highway(), n->out());
 QSet<QString> toTrain;
-//toTrain <<"C" << "Out";
+//toTrain <<"C" << "H1" << "H2" << "H3" << "H4" << "Out";
     foreach(SSiHighwayNeuron* n, m_neurons) if (toTrain.isEmpty() || toTrain.contains(n->name())) n->trainingStep();
     if (endOfCycle) foreach(SSiHighwayNeuron* n, m_neurons) if (toTrain.isEmpty() || toTrain.contains(n->name())) n->endOfCycle();
 }
