@@ -35,7 +35,8 @@ public:
     void trainingStep(bool endOfCycle)
     {
         resetDedo();
-        foreach(SScNeuron* n, m_neurons) n->trainingStep(endOfCycle);
+        foreach(SScNeuron* n, m_neurons) n->trainingStep();
+        if (endOfCycle) foreach(SScNeuron* n, m_neurons) n->endOfCycle();
     }
 
 private:

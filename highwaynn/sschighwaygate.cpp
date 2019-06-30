@@ -28,17 +28,32 @@ double SScHighwayGate::net()
     if (m_dirty)
     {
         m_dirty = false;
-        double net = 0;
+       /* double net = 0;
         for(QMap<SSiHighwayNeuron*,QSharedPointer<SScTrainableParameter> >::iterator it = begin(); it != end(); ++it)
-        net += it.key()->out()*it.value()->value();
+            net += it.key()->out()*it.value()->value();
         m_net = net;
-        //qWarning("CALC NET %s %lf", qPrintable(m_parent->name()), m_net);
+*/
+        m_net = m_a.dot(m_b);
+        //qWarning("CALC NET %s %lf %lf", qPrintable(m_parent->name()), m_net, m_a.dot(m_b));
     }
-    //else qWarning("NET %s ALREADY DONE: %lf", qPrintable(m_parent->name()), m_net);
     return m_net;
 }
 
+void SScHighwayGate::endOfCycle()
+{
+    m_b.clear();
+    m_b.reserve(size());
+    for(QMap<SSiHighwayNeuron*,QSharedPointer<SScTrainableParameter> >::iterator it = begin(); it != end(); ++it)
+    {
+        it.value()->endOfCycle();
+        m_b << it.value()->value();
+    }
+}
 void SScHighwayGate::reset()
 {
     m_dirty=true;
+    m_a.clear();
+    m_a.reserve(size());
+    for(QMap<SSiHighwayNeuron*,QSharedPointer<SScTrainableParameter> >::iterator it = begin(); it != end(); ++it)
+        m_a << it.key()->out();
 }

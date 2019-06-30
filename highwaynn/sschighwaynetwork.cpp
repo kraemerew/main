@@ -46,14 +46,18 @@ void SScHighwayNetwork::connectForward()
 }
 
 bool SScHighwayNetwork::connect(SSiHighwayNeuron* from, SSiHighwayNeuron* to, double v)
-{
+{   
     if (!contains(from) || !contains(to)) return false;
     to->addInput(from,v);
+
     if (!isFeedForward())
     {
+        qWarning("err");
+
         (void) disconnect(from,to);
         return false;
     }
+
     return true;
 }
 

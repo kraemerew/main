@@ -67,8 +67,7 @@ public:
     }
     virtual void endOfCycle()
     {
-        for(QMap<SSiHighwayNeuron*,QSharedPointer<SScTrainableParameter> >::iterator it = m_in.begin(); it != m_in.end(); ++it)
-            it.value()->endOfCycle();
+        m_in.endOfCycle();
         m_act->endOfCycle();
         reset();
     }

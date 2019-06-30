@@ -27,14 +27,20 @@ public:
         return -dedo()*n->out()*m_act->dev()*m_act->gain();
     }
 
-    virtual bool trainingStep(bool cycleDone)
+    virtual bool trainingStep()
     {                
         for(QMap<SScNeuron*,QSharedPointer<SScTrainableParameter> >::iterator it = m_in.begin(); it != m_in.end(); ++it)
-            it.value()->update(deltaw(it.key()),cycleDone);
-        m_act->updateGain(deltag(),cycleDone);
+            it.value()->update(deltaw(it.key()));
+        m_act->update(deltag());
         return true;
     }
-
+    virtual bool endOfCycle()
+    {
+        for(QMap<SScNeuron*,QSharedPointer<SScTrainableParameter> >::iterator it = m_in.begin(); it != m_in.end(); ++it)
+            it.value()->endOfCycle();
+        m_act->endOfCycle();
+        return true;
+    }
     SScGate m_in;
 };
 
@@ -68,7 +74,6 @@ public:
     virtual double net() { return m_input; }
     virtual double out() { return net(); }
     virtual QList<SScNeuron*> inputs() const { return QList<SScNeuron*>();  }
-    virtual bool trainingStep(bool) { return false; }
 
 private:
     double                  m_input;
@@ -87,7 +92,6 @@ public:
     virtual double  net         ()                      { return 1.0; }
     virtual double  out         ()                      { return 1.0; }
     virtual QList<SScNeuron*> inputs() const { return QList<SScNeuron*>();  }
-    virtual bool trainingStep(bool) { return false; }
 
 private:
     QList<SScNeuron*>       m_out;

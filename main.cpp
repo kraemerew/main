@@ -9,6 +9,13 @@
 #include "image/moments.hpp"
 #include <QTimer>
 
+#ifndef _DEPRECATION_DISABLE
+#define _DEPRECATION_DISABLE
+#if (_MSC_VER >= 1400)
+#pragma warning(disable: 4996)
+#endif
+#endif
+
 class SScMultiCamTester : public QObject
 {
     Q_OBJECT
@@ -39,8 +46,8 @@ private slots:
 private:
     SScCam* m_cam;
 };
+#include <cblas.h>
 
-#include "main.moc"
 #include "filter/filter.hpp"
 //#include "rnn/rneuron.hpp"
 
@@ -50,7 +57,8 @@ double getRand()
 }
 int main(int argc, char *argv[])
 {
-
+    Q_UNUSED(argc);
+    Q_UNUSED(argv);
     SScHighwayNetwork net;
 
     const int bi = net.addBiasNeuron    ("Bias"),
@@ -69,6 +77,7 @@ int main(int argc, char *argv[])
               hl = QList<int>() << h1 << h2 << h3 << h4;
 
    // Bias to carry, hidden and out
+
    net.connect(bi,o1,getRand());
    net.connect(bi,carry, getRand());
    foreach(int to, hl) net.connect(bi,to,getRand());
@@ -88,7 +97,6 @@ int main(int argc, char *argv[])
    net.setHighway(h2,i2,carry);
    net.setHighway(h3,i3,carry);
    net.setHighway(h4,i4,carry);
-
 
     foreach(int h,hl) net.idx2n(h)->setActivation(SScActivation::ACT_RBF);
     net.idx2n(carry)->setActivation(SScActivation::ACT_RBF);
@@ -117,7 +125,7 @@ int main(int argc, char *argv[])
         net.reset();
 
 
-        qWarning("Pattern %d Output %lf Carry %lf", p, net.idx2n(o1)->out(), net.idx2n(carry)->out());
+        //qWarning("Pattern %d Output %lf Carry %lf", p, net.idx2n(o1)->out(), net.idx2n(carry)->out());
         const double perr = net.idx2n(o1)->perr();
         err+=perr;
         if (p==15)

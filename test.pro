@@ -10,6 +10,8 @@ CONFIG -= app_bundle
 
 TEMPLATE = app
 
+LIBS += -lv4l1 -lcblas
+
 SOURCES += main.cpp \
     cam/cam.cpp \
     nnhelpers/sscactivation.cpp \
@@ -29,7 +31,8 @@ SOURCES += main.cpp \
     filter/selector.cpp \
     cam/framereader.cpp \
     image/moments.cpp \
-    nn/sscgate.cpp
+    #nn/sscgate.cpp \
+    blas/blasvector.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -63,7 +66,7 @@ HEADERS += \
     filter/selector.hpp \
     cam/framereader.hpp \
     image/moments.hpp \
-    nn/ssineuron.hpp \
-    nn/sscgate.hpp
+    #nn/ssineuron.hpp \
+    #nn/sscgate.hpp \
+    blas/blasvector.hpp
 
-LIBS += -lv4l1
