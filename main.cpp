@@ -46,7 +46,6 @@ private slots:
 private:
     SScCam* m_cam;
 };
-#include <cblas.h>
 
 #include "filter/filter.hpp"
 //#include "rnn/rneuron.hpp"
@@ -98,9 +97,9 @@ int main(int argc, char *argv[])
    net.setHighway(h3,i3,carry);
    net.setHighway(h4,i4,carry);
 
-    foreach(int h,hl) net.idx2n(h)->setActivation(SScActivation::ACT_RBF);
-    net.idx2n(carry)->setActivation(SScActivation::ACT_RBF);
-    net.idx2n(o1)->setActivation(SScActivation::ACT_SWISH);
+    foreach(int h,hl) net.idx2n(h)->setActivation(SScActivation::ACT_RBF,1);
+    net.idx2n(carry)->setActivation(SScActivation::ACT_RBF,  1);
+    net.idx2n(o1)   ->setActivation(SScActivation::ACT_SWISH,1);
 
     // training preparation
     net.connectForward();

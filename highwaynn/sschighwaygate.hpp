@@ -32,7 +32,7 @@ private:
     SSiHighwayNeuron*   m_parent;
     bool                m_dirty;
     double              m_net;
-    SScBlasVector       m_a, m_b;
+    QVector<double>     m_a, m_b;
 };
 
 #endif // SSCHWGATE_HPP

@@ -75,7 +75,7 @@ bool SScHighwayNetwork::isFeedForward() const
 bool SScHighwayNetwork::setHighway(int neuron, int highway, int carry)
 {
     SSiHighwayNeuron* n = idx2n(neuron), *hwn = idx2n(highway), *cn = idx2n(carry);
-    if (n && hwn && cn && n->connectHighway(hwn,cn))
+    if (n && hwn && cn && cn->act()->canCarry() && n->connectHighway(hwn,cn))
     {
         if (isFeedForward()) return true;
         delHighway(neuron);

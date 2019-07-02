@@ -31,10 +31,16 @@ public:
     inline double activate  (double pot) { m_pot = pot; priv_activate(); return m_act; }
     inline double dev       () { return priv_dev(); }
     inline double gain      () const { return m_gain->value(); }
+    inline bool   setGain   (double v) { m_gain->set(v); return true; }
     inline void   update(double v) { m_gain->update(v); }
     inline void   endOfCycle() { m_gain->endOfCycle(); }
 
     static SScActivation* create(Type type);
+    /*!
+     * \brief Whether this activation can be used for a carry signal (range [0;1])
+     * \return
+     */
+    virtual bool canCarry() const { return false; }
 
 protected:
     virtual void priv_activate() = 0;

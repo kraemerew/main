@@ -30,7 +30,7 @@ public:
     {
         const bool signchange = ((m_updatesum>0) && (m_last<0)) || ((m_updatesum<0) && (m_last>0));
         if (signchange) m_uval*=.6; else m_uval*=1.2;
-        m_uval=qBound(0.0000001,m_uval,100.0);
+        m_uval=qBound(0.00000001,m_uval,100.0);
         if (m_updatesum>0) m_value+=m_uval; else if (m_updatesum<0) m_value-=m_uval;
         m_last=m_updatesum;
         m_updatesum=0.0;

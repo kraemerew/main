@@ -1,6 +1,14 @@
 #include "sschighwayneuron.hpp"
 #include "sschighwaynetwork.hpp"
+#include <future>
+#include <thread>
 
+double multiply(double* d, unsigned int len)
+{
+    double ret = 1.0;
+    for (unsigned int i = 0; i<len; ++i) ret*=d[i];
+    return ret;
+}
 
 class SScConnectedNeuron : public SSiHighwayNeuron
 {
@@ -153,11 +161,12 @@ private:
     double m_target;
 };
 
-bool SSiHighwayNeuron::setActivation(SScActivation::Type type)
+bool SSiHighwayNeuron::setActivation(SScActivation::Type type, double gain)
 {
     if (m_act) delete m_act;
     m_act = SScActivation::create(type);
     Q_CHECK_PTR(m_act);
+    if (m_act) m_act->setGain(gain);
     return m_act!=NULL;
 }
 
@@ -177,3 +186,27 @@ SSiHighwayNeuron* SSiHighwayNeuron::create(SSeNeuronType type, const QString& na
 
 
 
+double SSiHighwayNeuron::priv_dedo()
+{
+    // dE/do_j = sum(l) dE/dnet_l * dnet_l/do_j = sum(l) dE/dnet_l wjl
+    //         = sum(l) w_jl dE/do_l do_l/dnet_l
+    //         = sum(l) w_jl dedo(l) act(l)'gain_l
+    double ret = 0;
+
+    foreach(SSiHighwayNeuron* l, m_out)
+    {
+       const double w_jl = l->icon(this);
+       ret += l->dedo()*w_jl*l->act()->dev()*l->act()->gain()*(1.0-l->carry());
+    }
+
+    /*std::vector<std::future<double> > fv;
+    fv.reserve(m_out.size());
+    foreach(SSiHighwayNeuron* l, m_out)
+    {
+        double d[] = { l->dedo(), l->icon(this), l->act()->dev(),l->act()->gain(), (1.0-l->carry()) };
+        fv.insert(fv.end(),std::async(multiply,d,4));
+    }
+    for (auto it = fv.begin(); it!=fv.end(); ++it) ret += it->get();
+*/
+    return ret;
+}

@@ -8,6 +8,7 @@
 #include <QSharedPointer>
 #include <QtMath>
 
+
 class SSiHighwayNeuron
 {
 public:
@@ -40,7 +41,7 @@ public:
 
     virtual bool  setInput(double) = 0;
     virtual bool  setTarget(double) = 0;
-    virtual bool setActivation(SScActivation::Type type);
+    virtual bool setActivation(SScActivation::Type type, double gain = 1.0);
     virtual double deltaw(SSiHighwayNeuron* n) = 0;
     virtual double deltag() = 0;
     virtual bool addInput(SSiHighwayNeuron* other, double v) = 0;
@@ -64,20 +65,7 @@ public:
 protected:
     // Partial derivative of network error by o_j (with j being the index of this neuron)
     // The same for all neurons with exception of output neurons where it is redefined
-    virtual double priv_dedo()
-    {
-        // dE/do_j = sum(l) dE/dnet_l * dnet_l/do_j = sum(l) dE/dnet_l wjl
-        //         = sum(l) w_jl dE/do_l do_l/dnet_l
-        //         = sum(l) w_jl dedo(l) act(l)'gain_l
-        double ret = 0;
-
-        foreach(SSiHighwayNeuron* l, m_out)
-        {
-            const double w_jl = l->icon(this);
-            ret += l->dedo()*w_jl*l->act()->dev()*l->act()->gain()*(1.0-l->carry());
-        }
-        return ret;
-    }
+    virtual double priv_dedo();
 
     SSeNeuronType               m_type;
     bool                        m_dedoset, m_outset;

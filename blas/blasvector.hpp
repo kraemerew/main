@@ -3,10 +3,9 @@
 
 #include <QVector>
 
-class SScBlasVector : public QVector<double>
+namespace SSnBlas
 {
-public:
-    double dot(const SScBlasVector& other);
-};
+    double dot(const QVector<double>& a, const QVector<double>& b);
+}
 
 #endif // BLASVECTOR_HPP

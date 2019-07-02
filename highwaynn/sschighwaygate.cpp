@@ -33,7 +33,8 @@ double SScHighwayGate::net()
             net += it.key()->out()*it.value()->value();
         m_net = net;
 */
-        m_net = m_a.dot(m_b);
+        if (m_b.size()!=m_a.size()) endOfCycle();
+        m_net = SSnBlas::dot(m_a,m_b);
         //qWarning("CALC NET %s %lf %lf", qPrintable(m_parent->name()), m_net, m_a.dot(m_b));
     }
     return m_net;

@@ -13,6 +13,7 @@ public:
 
     SScTrainableParameter(double value) : m_ctr(0), m_eta(.1), m_updatesum(0), m_value(value) {}
     virtual ~SScTrainableParameter() {}
+    inline void set(double v) { m_value = v; }
     inline double value() const { return m_value; }
     inline void setEta(double v) { m_eta=qMax(0.000001,v); }
     virtual void update(double v);

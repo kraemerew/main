@@ -16,9 +16,11 @@ class SScActivationSigmoid : public SScActivation
 public:
     SScActivationSigmoid() : SScActivation() {}
     virtual QString name() const { return "Logistic"; }
+    virtual bool canCarry() const { return true; }
+
 private:
     virtual void priv_activate() { m_act = 1.0/(1.0+exp(-m_pot*m_gain->value())); }
-    virtual double priv_dev() { return m_act*(1.0-m_act); }
+    virtual double priv_dev() { return m_act*(1.0-m_act); }    
 };
 
 class SScActivationTanh : public SScActivation
@@ -37,6 +39,8 @@ class SScActivationRbf: public SScActivation
 public:
     SScActivationRbf() : SScActivation() {}
     virtual QString name() const { return "Rbf"; }
+    virtual bool canCarry() const { return true; }
+
 private:
     virtual void priv_activate() { m_gp = m_pot*m_gain->value(); m_act = exp(-qPow(m_gp,2.0)); }
     virtual double priv_dev() { return -2.0*m_gp*m_act; }
