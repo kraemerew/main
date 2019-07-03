@@ -17,6 +17,20 @@ public:
     {
         setActivation(SScActivation::ACT_SIGMOID,1.0);
     }
+    virtual double transform()
+    {
+        if (!m_transformset)
+        {
+            m_t = m_act->activate(net());
+            m_transformset = true;
+        }
+        return m_t;
+    }
+
+    virtual double out()
+    {
+        return transform();
+    }
     virtual bool addInput(SSiHighwayNeuron *other, double v) { return m_in.addInput(other,v); }
     virtual bool delInput(SSiHighwayNeuron *other) { return m_in.delInput(other); }
     virtual double net() { return m_in.net(); }
@@ -30,7 +44,7 @@ public:
     }
     virtual double deltaw(SSiHighwayNeuron* n)
     {
-        return -dedo()*n->out()*m_act->dev()*m_act->gain();
+       return -dedo()*n->out()*m_act->dev()*m_act->gain();
     }
 
     virtual bool setActivation(SScActivation::Type type, double gain)
@@ -49,10 +63,8 @@ public:
 
     virtual void trainingStep()
     {
-        qWarning(">>>>CARRY DEDO %lf", dedo());
         for(QMap<SSiHighwayNeuron*,QSharedPointer<SScTrainableParameter> >::iterator it = m_in.begin(); it != m_in.end(); ++it)
         {
-           qWarning("CARRY DELTAW %lf", deltaw(it.key()));
             it.value()->update(deltaw(it.key()));
         }
         m_act->update(deltag());
@@ -220,7 +232,6 @@ public:
     virtual bool    setInput(double) { Q_ASSERT(false); return false; }
     virtual bool    setTarget(double v) { m_target = v; return true; }
     virtual double  err() { return out()-m_target; }
-    virtual double  out() { return m_act->activate(net()); }
     virtual void    connectForward(const QList<SSiHighwayNeuron*>&) { }
 
 private:
