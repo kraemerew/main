@@ -103,6 +103,15 @@ private:
     double m_x, m_actsig;
 };
 
+bool SScActivation::canCarry(Type type)
+{
+    switch (type)
+    {
+    case ACT_SIGMOID:
+    case ACT_RBF:       return true; break;
+    default: return false; break;
+    }
+}
 SScActivation* SScActivation::create(Type type)
 {
     switch (type)

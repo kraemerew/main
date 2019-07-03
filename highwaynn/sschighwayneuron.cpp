@@ -10,6 +10,70 @@ double multiply(double* d, unsigned int len)
     return ret;
 }
 
+class SScCarryNeuron : public SSiHighwayNeuron
+{
+public:
+    SScCarryNeuron() : SSiHighwayNeuron(NeuronType_Carry), m_in(SScHighwayGate(this))
+    {
+        setActivation(SScActivation::ACT_SIGMOID,1.0);
+    }
+    virtual bool addInput(SSiHighwayNeuron *other, double v) { return m_in.addInput(other,v); }
+    virtual bool delInput(SSiHighwayNeuron *other) { return m_in.delInput(other); }
+    virtual double net() { return m_in.net(); }
+    virtual void reset() { SSiHighwayNeuron::reset(); m_in.reset(); }
+    virtual bool  setInput(double) { Q_ASSERT(false); return false; }
+    virtual bool  setTarget(double) { Q_ASSERT(false); return false; }
+    virtual bool    connectHighway(SSiHighwayNeuron*, SSiHighwayNeuron*) { Q_ASSERT(false); return false; }
+    virtual double  deltag()
+    {
+        return -dedo()*net()*m_act->dev();
+    }
+    virtual double deltaw(SSiHighwayNeuron* n)
+    {
+        return -dedo()*n->out()*m_act->dev()*m_act->gain();
+    }
+
+    virtual bool setActivation(SScActivation::Type type, double gain)
+    {
+        if (!SScActivation::canCarry(type)) return false;
+        if (m_act) delete m_act;
+        m_act = SScActivation::create(type);
+        Q_CHECK_PTR(m_act);
+        if (m_act) m_act->setGain(gain);
+        return m_act!=NULL;
+    }
+    virtual QList<SSiHighwayNeuron*> inputs() const { return m_in.keys(); }
+    virtual QList<SSiHighwayNeuron*> allInputs() const { return inputs(); }
+    virtual double icon(SSiHighwayNeuron *other) { return m_in.contains(other) ? m_in[other]->value() : 0.0; }
+
+
+    virtual void trainingStep()
+    {
+        qWarning(">>>>CARRY DEDO %lf", dedo());
+        for(QMap<SSiHighwayNeuron*,QSharedPointer<SScTrainableParameter> >::iterator it = m_in.begin(); it != m_in.end(); ++it)
+        {
+           qWarning("CARRY DELTAW %lf", deltaw(it.key()));
+            it.value()->update(deltaw(it.key()));
+        }
+        m_act->update(deltag());
+    }
+    virtual void endOfCycle()
+    {
+        m_in.endOfCycle();
+        m_act->endOfCycle();
+        reset();
+    }
+
+protected:
+    virtual double priv_dedo()
+    {
+        double ret = 0;
+        foreach(SSiHighwayNeuron* l, m_out) ret += l->dedo()*l->highwayMinusTransform();
+        return ret;
+    }
+    SScHighwayGate m_in;
+};
+
 class SScConnectedNeuron : public SSiHighwayNeuron
 {
 public:
@@ -32,12 +96,13 @@ public:
     }
     virtual double icon(SSiHighwayNeuron *other) { return m_in.contains(other) ? m_in[other]->value() : 0.0; }
 
-    virtual void    reset() { m_outset = false; m_dedoset=false; m_in.reset(); }
+    virtual void    reset() { SSiHighwayNeuron::reset(); m_in.reset(); }
     virtual double  carry() { return m_cn ? m_cn->out() : 0.0; }
     virtual double  highway() { return m_hwn ? m_hwn->out() : 0.0; }
     virtual bool connectHighway  (SSiHighwayNeuron* hwn, SSiHighwayNeuron* cn)
     {
-        if ( (!hwn && !cn) || (hwn && cn && (hwn!=cn) && (hwn!=this) && (cn!=this)) )
+        SScCarryNeuron* dccn = dynamic_cast<SScCarryNeuron*>(cn);
+        if ( (!hwn && !cn) || (hwn && cn && dccn && (hwn!=cn) && (hwn!=this) && (cn!=this)) )
         {
             m_hwn=hwn;
             m_cn=cn;
@@ -45,12 +110,21 @@ public:
         }
         return false;
     }
+    virtual double transform()
+    {
+        if (!m_transformset)
+        {
+            m_t = m_act->activate(net());
+            m_transformset = true;
+        }
+        return m_t;
+    }
 
     virtual double out()
     {
         if (!m_outset)
-        {
-            m_o = m_act->activate(net())*(1.0-carry())+carry()*highway();
+        {            
+            m_o = transform()*(1.0-carry())+(carry()*highway());
             m_outset = true;
         }
         return m_o;
@@ -70,7 +144,9 @@ public:
     virtual void trainingStep()
     {
         for(QMap<SSiHighwayNeuron*,QSharedPointer<SScTrainableParameter> >::iterator it = m_in.begin(); it != m_in.end(); ++it)
+        {
             it.value()->update(deltaw(it.key()));
+        }
         m_act->update(deltag());
     }
     virtual void endOfCycle()
@@ -95,8 +171,6 @@ public:
     virtual bool  setTarget(double) { Q_ASSERT(false); return false; }
 
 };
-
-
 
 class SScInputNeuron : public SSiHighwayNeuron
 {
@@ -179,6 +253,7 @@ SSiHighwayNeuron* SSiHighwayNeuron::create(SSeNeuronType type, const QString& na
         case NeuronType_Input:  ret = new (std::nothrow) SScInputNeuron  (); break;
         case NeuronType_Output: ret = new (std::nothrow) SScOutputNeuron (); break;
         case NeuronType_Bias:   ret = new (std::nothrow) SScBiasNeuron   (); break;
+        case NeuronType_Carry:  ret = new (std::nothrow) SScCarryNeuron  (); break;
     }
     ret->setName(name);
     return ret;
@@ -196,7 +271,7 @@ double SSiHighwayNeuron::priv_dedo()
     foreach(SSiHighwayNeuron* l, m_out)
     {
        const double w_jl = l->icon(this);
-       ret += l->dedo()*w_jl*l->act()->dev()*l->act()->gain()*(1.0-l->carry());
+       ret += w_jl*l->dedo()*l->act()->dev()*l->act()->gain()*(1.0-l->carry());
     }
 
     /*std::vector<std::future<double> > fv;

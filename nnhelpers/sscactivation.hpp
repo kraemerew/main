@@ -36,6 +36,7 @@ public:
     inline void   endOfCycle() { m_gain->endOfCycle(); }
 
     static SScActivation* create(Type type);
+    static bool canCarry(Type type);
     /*!
      * \brief Whether this activation can be used for a carry signal (range [0;1])
      * \return

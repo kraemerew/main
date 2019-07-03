@@ -77,7 +77,7 @@ bool SScHighwayNetwork::setHighway(int neuron, int highway, int carry)
     SSiHighwayNeuron* n = idx2n(neuron), *hwn = idx2n(highway), *cn = idx2n(carry);
     if (n && hwn && cn && cn->act()->canCarry() && n->connectHighway(hwn,cn))
     {
-        if (isFeedForward()) return true;
+        if (isFeedForward()) { qWarning("SET CARRY SUCCESS");  return true; }
         delHighway(neuron);
     }
     return false;
@@ -95,7 +95,9 @@ bool SScHighwayNetwork::delHighway(int neuron)
 int                 SScHighwayNetwork::addInputNeuron   (const QString& name)           { return addNeuron(SSiHighwayNeuron::NeuronType_Input,  name); }
 int                 SScHighwayNetwork::addHiddenNeuron  (const QString& name)           { return addNeuron(SSiHighwayNeuron::NeuronType_Hidden, name); }
 int                 SScHighwayNetwork::addOutputNeuron  (const QString& name)           { return addNeuron(SSiHighwayNeuron::NeuronType_Output, name); }
-int                 SScHighwayNetwork::addBiasNeuron    (const QString& name)           { return addNeuron(SSiHighwayNeuron::NeuronType_Bias, name); }
+int                 SScHighwayNetwork::addBiasNeuron    (const QString& name)           { return addNeuron(SSiHighwayNeuron::NeuronType_Bias,   name); }
+int                 SScHighwayNetwork::addCarryNeuron   (const QString& name)           { return addNeuron(SSiHighwayNeuron::NeuronType_Carry,  name); }
+
 bool                SScHighwayNetwork::delNeuron        (SSiHighwayNeuron* n)           { return delNeuron(n2idx(n)); }
 int                 SScHighwayNetwork::n2idx            (SSiHighwayNeuron* n) const     { return m_neurons.indexOf(n); }
 SSiHighwayNeuron*   SScHighwayNetwork::idx2n            (int idx) const                 { if ((idx<0) || (idx>=m_neurons.size())) return NULL; return m_neurons[idx]; }

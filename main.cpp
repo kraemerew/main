@@ -47,17 +47,13 @@ private:
     SScCam* m_cam;
 };
 
-#include "filter/filter.hpp"
-//#include "rnn/rneuron.hpp"
 
 double getRand()
 {
     return 2.0*((double)qrand()/(double)RAND_MAX)-1;
 }
-int main(int argc, char *argv[])
+void parityTest()
 {
-    Q_UNUSED(argc);
-    Q_UNUSED(argv);
     SScHighwayNetwork net;
 
     const int bi = net.addBiasNeuron    ("Bias"),
@@ -69,8 +65,6 @@ int main(int argc, char *argv[])
               h2 = net.addHiddenNeuron  ("H2"),
               h3 = net.addHiddenNeuron  ("H3"),
               h4 = net.addHiddenNeuron  ("H4"),
-
-              carry  = net.addHiddenNeuron  ("C"),      //<Carry
               o1 = net.addOutputNeuron  ("Out");
    QList<int> il = QList<int>() << i1 << i2 << i3 << i4,
               hl = QList<int>() << h1 << h2 << h3 << h4;
@@ -78,27 +72,15 @@ int main(int argc, char *argv[])
    // Bias to carry, hidden and out
 
    net.connect(bi,o1,getRand());
-   net.connect(bi,carry, getRand());
    foreach(int to, hl) net.connect(bi,to,getRand());
 
    // Input to hidden
    foreach(int from, il) foreach(int to, hl) net.connect(from,to,getRand());
-   // Input to carry
-   foreach(int from, il) net.connect(from,carry,getRand());
 
    // Hidden to output
    foreach(int from, hl) net.connect(from,o1,getRand());
-   // Carry to output
-   net.connect(carry,o1,getRand());
-   //foreach(int from, il) net.connect(from,o1,getRand());
-
-   net.setHighway(h1,i1,carry);
-   net.setHighway(h2,i2,carry);
-   net.setHighway(h3,i3,carry);
-   net.setHighway(h4,i4,carry);
 
     foreach(int h,hl) net.idx2n(h)->setActivation(SScActivation::ACT_RBF,1);
-    net.idx2n(carry)->setActivation(SScActivation::ACT_RBF,  1);
     net.idx2n(o1)   ->setActivation(SScActivation::ACT_SWISH,1);
 
     // training preparation
@@ -145,6 +127,89 @@ int main(int argc, char *argv[])
     while (!done);
     qWarning("Training took %d microseconds", (int)t.nsecsElapsed()/1000);
     std::exit(0);
+}
+void carryTest()
+{
+    SScHighwayNetwork net;
+
+    const int bi = net.addBiasNeuron    ("Bias"),
+              i1 = net.addInputNeuron   ("In1"),
+              i2 = net.addInputNeuron   ("In2"),
+              i3 = net.addInputNeuron   ("In3"),
+              i4 = net.addInputNeuron   ("In4"),
+              carry = net.addCarryNeuron  ("C"),      //<Carry
+              o1 = net.addOutputNeuron  ("Out");
+
+    QList<int> il = QList<int>() << i1 << i2 << i3 << i4;
+
+    net.idx2n(carry)->setActivation(SScActivation::ACT_SIGMOID,  1);
+    net.idx2n(o1)   ->setActivation(SScActivation::ACT_SWISH,1);
+
+    net.connect(bi,carry,getRand());
+    net.connect(bi,o1,getRand());
+    foreach(int from, il)
+    {
+
+        net.connect(from,o1,getRand());
+        net.connect(from,carry,getRand());
+    }
+    net.setHighway(o1,i1,carry);
+
+    net.connectForward();
+    // training
+    QElapsedTimer t; t.start();
+    int c=0;
+    double err = 0, lasterr = 0;
+    bool done = false;
+    do
+    {
+
+        const int p = (++c)%16;
+        if (p==0) err = 0;
+        int bits = 0;
+        if (p&0x01) { net.idx2n(i1)->setInput(1); ++bits; } else net.idx2n(i1)->setInput(0);
+        if (p&0x02) { net.idx2n(i2)->setInput(1); ++bits; } else net.idx2n(i2)->setInput(0);
+        if (p&0x04) { net.idx2n(i3)->setInput(1); ++bits; } else net.idx2n(i3)->setInput(0);
+        if (p&0x08) { net.idx2n(i4)->setInput(1); ++bits; } else net.idx2n(i4)->setInput(0);
+
+        if (p&0x01)   net.idx2n(o1)->setTarget(1);          else net.idx2n(o1)->setTarget(0);
+
+        net.reset();
+
+
+        qWarning("Pattern %d In1 %lf Output %lf Carry %lf", p, net.idx2n(i1)->out(), net.idx2n(o1)->out(), net.idx2n(carry)->out());
+        const double perr = net.idx2n(o1)->perr();
+        err+=perr;
+        if (p==15)
+        {
+            err/=16.0;
+            if (err<0.0001) done = true;
+            qWarning("Cycle %d Error %lf Last %lf %s", c/16, err, lasterr, err<lasterr ? "lower":"higher");
+            if (done) qWarning("Done");
+            lasterr = err;
+
+            //if (c>1000) std::exit(1);
+        }
+
+
+        const bool endOfCycle = (p==15);
+        net.trainingStep(endOfCycle);
+    }
+    while (!done);
+    qWarning("Training took %d microseconds", (int)t.nsecsElapsed()/1000);
+    std::exit(0);
+}
+
+
+
+#include "filter/filter.hpp"
+//#include "rnn/rneuron.hpp"
+
+int main(int argc, char *argv[])
+{
+    Q_UNUSED(argc);
+    Q_UNUSED(argv);
+    parityTest();
     /*SScRBiasNeuron* bn = new (std::nothrow) SScRBiasNeuron();
     QList<SScRNeuron*> nl;
     for (int i=0; i<2; ++i) nl << new (std::nothrow) SScRNeuron();

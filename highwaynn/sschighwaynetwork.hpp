@@ -14,6 +14,7 @@ public:
     int addHiddenNeuron  (const QString& name = QString());
     int addOutputNeuron  (const QString& name = QString());
     int addBiasNeuron    (const QString& name = QString());
+    int addCarryNeuron   (const QString& name = QString());
 
     bool delNeuron(SSiHighwayNeuron* n);
     bool delNeuron(int idx);

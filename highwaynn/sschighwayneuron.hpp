@@ -17,10 +17,11 @@ public:
         NeuronType_Input,
         NeuronType_Hidden,
         NeuronType_Output,
-        NeuronType_Bias
+        NeuronType_Bias,
+        NeuronType_Carry
     };
     explicit SSiHighwayNeuron(SSeNeuronType type, SScActivation::Type acttype = SScActivation::ACT_IDENTITY)
-        : m_type(type), m_dedoset(false), m_outset(false), m_o(0.0), m_dedo(0.0), m_act(SScActivation::create(acttype)) {}
+        : m_type(type), m_dedoset(false), m_transformset(false), m_outset(false), m_dedo(0.0), m_t(0.0), m_o(0.0), m_act(SScActivation::create(acttype)) {}
     virtual ~SSiHighwayNeuron() { if (m_act) delete m_act; m_act=NULL; }
     /*!
      * \brief Partial derivative or network error by this output
@@ -31,7 +32,7 @@ public:
         if (!m_dedoset) { m_dedo = priv_dedo(); m_dedoset = true; }
         return m_dedo;
     }
-    virtual void    reset   () { m_dedoset = false; m_outset=false;  }
+    virtual void    reset   () { m_dedoset = false; m_outset=false;  m_transformset = false; }
     virtual double  err     () { return 0.0; }
     inline double   perr    () { return qPow(err(),2.0); }
 
@@ -48,15 +49,17 @@ public:
     virtual bool delInput(SSiHighwayNeuron* other) = 0;
     virtual double net() { return 0.0; }
     virtual double out() { return 0.0; }
-    virtual double carry() = 0;
-    virtual double highway() = 0;
+    virtual double transform() { return 0.0; }
+    virtual double carry() { return 0.0; }
+    virtual double highway() { return 0.0; }
+    virtual double highwayMinusTransform() { return highway()-transform(); }
     virtual bool connectHighway(SSiHighwayNeuron* hwn, SSiHighwayNeuron* cn) = 0;
 
     virtual QList<SSiHighwayNeuron*> inputs() const { return QList<SSiHighwayNeuron*>(); }
     virtual QList<SSiHighwayNeuron*> allInputs() const { return inputs(); }
 
     static SSiHighwayNeuron* create(SSeNeuronType type, const QString& name = QString());
-    virtual void connectForward (const QList<SSiHighwayNeuron*>& fwd) { m_out = fwd; }
+    virtual void connectForward (const QList<SSiHighwayNeuron*>& fwd) { qWarning("N %s FORWARD %d", qPrintable(name()), fwd.size()); m_out = fwd; }
     virtual void trainingStep   () {}
     virtual void endOfCycle     () {}
     inline void setName(const QString& name) { m_name=name; }
@@ -68,8 +71,8 @@ protected:
     virtual double priv_dedo();
 
     SSeNeuronType               m_type;
-    bool                        m_dedoset, m_outset;
-    double                      m_o, m_dedo;
+    bool                        m_dedoset, m_transformset, m_outset;
+    double                      m_dedo, m_t, m_o;
     SScActivation*              m_act;
     QString                     m_name;
     QList<SSiHighwayNeuron*>    m_out;
