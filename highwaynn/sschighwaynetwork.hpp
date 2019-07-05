@@ -44,6 +44,9 @@ public:
 
     void trainingStep(bool endOfCycle);
 
+    bool setInput (int idx, double d);
+    bool setTarget(int idx, double d);
+
 private:
     bool isFeedForward() const;
     int addNeuron(SSiHighwayNeuron::SSeNeuronType type, const QString& name = QString());

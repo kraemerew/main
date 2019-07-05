@@ -88,12 +88,12 @@ net.setHiddenActivationType(SScActivation::ACT_RBF);
         const int p = (++c)%16;
         if (p==0) err = 0;
         int bits = 0;
-        if (p&0x01) { net.idx2n(i1)->setInput(1); ++bits; } else net.idx2n(i1)->setInput(0);
-        if (p&0x02) { net.idx2n(i2)->setInput(1); ++bits; } else net.idx2n(i2)->setInput(0);
-        if (p&0x04) { net.idx2n(i3)->setInput(1); ++bits; } else net.idx2n(i3)->setInput(0);
-        if (p&0x08) { net.idx2n(i4)->setInput(1); ++bits; } else net.idx2n(i4)->setInput(0);
+        if (p&0x01) { net.setInput(i1,1); ++bits; } else net.setInput(i1,0);
+        if (p&0x02) { net.setInput(i2,1); ++bits; } else net.setInput(i2,0);
+        if (p&0x04) { net.setInput(i3,1); ++bits; } else net.setInput(i3,0);
+        if (p&0x08) { net.setInput(i4,1); ++bits; } else net.setInput(i4,0);
 
-        if (bits%2==0)net.idx2n(o1)->setTarget(0);          else net.idx2n(o1)->setTarget(1);
+        if (bits%2==0)net.setTarget(o1,0); else net.setTarget(o1,1);
 
         net.reset();
 
@@ -155,12 +155,12 @@ if (c==10000) std::exit(0);
         const int p = (++c)%16;
         if (p==0) err = 0;
         int bits = 0;
-        if (p&0x01) { net.idx2n(i1)->setInput(1); ++bits; } else net.idx2n(i1)->setInput(0);
-        if (p&0x02) { net.idx2n(i2)->setInput(1); ++bits; } else net.idx2n(i2)->setInput(0);
-        if (p&0x04) { net.idx2n(i3)->setInput(1); ++bits; } else net.idx2n(i3)->setInput(0);
-        if (p&0x08) { net.idx2n(i4)->setInput(1); ++bits; } else net.idx2n(i4)->setInput(0);
+        if (p&0x01) { net.setInput(i1,1); ++bits; } else net.setInput(i1,0);
+        if (p&0x02) { net.setInput(i2,1); ++bits; } else net.setInput(i2,0);
+        if (p&0x04) { net.setInput(i3,1); ++bits; } else net.setInput(i3,0);
+        if (p&0x08) { net.setInput(i4,1); ++bits; } else net.setInput(i4,0);
 
-        if (p&0x01)   net.idx2n(o1)->setTarget(1);          else net.idx2n(o1)->setTarget(0);
+        if (p&0x01)   net.setTarget(o1,1);          else net.setTarget(o1,0);
 
         net.reset();
 
@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
 {
     Q_UNUSED(argc);
     Q_UNUSED(argv);
-    parityTest();
+    carryTest();
     /*SScRBiasNeuron* bn = new (std::nothrow) SScRBiasNeuron();
     QList<SScRNeuron*> nl;
     for (int i=0; i<2; ++i) nl << new (std::nothrow) SScRNeuron();
