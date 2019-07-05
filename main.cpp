@@ -48,14 +48,10 @@ private:
 };
 
 
-double getRand()
-{
-    return 2.0*((double)qrand()/(double)RAND_MAX)-1;
-}
 void parityTest()
 {
     SScHighwayNetwork net;
-
+net.setHiddenActivationType(SScActivation::ACT_RBF);
     const int bi = net.addBiasNeuron    ("Bias"),
               i1 = net.addInputNeuron   ("In1"),
               i2 = net.addInputNeuron   ("In2"),
@@ -66,22 +62,18 @@ void parityTest()
               h3 = net.addHiddenNeuron  ("H3"),
               h4 = net.addHiddenNeuron  ("H4"),
               o1 = net.addOutputNeuron  ("Out");
-   QList<int> il = QList<int>() << i1 << i2 << i3 << i4,
-              hl = QList<int>() << h1 << h2 << h3 << h4;
+    QList<int> il = QList<int>() << i1 << i2 << i3 << i4,
+               hl = QList<int>() << h1 << h2 << h3 << h4;
 
-   // Bias to carry, hidden and out
+    // Bias to carry, hidden and out
+    net.connect(bi,o1);
+    foreach(int to, hl) net.connect(bi,to);
 
-   net.connect(bi,o1,getRand());
-   foreach(int to, hl) net.connect(bi,to,getRand());
+    // Input to hidden
+    foreach(int from, il) foreach(int to, hl) net.connect(from,to);
 
-   // Input to hidden
-   foreach(int from, il) foreach(int to, hl) net.connect(from,to,getRand());
-
-   // Hidden to output
-   foreach(int from, hl) net.connect(from,o1,getRand());
-
-    foreach(int h,hl) net.idx2n(h)->setActivation(SScActivation::ACT_RBF,1);
-    net.idx2n(o1)   ->setActivation(SScActivation::ACT_SWISH,1);
+    // Hidden to output
+    foreach(int from, hl) net.connect(from,o1);
 
     // training preparation
     net.connectForward();
@@ -142,16 +134,12 @@ void carryTest()
 
     QList<int> il = QList<int>() << i1 << i2 << i3 << i4;
 
-    net.idx2n(carry)->setActivation(SScActivation::ACT_SIGMOID,  1);
-    net.idx2n(o1)   ->setActivation(SScActivation::ACT_SWISH,1);
-
-    net.connect(bi,carry,getRand());
-    net.connect(bi,o1,getRand());
+    net.connect(bi,carry);
+    net.connect(bi,o1);
     foreach(int from, il)
     {
-
-        net.connect(from,o1,getRand());
-        net.connect(from,carry,getRand());
+        net.connect(from,o1);
+        net.connect(from,carry);
     }
     net.setHighway(o1,i1,carry);
 
@@ -209,7 +197,7 @@ int main(int argc, char *argv[])
 {
     Q_UNUSED(argc);
     Q_UNUSED(argv);
-    carryTest();
+    parityTest();
     /*SScRBiasNeuron* bn = new (std::nothrow) SScRBiasNeuron();
     QList<SScRNeuron*> nl;
     for (int i=0; i<2; ++i) nl << new (std::nothrow) SScRNeuron();

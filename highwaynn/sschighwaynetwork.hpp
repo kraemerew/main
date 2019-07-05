@@ -2,9 +2,9 @@
 #define HIGHWAYNETWORK_HPP
 #include "sschighwayneuron.hpp"
 #include "../nnhelpers/sscvm.hpp"
-
+#include "../nnhelpers/sscnetworkbase.hpp"
 #include <QMap>
-class SScHighwayNetwork
+class SScHighwayNetwork : public SScNetworkBase
 {
 public:
     SScHighwayNetwork();
@@ -23,9 +23,11 @@ public:
     void reset();
     void connectForward();
     bool contains(SSiHighwayNeuron* n) const;
-    bool connect(SSiHighwayNeuron* from, SSiHighwayNeuron* to, double v);
+    bool connect(SSiHighwayNeuron* from, SSiHighwayNeuron* to, double v);    
     bool disconnect(SSiHighwayNeuron* from, SSiHighwayNeuron* to);
     bool connect(int from, int to, double v);
+    bool connect(int from, int to);
+
     /*!
      * \brief Make a highway connection
      * \param neuron    Highway neuron (must be hidden or output)

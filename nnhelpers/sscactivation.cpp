@@ -4,8 +4,7 @@
 class SScActivationIdentity : public SScActivation
 {
 public:
-    SScActivationIdentity(): SScActivation() {}
-    virtual QString name() const { return "Identity"; }
+    SScActivationIdentity(): SScActivation(ACT_IDENTITY) {}
 
 private:
     virtual void priv_activate() { m_act = m_pot*m_gain->value(); }
@@ -14,9 +13,7 @@ private:
 class SScActivationSigmoid : public SScActivation
 {
 public:
-    SScActivationSigmoid() : SScActivation() {}
-    virtual QString name() const { return "Logistic"; }
-    virtual bool canCarry() const { return true; }
+    SScActivationSigmoid() : SScActivation(ACT_SIGMOID) {}
 
 private:
     virtual void priv_activate() { m_act = 1.0/(1.0+exp(-m_pot*m_gain->value())); }
@@ -26,8 +23,7 @@ private:
 class SScActivationTanh : public SScActivation
 {
 public:
-    SScActivationTanh(): SScActivation() {}
-    virtual QString name() const { return "Tanh"; }
+    SScActivationTanh(): SScActivation(ACT_TANH) {}
 
 private:
     virtual void priv_activate() { m_act = tanh(m_pot*m_gain->value()); }
@@ -37,9 +33,7 @@ private:
 class SScActivationRbf: public SScActivation
 {
 public:
-    SScActivationRbf() : SScActivation() {}
-    virtual QString name() const { return "Rbf"; }
-    virtual bool canCarry() const { return true; }
+    SScActivationRbf() : SScActivation(ACT_RBF) {}
 
 private:
     virtual void priv_activate() { m_gp = m_pot*m_gain->value(); m_act = exp(-qPow(m_gp,2.0)); }
@@ -51,8 +45,8 @@ private:
 class SScActivationMHat: public SScActivation
 {
 public:
-    SScActivationMHat() : SScActivation() {}
-    virtual QString name() const { return "Rbf"; }
+    SScActivationMHat() : SScActivation(ACT_MHAT) {}
+
 private:
     virtual void priv_activate() { m_gp = m_pot*m_gain->value(); m_gp2 = qPow(m_gp,2.0); m_act = (1.0-m_gp2)*exp(-m_gp2); }
     virtual double priv_dev() { return (m_gp==1.0) ? -2.0/exp(1) : -2.0*m_gp*m_act*(1+1.0/(1.0-m_gp2)); }
@@ -62,8 +56,8 @@ private:
 class SScActivationGaussianDerivative : public SScActivation
 {
 public:
-    SScActivationGaussianDerivative() : SScActivation() {}
-    virtual QString name() const { return "GDer"; }
+    SScActivationGaussianDerivative() : SScActivation(ACT_GDER) {}
+
 private:
     virtual void priv_activate() { m_x = m_pot*m_gain->value(); m_act = -2.0*m_x*exp(-qPow(m_x,2.0)); }
     virtual double priv_dev() { return (m_x!=0.0) ? ((1.0/m_x)-(2.0*m_x)) * m_act : -2.0; }
@@ -73,8 +67,8 @@ private:
 class SScActivationSoftPlus : public SScActivation
 {
 public:
-    SScActivationSoftPlus() : SScActivation() {}
-    virtual QString name() const { return "SoftPlus"; }
+    SScActivationSoftPlus() : SScActivation(ACT_SOFTPLUS) {}
+
 private:
     virtual void priv_activate() { m_e = exp(m_pot*m_gain->value()); m_act = log(1+m_e); }
     virtual double priv_dev() { return m_e/(1.0+m_e); }
@@ -84,8 +78,8 @@ private:
 class SScActivationX : public SScActivation
 {
 public:
-    SScActivationX() : SScActivation() {}
-    virtual QString name() const { return "X"; }
+    SScActivationX() : SScActivation(ACT_X) {}
+
 private:
     virtual void priv_activate() { m_x = m_pot*m_gain->value(); m_xp=qPow(m_x,2.0);  m_act = 2.0*(m_x/(m_xp+1.0)); }
     virtual double priv_dev() { return 2.0*(1.0-m_xp)/(qPow(m_xp+1,2)); }
@@ -95,14 +89,15 @@ private:
 class SScActivationSwish : public SScActivation
 {
 public:
-    SScActivationSwish() : SScActivation() {}
-    virtual QString name() const { return "Swish"; }
+    SScActivationSwish() : SScActivation(ACT_SWISH) {}
+
 private:
     virtual void priv_activate() { const double m_x = m_pot*m_gain->value();  m_actsig = 1.0/(1.0+exp(-m_x)); m_act = m_x*m_actsig; }
     virtual double priv_dev() { return m_actsig+m_x*m_actsig*(1-m_actsig); }
     double m_x, m_actsig;
 };
 
+bool SScActivation::nonLinear(Type type) { return type!=ACT_IDENTITY; }
 bool SScActivation::canCarry(Type type)
 {
     switch (type)
@@ -129,4 +124,20 @@ SScActivation* SScActivation::create(Type type)
     return NULL;
 }
 
+QString SScActivation::name(Type type)
+{
+    switch (type)
+    {
+    case ACT_IDENTITY:  return "Id"; break;
+    case ACT_SIGMOID:   return "Logistic"; break;
+    case ACT_TANH:      return "Tanh"; break;
+    case ACT_RBF:       return "Rbf"; break;
+    case ACT_SOFTPLUS:  return "SoftPlus"; break;
+    case ACT_SWISH:     return "Swish"; break;
+    case ACT_MHAT:      return "MexHat"; break;
+    case ACT_GDER:      return "GDer"; break;
+    case ACT_X:         return "X"; break;
+    }
+    return "";
+}
 

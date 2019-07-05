@@ -3,7 +3,7 @@
 #include "../nnhelpers/ssccycledetector.hpp"
 #include <QSet>
 
-SScHighwayNetwork::SScHighwayNetwork()
+SScHighwayNetwork::SScHighwayNetwork() : SScNetworkBase()
 {
 }
 SScHighwayNetwork::~SScHighwayNetwork()
@@ -14,7 +14,24 @@ SScHighwayNetwork::~SScHighwayNetwork()
 
 int SScHighwayNetwork::addNeuron   (SSiHighwayNeuron::SSeNeuronType type, const QString& name)
 {
-    m_neurons << SSiHighwayNeuron::create(type,name);
+    SSiHighwayNeuron* n = SSiHighwayNeuron::create(type,name);
+    Q_CHECK_PTR(n);
+    switch(type)
+    {
+        case SSiHighwayNeuron::NeuronType_Bias:
+        case SSiHighwayNeuron::NeuronType_Input:
+        break;
+        case SSiHighwayNeuron::NeuronType_Hidden:
+            n->setActivation(hActType(), getRandomGainValue());
+        break;
+        case SSiHighwayNeuron::NeuronType_Carry:
+            n->setActivation(cActType(),getRandomGainValue());
+        break;
+        case SSiHighwayNeuron::NeuronType_Output:
+            n->setActivation(oActType(),getRandomGainValue());
+        break;
+    }
+    m_neurons << n;
     return m_neurons.size()-1;
 }
 
@@ -103,6 +120,7 @@ int                 SScHighwayNetwork::n2idx            (SSiHighwayNeuron* n) co
 SSiHighwayNeuron*   SScHighwayNetwork::idx2n            (int idx) const                 { if ((idx<0) || (idx>=m_neurons.size())) return NULL; return m_neurons[idx]; }
 bool                SScHighwayNetwork::contains         (SSiHighwayNeuron *n) const     { return m_neurons.contains(n); }
 bool                SScHighwayNetwork::connect          (int from, int to, double v)    { return SScHighwayNetwork::connect   (idx2n(from), idx2n(to), v ); }
+bool                SScHighwayNetwork::connect          (int from, int to)              { return connect(from,to,getRandomConnectionValue()); }
 bool                SScHighwayNetwork::disconnect       (int from, int to)              { return SScHighwayNetwork::disconnect(idx2n(from), idx2n(to)); }
 void                SScHighwayNetwork::reset            ()                              { foreach(SSiHighwayNeuron* n, m_neurons) n->reset(); }
 void                SScHighwayNetwork::trainingStep     (bool endOfCycle)

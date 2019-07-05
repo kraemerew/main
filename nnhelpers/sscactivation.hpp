@@ -20,13 +20,14 @@ public:
         ACT_X
     };
 
-    SScActivation()
-        : m_pot (0),
+    SScActivation(Type t)
+        : m_t   (t),
+          m_pot (0),
           m_act (0),
           m_gain(SScTrainableParameter::create(SScTrainableParameter::CON_RPROP,1.0))
     {}
     virtual ~SScActivation() { delete m_gain; }
-    virtual QString name() const = 0;
+    virtual QString name() const { return name(m_t); }
 
     inline double activate  (double pot) { m_pot = pot; priv_activate(); return m_act; }
     inline double dev       () { return priv_dev(); }
@@ -36,16 +37,20 @@ public:
     inline void   endOfCycle() { m_gain->endOfCycle(); }
 
     static SScActivation* create(Type type);
+    static QString name(Type type);
     static bool canCarry(Type type);
+    static bool nonLinear(Type type);
     /*!
      * \brief Whether this activation can be used for a carry signal (range [0;1])
      * \return
      */
-    virtual bool canCarry() const { return false; }
+    virtual bool canCarry() const { return canCarry(m_t); }
+    virtual bool nonLinear() const { return nonLinear(m_t); }
 
 protected:
     virtual void priv_activate() = 0;
     virtual double priv_dev() = 0;
+    Type m_t;
     double m_pot, m_act;
     SScTrainableParameter* m_gain;
 };
