@@ -161,7 +161,16 @@ if (c==10000) std::exit(0);
         if (p&0x04) { net.setInput(i3,1); ++bits; } else net.setInput(i3,0);
         if (p&0x08) { net.setInput(i4,1); ++bits; } else net.setInput(i4,0);
 
-        if (p&0x01)   net.setTarget(o1,1);          else net.setTarget(o1,0);
+        if (p<8)
+        {
+            // First half: actually use the parity - carry should be random or low
+            if (bits%2) net.setTarget(o1,1); else net.setTarget(o1,0);
+        }
+        else
+        {
+            // Second half: use the input 1 as target - carry should be high on these
+            if (p&0x01)   net.setTarget(o1,1); else net.setTarget(o1,0);
+        }
 
         net.reset();
 
