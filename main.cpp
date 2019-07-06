@@ -85,6 +85,7 @@ net.setHiddenActivationType(SScActivation::ACT_RBF);
     do
     {
 
+        //if (c==50) std::exit(0);
         const int p = (++c)%16;
         if (p==0) err = 0;
         int bits = 0;
@@ -197,7 +198,7 @@ int main(int argc, char *argv[])
 {
     Q_UNUSED(argc);
     Q_UNUSED(argv);
-    carryTest();
+    parityTest();
     /*SScRBiasNeuron* bn = new (std::nothrow) SScRBiasNeuron();
     QList<SScRNeuron*> nl;
     for (int i=0; i<2; ++i) nl << new (std::nothrow) SScRNeuron();

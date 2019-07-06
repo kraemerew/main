@@ -24,8 +24,9 @@ public:
         : m_t   (t),
           m_pot (0),
           m_act (0),
-          m_gain(SScTrainableParameter::create(SScTrainableParameter::CON_RPROP,1.0))
+          m_gain(SScTrainableParameter::create(SScTrainableParameter::CON_ADAM,1.0))
     {}
+
     virtual ~SScActivation() { delete m_gain; }
     virtual QString name() const { return name(m_t); }
 

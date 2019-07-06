@@ -7,12 +7,12 @@ SScHighwayGate::SScHighwayGate(SSiHighwayNeuron* parent)
 
 SScHighwayGate::~SScHighwayGate() {}
 
-bool SScHighwayGate::addInput(SSiHighwayNeuron *other, double v)
+bool SScHighwayGate::addInput(SSiHighwayNeuron *other, double v, SScTrainableParameter::Type t)
 {
     Q_CHECK_PTR(other);
     if ((m_parent==other) || contains(other)) return false;
     m_dirty=true;
-    (*this)[other]=QSharedPointer<SScTrainableParameter>(SScTrainableParameter::create(SScTrainableParameter::CON_RPROP,v));
+    (*this)[other]=QSharedPointer<SScTrainableParameter>(SScTrainableParameter::create(t,v));
     return true;
 }
 bool SScHighwayGate::delInput(SSiHighwayNeuron *other)
