@@ -56,7 +56,7 @@ int bitsSet(int v)
 }
 bool evenParity(int v) { return ((bitsSet(v)%2)==0); }
 
-void parityTest(int pow = 10)
+void parityTest(int pow)
 {
     const int pmax = qPow(2,pow), plast = pmax-1;
     SScHighwayNetwork net;
@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
 {
     Q_UNUSED(argc);
     Q_UNUSED(argv);
-    parityTest();
+    parityTest(10);
     /*SScRBiasNeuron* bn = new (std::nothrow) SScRBiasNeuron();
     QList<SScRNeuron*> nl;
     for (int i=0; i<2; ++i) nl << new (std::nothrow) SScRNeuron();
