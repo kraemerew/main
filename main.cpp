@@ -58,13 +58,21 @@ void parityTest()
               i2 = net.addInputNeuron   ("In2"),
               i3 = net.addInputNeuron   ("In3"),
               i4 = net.addInputNeuron   ("In4"),
+              i5 = net.addInputNeuron   ("In5"),
+              i6 = net.addInputNeuron   ("In6"),
+              i7 = net.addInputNeuron   ("In7"),
+              i8 = net.addInputNeuron   ("In8"),
               h1 = net.addHiddenNeuron  ("H1"),
               h2 = net.addHiddenNeuron  ("H2"),
               h3 = net.addHiddenNeuron  ("H3"),
               h4 = net.addHiddenNeuron  ("H4"),
-              o1 = net.addOutputNeuron  ("Out");
-    QList<int> il = QList<int>() << i1 << i2 << i3 << i4,
-               hl = QList<int>() << h1 << h2 << h3 << h4;
+              h5 = net.addHiddenNeuron  ("H5"),
+              h6 = net.addHiddenNeuron  ("H6"),
+            h7 = net.addHiddenNeuron  ("H7"),
+
+            o1 = net.addOutputNeuron  ("Out");
+    QList<int> il = QList<int>() << i1 << i2 << i3 << i4 << i5 << i6 << i7 << i8,
+               hl = QList<int>() << h1 << h2 << h3 << h4 << h5 << h6 << h7;
 
     // Bias to carry, hidden and out
     net.connect(bi,o1);
@@ -72,6 +80,7 @@ void parityTest()
 
     // Input to hidden
     foreach(int from, il) foreach(int to, hl) net.connect(from,to);
+    foreach(int from, il) net.connect(from,o1);
 
     // Hidden to output
     foreach(int from, hl) net.connect(from,o1);
@@ -82,44 +91,51 @@ void parityTest()
     QElapsedTimer t; t.start();
     int c=0;
     double err = 0, lasterr = 0;
-    bool done = false;
+    bool done = false, success = true;
     do
     {
 
         //if (c==50) std::exit(0);
-        const int p = (++c)%16;
+        const int p = (++c)%256;
         if (p==0) err = 0;
         int bits = 0;
         if (p&0x01) { net.setInput(i1,1); ++bits; } else net.setInput(i1,0);
         if (p&0x02) { net.setInput(i2,1); ++bits; } else net.setInput(i2,0);
         if (p&0x04) { net.setInput(i3,1); ++bits; } else net.setInput(i3,0);
         if (p&0x08) { net.setInput(i4,1); ++bits; } else net.setInput(i4,0);
+        if (p&0x10) { net.setInput(i5,1); ++bits; } else net.setInput(i5,0);
+        if (p&0x20) { net.setInput(i6,1); ++bits; } else net.setInput(i6,0);
+        if (p&0x40) { net.setInput(i7,1); ++bits; } else net.setInput(i7,0);
+        if (p&0x80) { net.setInput(i8,1); ++bits; } else net.setInput(i8,0);
 
-        if (bits%2==0)net.setTarget(o1,0); else net.setTarget(o1,1);
+        const bool even = (bits%2)==0;
+        if (even) net.setTarget(o1,0); else net.setTarget(o1,1);
 
         net.reset();
 
 
-        //qWarning("Pattern %d Output %lf Carry %lf", p, net.idx2n(o1)->out(), net.idx2n(carry)->out());
+        //qWarning("Pattern %d BITS %d %s Output %lf", p, bits, even ?"EVEN":"ODD", net.idx2n(o1)->out());
         const double perr = net.idx2n(o1)->perr();
         err+=perr;
-        if (p==15)
+        if ( even && net.idx2n(o1)->out()>0.2) success = false;
+        if (!even && net.idx2n(o1)->out()<0.7) success = false;
+
+        if (p==255)
         {
-            err/=16.0;
-            if (err<0.0001) done = true;
-            qWarning("Cycle %d Error %lf Last %lf %s", c/16, err, lasterr, err<lasterr ? "lower":"higher");
+            if (success) done = true;
+            if (done) qWarning("Cycle %d Error %lf Last %lf %s", c/256, err, lasterr, err<lasterr ? "lower":"higher");
             if (done) qWarning("Done");
             lasterr = err;
-
+            success = true;
             //if (c>1000) std::exit(1);
         }
 
 
-        const bool endOfCycle = (p==15);
+        const bool endOfCycle = (p==255);
         net.trainingStep(endOfCycle);
     }
     while (!done);
-    qWarning("Training took %d microseconds", (int)t.nsecsElapsed()/1000);
+    qWarning("Training took %d ms", (int)t.elapsed());
     std::exit(0);
 }
 void carryTest()
