@@ -47,6 +47,14 @@ private:
     SScCam* m_cam;
 };
 
+bool bitSet(int v, int nr) { return (v&(0x01<<nr))!=0; }
+int bitsSet(int v)
+{
+    int ret = 0;
+    for (int i=0; i<31; ++i) if (bitSet(v,i)) ++ret;
+    return ret;
+}
+bool evenParity(int v) { return ((bitsSet(v)%2)==0); }
 
 void parityTest()
 {
@@ -101,19 +109,14 @@ void parityTest()
         //if (c==50) std::exit(0);
         const int p = (++c)%256;
         if (p==0) err = 0;
-        int bits = 0;
-        if (p&0x01) { net.setInput(i1,1); ++bits; } else net.setInput(i1,0);
-        if (p&0x02) { net.setInput(i2,1); ++bits; } else net.setInput(i2,0);
-        if (p&0x04) { net.setInput(i3,1); ++bits; } else net.setInput(i3,0);
-        if (p&0x08) { net.setInput(i4,1); ++bits; } else net.setInput(i4,0);
-        if (p&0x10) { net.setInput(i5,1); ++bits; } else net.setInput(i5,0);
-        if (p&0x20) { net.setInput(i6,1); ++bits; } else net.setInput(i6,0);
-        if (p&0x40) { net.setInput(i7,1); ++bits; } else net.setInput(i7,0);
-        if (p&0x80) { net.setInput(i8,1); ++bits; } else net.setInput(i8,0);
+        const int bits = bitsSet(p);
+
+        for (int i=0; i<8; ++i) if (bitSet(p,i)) net.setInput(il[i],1); else net.setInput(il[i],0);
 
         const bool even = (bits%2)==0;
         const double trg = even ? 0.0 : 1.0;
         net.setTarget(o1,trg);
+
         net.reset();
 
 
