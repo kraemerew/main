@@ -130,8 +130,6 @@ bool                SScHighwayNetwork::disconnect       (int from, int to)      
 void                SScHighwayNetwork::reset            ()                              { foreach(SSiHighwayNeuron* n, m_neurons) n->reset(); }
 void                SScHighwayNetwork::trainingStep     (bool endOfCycle)
 {
-    QSet<QString> toTrain;
-    //toTrain <<"C" << "H1" << "H2" << "H3" << "H4" << "Out";
-    foreach(SSiHighwayNeuron* n, m_neurons) if (toTrain.isEmpty() || toTrain.contains(n->name())) n->trainingStep();
-    if (endOfCycle) foreach(SSiHighwayNeuron* n, m_neurons) if (toTrain.isEmpty() || toTrain.contains(n->name())) n->endOfCycle();
+    foreach(SSiHighwayNeuron* n, m_neurons.values()) n->trainingStep();
+    if (endOfCycle) foreach(SSiHighwayNeuron* n, m_neurons.values()) n->endOfCycle();
 }

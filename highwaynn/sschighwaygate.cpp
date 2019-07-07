@@ -28,14 +28,8 @@ double SScHighwayGate::net()
     if (m_dirty)
     {
         m_dirty = false;
-       /* double net = 0;
-        for(QMap<SSiHighwayNeuron*,QSharedPointer<SScTrainableParameter> >::iterator it = begin(); it != end(); ++it)
-            net += it.key()->out()*it.value()->value();
-        m_net = net;
-*/
         if (m_b.size()!=m_a.size()) endOfCycle();
         m_net = SSnBlas::dot(m_a,m_b);
-        //qWarning("CALC NET %s %lf %lf", qPrintable(m_parent->name()), m_net, m_a.dot(m_b));
     }
     return m_net;
 }
