@@ -90,8 +90,6 @@ void parityTest(int pow = 9)
     bool done = false;
     do
     {
-
-        //if (c==50) std::exit(0);
         const int p = (++c)%pmax;
         if (p==0) err = 0;
         const int bits = bitsSet(p);

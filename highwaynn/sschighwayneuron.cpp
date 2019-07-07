@@ -72,8 +72,7 @@ public:
     virtual void endOfCycle()
     {
         m_in.endOfCycle();
-        m_act->endOfCycle();
-        reset();
+        m_act->endOfCycle();        
     }
 
 protected:
@@ -172,8 +171,7 @@ public:
     virtual void endOfCycle()
     {
         m_in.endOfCycle();
-        m_act->endOfCycle();
-        reset();
+        m_act->endOfCycle();        
     }
 
     SScHighwayGate      m_in;
