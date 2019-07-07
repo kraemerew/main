@@ -63,29 +63,13 @@ void parityTest()
     net.setHiddenActivationType(SScActivation::ACT_RBF);
     net.setOutputActivationType(SScActivation::ACT_RBF);
 
-    const int bi = net.addBiasNeuron    ("Bias"),
-              i1 = net.addInputNeuron   ("In1"),
-              i2 = net.addInputNeuron   ("In2"),
-              i3 = net.addInputNeuron   ("In3"),
-              i4 = net.addInputNeuron   ("In4"),
-              i5 = net.addInputNeuron   ("In5"),
-              i6 = net.addInputNeuron   ("In6"),
-              i7 = net.addInputNeuron   ("In7"),
-              i8 = net.addInputNeuron   ("In8"),
-              h1 = net.addHiddenNeuron  ("H1"),
-              h2 = net.addHiddenNeuron  ("H2"),
-              h3 = net.addHiddenNeuron  ("H3"),
-              h4 = net.addHiddenNeuron  ("H4"),
-              h5 = net.addHiddenNeuron  ("H5"),
-              h6 = net.addHiddenNeuron  ("H6"),
-              h7 = net.addHiddenNeuron  ("H7"),
-              h8 = net.addHiddenNeuron  ("H8"),
+    const int bi = net.addBiasNeuron    ("Bias");
+    QList<int> il, hl;
+    for (int i=0;i<8; ++i) il << net.addInputNeuron (QString("I%1").arg(i));
+    for (int i=0;i<8; ++i) hl << net.addHiddenNeuron(QString("H%1").arg(i));
+    const int o1 = net.addOutputNeuron  ("Out");
 
-            o1 = net.addOutputNeuron  ("Out");
-    QList<int> il = QList<int>() << i1 << i2 << i3 << i4 << i5 << i6 << i7 << i8,
-               hl = QList<int>() << h1 << h2 << h3 << h4 << h5 << h6 << h7 << h8;
-
-    // Bias to carry, hidden and out
+    // Bias to hidden and out
     net.connect(bi,o1);
     foreach(int to, hl) net.connect(bi,to);
 
