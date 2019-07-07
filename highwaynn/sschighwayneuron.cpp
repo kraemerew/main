@@ -3,13 +3,6 @@
 #include <future>
 #include <thread>
 
-double multiply(double* d, unsigned int len)
-{
-    double ret = 1.0;
-    for (unsigned int i = 0; i<len; ++i) ret*=d[i];
-    return ret;
-}
-
 class SScCarryNeuron : public SSiHighwayNeuron
 {
 public:
@@ -115,7 +108,12 @@ public:
     }
     virtual double icon(SSiHighwayNeuron *other) { return m_in.contains(other) ? m_in[other]->value() : 0.0; }
 
-    virtual void    reset() { SSiHighwayNeuron::reset(); m_in.reset(); }
+    virtual void    reset()
+    {
+        m_dedoset=false; m_transformset=false; m_outset=false;
+        SSiHighwayNeuron::reset();
+        m_in.reset();
+    }
     virtual double  carry() { return m_cn ? m_cn->out() : 0.0; }
     virtual double  highway() { return m_hwn ? m_hwn->out() : 0.0; }
     virtual bool connectHighway  (SSiHighwayNeuron* hwn, SSiHighwayNeuron* cn)
@@ -141,6 +139,11 @@ public:
 
     virtual double out()
     {
+       /* if (name()=="Out")
+        {
+            qWarning(">>>>T %s O %s", m_transformset ?"SET":"NOT SET", m_outset ? "SET":"NOT SET");
+            qWarning(">>>>>>OUT %lf", transform()*(1.0-carry())+(carry()*highway()));
+        }*/
         if (!m_outset)
         {            
             m_o = transform()*(1.0-carry())+(carry()*highway());
@@ -290,15 +293,5 @@ double SSiHighwayNeuron::priv_dedo()
        const double w_jl = l->icon(this);
        ret += w_jl*l->dedo()*l->act()->dev()*l->act()->gain()*(1.0-l->carry());
     }
-
-    /*std::vector<std::future<double> > fv;
-    fv.reserve(m_out.size());
-    foreach(SSiHighwayNeuron* l, m_out)
-    {
-        double d[] = { l->dedo(), l->icon(this), l->act()->dev(),l->act()->gain(), (1.0-l->carry()) };
-        fv.insert(fv.end(),std::async(multiply,d,4));
-    }
-    for (auto it = fv.begin(); it!=fv.end(); ++it) ret += it->get();
-*/
     return ret;
 }

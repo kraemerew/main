@@ -21,7 +21,17 @@ public:
         NeuronType_Carry
     };
     explicit SSiHighwayNeuron(SSeNeuronType type, SScActivation::Type acttype = SScActivation::ACT_IDENTITY)
-        : m_type(type), m_dedoset(false), m_transformset(false), m_outset(false), m_dedo(0.0), m_t(0.0), m_o(0.0), m_act(SScActivation::create(acttype)) {}
+        : m_type(type),
+          m_dedoset(false),
+          m_transformset(false),
+          m_outset(false),
+          m_dedo(0.0),
+          m_t(0.0),
+          m_o(0.0),
+          m_act(SScActivation::create(acttype))
+    {
+        reset();
+    }
     virtual ~SSiHighwayNeuron() { if (m_act) delete m_act; m_act=NULL; }
     /*!
      * \brief Partial derivative or network error by this output

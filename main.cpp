@@ -56,19 +56,20 @@ int bitsSet(int v)
 }
 bool evenParity(int v) { return ((bitsSet(v)%2)==0); }
 
-void parityTest(int pow = 9)
+void parityTest(int pow = 10)
 {
     const int pmax = qPow(2,pow), plast = pmax-1;
     SScHighwayNetwork net;
     net.setTrainingType(SScTrainableParameter::CON_ADAM);
     net.setHiddenActivationType(SScActivation::ACT_RBF);
-    net.setOutputActivationType(SScActivation::ACT_RBF);
-
+    net.setOutputActivationType(SScActivation::ACT_MHAT);
+   // net.setConnectionRange(1,0);
+   // net.setGainRange(0,1);
+    const int o1 = net.addOutputNeuron  ("Out");
     const int bi = net.addBiasNeuron    ("Bias");
     QList<int> il, hl;
     for (int i=0;i<pow; ++i) il << net.addInputNeuron (QString("I%1").arg(i));
-    for (int i=0;i<pow; ++i) hl << net.addHiddenNeuron(QString("H%1").arg(i));
-    const int o1 = net.addOutputNeuron  ("Out");
+    for (int i=0;i<2*pow; ++i) hl << net.addHiddenNeuron(QString("H%1").arg(i));
 
     // Bias to hidden and out
     net.connect(bi,o1);
@@ -105,7 +106,8 @@ void parityTest(int pow = 9)
 
         const double pout = net.idx2n(o1)->out(), pdlt = qAbs(pout-trg), perr = net.idx2n(o1)->perr();
         const bool success = pdlt<0.5;
-        //qWarning("%s %5d #bits: %2d %s Output %lf Target %lf", success ? "OK ":"NOK", p, bits, even ?"EVEN":"ODD", pout, trg);
+       // qWarning("%s %5d #bits: %2d %s Output %lf Target %lf", success ? "OK ":"NOK", p, bits, even ?"EVEN":"ODD", pout, trg);
+       // std::exit(1);
         err+=perr;
         if (!success) ++failcount;
 //if (c==100) std::exit(1);

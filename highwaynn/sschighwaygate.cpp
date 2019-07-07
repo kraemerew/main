@@ -27,28 +27,27 @@ double SScHighwayGate::net()
 {
     if (m_dirty)
     {
+        QVector<double> a, b;
+        a.reserve(size());
+        b.reserve(size());
+        for(QMap<SSiHighwayNeuron*,QSharedPointer<SScTrainableParameter> >::iterator it = begin(); it != end(); ++it)
+        {
+            a << it.key()->out();
+            b << it.value()->value();
+        }
+
         m_dirty = false;
-        if (m_b.size()!=m_a.size()) endOfCycle();
-        m_net = SSnBlas::dot(m_a,m_b);
+        m_net = SSnBlas::dot(a,b);
     }
     return m_net;
 }
 
 void SScHighwayGate::endOfCycle()
 {
-    m_b.clear();
-    m_b.reserve(size());
     for(QMap<SSiHighwayNeuron*,QSharedPointer<SScTrainableParameter> >::iterator it = begin(); it != end(); ++it)
-    {
-        it.value()->endOfCycle();
-        m_b << it.value()->value();
-    }
+        it.value()->endOfCycle();    
 }
 void SScHighwayGate::reset()
 {
     m_dirty=true;
-    m_a.clear();
-    m_a.reserve(size());
-    for(QMap<SSiHighwayNeuron*,QSharedPointer<SScTrainableParameter> >::iterator it = begin(); it != end(); ++it)
-        m_a << it.key()->out();
 }
