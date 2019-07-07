@@ -134,84 +134,92 @@ void parityTest(int pow)
     qWarning("Training took %d ms", (int)t.elapsed());
     std::exit(0);
 }
-void carryTest()
+
+void carryTest(int pow = 10)
 {
+    const int pmax = qPow(2,pow), plast = pmax-1;
     SScHighwayNetwork net;
-    net.setTrainingType(SScTrainableParameter::CON_ADAM);
-    const int bi = net.addBiasNeuron    ("Bias"),
-              i1 = net.addInputNeuron   ("In1"),
-              i2 = net.addInputNeuron   ("In2"),
-              i3 = net.addInputNeuron   ("In3"),
-              i4 = net.addInputNeuron   ("In4"),
-              carry = net.addCarryNeuron  ("C"),      //<Carry
-              o1 = net.addOutputNeuron  ("Out");
+    net.setTrainingType(SScTrainableParameter::CON_AMSGRAD);
+    net.setHiddenActivationType(SScActivation::ACT_RBF);
+    net.setOutputActivationType(SScActivation::ACT_MHAT);
+   // net.setConnectionRange(1,0);
+   // net.setGainRange(0,1);
+    const int o1 = net.addOutputNeuron  ("Out");
+    const int bi = net.addBiasNeuron    ("Bias");
+    const int cn = net.addCarryNeuron   ("Carry");
 
-    QList<int> il = QList<int>() << i1 << i2 << i3 << i4;
+    QList<int> il, hl;
+    for (int i=0;i<pow; ++i) il << net.addInputNeuron (QString("I%1").arg(i));
+    for (int i=0;i<pow; ++i) hl << net.addHiddenNeuron(QString("H%1").arg(i));
 
-    net.connect(bi,carry);
-    net.connect(bi,o1);
-    foreach(int from, il)
+    for (int i=0;i<pow; ++i)
     {
-        net.connect(from,o1);
-        net.connect(from,carry);
+        net.setHighway(hl[i],il[i],cn);
     }
-    net.setHighway(o1,i1,carry);
+    // Bias to hidden and out
+    net.connect(bi,o1);
+    net.connect(bi,cn);
+    foreach(int to, hl) net.connect(bi,to);
 
+    // Input to hidden, out and carry
+    foreach(int from, il) foreach(int to, hl) net.connect(from,to);
+    foreach(int from, il) { net.connect(from,o1); net.connect(from,cn); }
+
+    // Hidden to output
+    foreach(int from, hl) net.connect(from,o1);
+
+    // training preparation
     net.connectForward();
     // training
-    QElapsedTimer t; t.start();
-    int c=0;
+    QElapsedTimer t, et; t.start(); et.start();
+    int c=0, failcount=0;
     double err = 0, lasterr = 0;
     bool done = false;
     do
     {
-if (c==10000) std::exit(0);
-        const int p = (++c)%16;
+        const int p = (++c)%pmax;
         if (p==0) err = 0;
-        int bits = 0;
-        if (p&0x01) { net.setInput(i1,1); ++bits; } else net.setInput(i1,0);
-        if (p&0x02) { net.setInput(i2,1); ++bits; } else net.setInput(i2,0);
-        if (p&0x04) { net.setInput(i3,1); ++bits; } else net.setInput(i3,0);
-        if (p&0x08) { net.setInput(i4,1); ++bits; } else net.setInput(i4,0);
+        const int bits = bitsSet(p);
 
-        if (p<8)
-        {
-            // First half: actually use the parity - carry should be random or low
-            if (bits%2) net.setTarget(o1,1); else net.setTarget(o1,0);
-        }
-        else
-        {
-            // Second half: use the input 1 as target - carry should be high on these
-            if (p&0x01)   net.setTarget(o1,1); else net.setTarget(o1,0);
-        }
+        for (int i=0; i<pow; ++i) if (bitSet(p,i)) net.setInput(il[i],1); else net.setInput(il[i],0);
+
+        const bool even = (bits%2)==0;
+        const double trg = even ? 0.0 : 1.0;
+        net.setTarget(o1,trg);
 
         net.reset();
 
 
-        qWarning("Pattern %d In1 %lf Output %lf Carry %lf", p, net.idx2n(i1)->out(), net.idx2n(o1)->out(), net.idx2n(carry)->out());
-        const double perr = net.idx2n(o1)->perr();
+        const double pout = net.idx2n(o1)->out(), pdlt = qAbs(pout-trg), perr = net.idx2n(o1)->perr();
+        const bool success = pdlt<0.5;
+       // qWarning("%s %5d #bits: %2d %s Output %lf Target %lf", success ? "OK ":"NOK", p, bits, even ?"EVEN":"ODD", pout, trg);
+       // std::exit(1);
         err+=perr;
-        if (p==15)
+        if (!success) ++failcount;
+//if (c==100) std::exit(1);
+        if (p==plast)
         {
-            err/=16.0;
-            if (err<0.0001) done = true;
-            qWarning("Cycle %d Error %lf Last %lf %s", c/16, err, lasterr, err<lasterr ? "lower":"higher");
+            if (failcount==0) done = true;
+            if (done || (et.elapsed()>200))
+            {
+                et.restart();
+                qWarning("Cycle %d failures %d Error %lf Last %lf %s", c/pmax, failcount, err, lasterr, err<lasterr ? "lower":"higher");
+            }
             if (done) qWarning("Done");
-            lasterr = err;
 
+            lasterr = err;
+            failcount = 0;
             //if (c>1000) std::exit(1);
         }
 
 
-        const bool endOfCycle = (p==15);
+        const bool endOfCycle = (p==plast);
         net.trainingStep(endOfCycle);
     }
     while (!done);
-    qWarning("Training took %d microseconds", (int)t.nsecsElapsed()/1000);
+    qWarning("Training took %d ms", (int)t.elapsed());
     std::exit(0);
 }
-
-
 
 #include "filter/filter.hpp"
 //#include "rnn/rneuron.hpp"
@@ -220,7 +228,7 @@ int main(int argc, char *argv[])
 {
     Q_UNUSED(argc);
     Q_UNUSED(argv);
-    parityTest(10);
+    carryTest(10);
     /*SScRBiasNeuron* bn = new (std::nothrow) SScRBiasNeuron();
     QList<SScRNeuron*> nl;
     for (int i=0; i<2; ++i) nl << new (std::nothrow) SScRNeuron();
