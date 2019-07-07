@@ -11,11 +11,12 @@ public:
         CON_STD,
         CON_RPROP,
         CON_RMSPROP,
+        CON_AMSGRAD,
         CON_ADAM,
         CON_ADAMCORR
     };
 
-    SScTrainableParameter(double value, SScTrainableParameter::Type t = SScTrainableParameter::CON_RMSPROP) : m_t(t), m_ctr(0), m_eta(.1), m_updatesum(0), m_value(value) {}
+    SScTrainableParameter(double value, SScTrainableParameter::Type t = SScTrainableParameter::CON_RMSPROP) : m_t(t), m_ctr(0), m_eta(.01), m_updatesum(0), m_value(value) {}
     virtual ~SScTrainableParameter() {}
     inline void set(double v) { m_value = v; }
     inline double value() const { return m_value; }

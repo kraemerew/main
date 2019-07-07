@@ -52,7 +52,9 @@ void parityTest()
 {
     SScHighwayNetwork net;
     net.setTrainingType(SScTrainableParameter::CON_ADAM);
-    net.setHiddenActivationType(SScActivation::ACT_MHAT);
+    net.setHiddenActivationType(SScActivation::ACT_RBF);
+    net.setOutputActivationType(SScActivation::ACT_RBF);
+
     const int bi = net.addBiasNeuron    ("Bias"),
               i1 = net.addInputNeuron   ("In1"),
               i2 = net.addInputNeuron   ("In2"),
@@ -68,11 +70,12 @@ void parityTest()
               h4 = net.addHiddenNeuron  ("H4"),
               h5 = net.addHiddenNeuron  ("H5"),
               h6 = net.addHiddenNeuron  ("H6"),
-            h7 = net.addHiddenNeuron  ("H7"),
+              h7 = net.addHiddenNeuron  ("H7"),
+              h8 = net.addHiddenNeuron  ("H8"),
 
             o1 = net.addOutputNeuron  ("Out");
     QList<int> il = QList<int>() << i1 << i2 << i3 << i4 << i5 << i6 << i7 << i8,
-               hl = QList<int>() << h1 << h2 << h3 << h4 << h5 << h6 << h7;
+               hl = QList<int>() << h1 << h2 << h3 << h4 << h5 << h6 << h7 << h8;
 
     // Bias to carry, hidden and out
     net.connect(bi,o1);
@@ -88,10 +91,10 @@ void parityTest()
     // training preparation
     net.connectForward();
     // training
-    QElapsedTimer t; t.start();
-    int c=0;
+    QElapsedTimer t, et; t.start(); et.start();
+    int c=0, failcount=0;
     double err = 0, lasterr = 0;
-    bool done = false, success = true;
+    bool done = false;
     do
     {
 
@@ -117,16 +120,21 @@ void parityTest()
         //qWarning("Pattern %d BITS %d %s Output %lf", p, bits, even ?"EVEN":"ODD", net.idx2n(o1)->out());
         const double perr = net.idx2n(o1)->perr();
         err+=perr;
-        if ( even && net.idx2n(o1)->out()>0.2) success = false;
-        if (!even && net.idx2n(o1)->out()<0.7) success = false;
+        if ( even && net.idx2n(o1)->out()>0.4) ++failcount;
+        if (!even && net.idx2n(o1)->out()<0.6) ++failcount;
 
         if (p==255)
         {
-            if (success) done = true;
-            if (done) qWarning("Cycle %d Error %lf Last %lf %s", c/256, err, lasterr, err<lasterr ? "lower":"higher");
+            if (failcount==0) done = true;
+            if (done || (et.elapsed()>100))
+            {
+                et.restart();
+                qWarning("Cycle %d failures %d Error %lf Last %lf %s", c/256, failcount, err, lasterr, err<lasterr ? "lower":"higher");
+            }
             if (done) qWarning("Done");
+
             lasterr = err;
-            success = true;
+            failcount = 0;
             //if (c>1000) std::exit(1);
         }
 

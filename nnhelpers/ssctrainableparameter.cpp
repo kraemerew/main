@@ -162,6 +162,50 @@ private:
             m_v, m_m;
 };
 
+
+class SScConnectionAMSGrad : public SScTrainableParameter
+{
+public:
+    SScConnectionAMSGrad(double v, double beta1 = 0.9, double beta2 = 0.99)
+        : SScTrainableParameter(v,CON_ADAM),
+          m_beta1   (beta1),
+          m_beta2   (beta2),
+          m_beta1c  (1-m_beta1),
+          m_beta2c  (1-m_beta2),
+          m_v       (0),
+          m_m       (0)
+    {
+        Q_ASSERT(beta1>=0);
+        Q_ASSERT(beta1<1);
+        Q_ASSERT(beta2>=0);
+        Q_ASSERT(beta2<1);
+    }
+    virtual void endOfCycle()
+    {
+        if (m_ctr>0)
+        {
+            const double g = m_updatesum/m_ctr,
+                         v = (m_beta2*m_v) + (m_beta2c*g*g),
+                      vmax = qMax(m_v,v);
+
+            m_m = (m_beta1*m_m) + (m_beta1c*g);
+            m_v = v;
+
+            const double dlt   = m_eta*(m_m/(qSqrt(vmax)+1e-10));
+            m_value+=dlt;
+            m_updatesum = 0;
+            m_ctr = 0;
+        }
+    }
+    virtual bool reset() { m_m=0; m_v=0; return true; }
+
+private:
+
+    double  m_beta1,  m_beta2,
+            m_beta1c, m_beta2c,  //< 1-beta
+            m_v, m_m;
+};
+
 QString SScTrainableParameter::name(Type t)
 {
     switch(t)
@@ -169,6 +213,7 @@ QString SScTrainableParameter::name(Type t)
     case CON_STD:       return "Std";       break;
     case CON_RPROP:     return "RProp";     break;
     case CON_RMSPROP:   return "RmsProp";   break;
+    case CON_AMSGRAD:   return "AMSGrad";   break;
     case CON_ADAM:      return "Adam";      break;
     case CON_ADAMCORR:  return "AdamCorr";  break;
     }
@@ -182,6 +227,7 @@ SScTrainableParameter* SScTrainableParameter::create(Type type, double v)
     case CON_STD:       return new SScTrainableParameter(v); break;
     case CON_RPROP:     return new SScConnectionRProp   (v); break;
     case CON_RMSPROP:   return new SScConnectionRMSProp (v); break;
+    case CON_AMSGRAD:   return new SScConnectionAMSGrad (v); break;
     case CON_ADAMCORR:  return new SScConnectionAdamCorr(v); break;
     case CON_ADAM:      return new SScConnectionAdam    (v); break;
     }
