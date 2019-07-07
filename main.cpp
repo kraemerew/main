@@ -112,21 +112,21 @@ void parityTest()
         if (p&0x80) { net.setInput(i8,1); ++bits; } else net.setInput(i8,0);
 
         const bool even = (bits%2)==0;
-        if (even) net.setTarget(o1,0); else net.setTarget(o1,1);
-
+        const double trg = even ? 0.0 : 1.0;
+        net.setTarget(o1,trg);
         net.reset();
 
 
-        //qWarning("Pattern %d BITS %d %s Output %lf", p, bits, even ?"EVEN":"ODD", net.idx2n(o1)->out());
-        const double perr = net.idx2n(o1)->perr();
+        const double pout = net.idx2n(o1)->out(), pdlt = qAbs(pout-trg), perr = net.idx2n(o1)->perr();
+        const bool success = pdlt<0.5;
+        qWarning("%s %5d #bits: %2d %s Output %lf Target %lf", success ? "OK ":"NOK", p, bits, even ?"EVEN":"ODD", pout, trg);
         err+=perr;
-        if ( even && net.idx2n(o1)->out()>0.4) ++failcount;
-        if (!even && net.idx2n(o1)->out()<0.6) ++failcount;
-
+        if (!success) ++failcount;
+//if (c==100) std::exit(1);
         if (p==255)
         {
             if (failcount==0) done = true;
-            if (done || (et.elapsed()>100))
+            if (done || (et.elapsed()>200))
             {
                 et.restart();
                 qWarning("Cycle %d failures %d Error %lf Last %lf %s", c/256, failcount, err, lasterr, err<lasterr ? "lower":"higher");
