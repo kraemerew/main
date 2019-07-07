@@ -16,7 +16,7 @@ public:
     explicit SScHighwayGate(SSiHighwayNeuron* parent);
     virtual ~SScHighwayGate();
 
-    virtual bool addInput(SSiHighwayNeuron *other, double v, SScTrainableParameter::Type t = SScTrainableParameter::CON_ADAM);
+    virtual bool addInput(SSiHighwayNeuron *other, double v, SScTrainableParameter::Type t);
     virtual bool delInput(SSiHighwayNeuron *other);
     virtual double net();
     /*!

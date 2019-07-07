@@ -124,7 +124,7 @@ net.setHiddenActivationType(SScActivation::ACT_RBF);
 void carryTest()
 {
     SScHighwayNetwork net;
-
+    net.setTrainingType(SScTrainableParameter::CON_ADAM);
     const int bi = net.addBiasNeuron    ("Bias"),
               i1 = net.addInputNeuron   ("In1"),
               i2 = net.addInputNeuron   ("In2"),
@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
 {
     Q_UNUSED(argc);
     Q_UNUSED(argv);
-    carryTest();
+    parityTest();
     /*SScRBiasNeuron* bn = new (std::nothrow) SScRBiasNeuron();
     QList<SScRNeuron*> nl;
     for (int i=0; i<2; ++i) nl << new (std::nothrow) SScRNeuron();

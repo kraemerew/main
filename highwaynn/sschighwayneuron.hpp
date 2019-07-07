@@ -45,7 +45,7 @@ public:
     virtual bool setActivation(SScActivation::Type type, double gain = 1.0);
     virtual double deltaw(SSiHighwayNeuron* n) = 0;
     virtual double deltag() = 0;
-    virtual bool addInput(SSiHighwayNeuron* other, double v) = 0;
+    virtual bool addInput(SSiHighwayNeuron* other, double v, SScTrainableParameter::Type t) = 0;
     virtual bool delInput(SSiHighwayNeuron* other) = 0;
     virtual double net() { return 0.0; }
     virtual double out() { return 0.0; }

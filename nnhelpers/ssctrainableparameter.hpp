@@ -27,6 +27,7 @@ public:
 
     static QString  name(Type t);
     static SScTrainableParameter* create(Type type, double v);
+    inline SScTrainableParameter::Type trainingType() const { return m_t; }
 
 protected:
     SScTrainableParameter::Type m_t;

@@ -31,6 +31,7 @@ int SScHighwayNetwork::addNeuron   (SSiHighwayNeuron::SSeNeuronType type, const 
             n->setActivation(oActType(),getRandomGainValue());
         break;
     }
+    n->act()->setTrainingType(trainingType());
     m_neurons << n;
     return m_neurons.size()-1;
 }
@@ -65,7 +66,7 @@ void SScHighwayNetwork::connectForward()
 bool SScHighwayNetwork::connect(SSiHighwayNeuron* from, SSiHighwayNeuron* to, double v)
 {   
     if (!contains(from) || !contains(to)) return false;
-    to->addInput(from,v);
+    to->addInput(from,v,trainingType());
 
     if (!isFeedForward())
     {
@@ -94,7 +95,7 @@ bool SScHighwayNetwork::setHighway(int neuron, int highway, int carry)
     SSiHighwayNeuron* n = idx2n(neuron), *hwn = idx2n(highway), *cn = idx2n(carry);
     if (n && hwn && cn && cn->act()->canCarry() && n->connectHighway(hwn,cn))
     {
-        if (isFeedForward()) { qWarning("SET CARRY SUCCESS");  return true; }
+        if (isFeedForward()) return true;
         delHighway(neuron);
     }
     return false;

@@ -141,3 +141,13 @@ QString SScActivation::name(Type type)
     return "";
 }
 
+void SScActivation::setTrainingType(SScTrainableParameter::Type t)
+{
+    if (m_gain->trainingType()!=t)
+    {
+        const double v = m_gain->value();
+        delete m_gain;
+        m_gain = SScTrainableParameter::create(t,v);
+        Q_CHECK_PTR(m_gain);
+    }
+}

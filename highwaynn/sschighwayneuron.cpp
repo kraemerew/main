@@ -31,7 +31,7 @@ public:
     {
         return transform();
     }
-    virtual bool addInput(SSiHighwayNeuron *other, double v) { return m_in.addInput(other,v); }
+    virtual bool addInput(SSiHighwayNeuron *other, double v, SScTrainableParameter::Type t) { return m_in.addInput(other,v,t); }
     virtual bool delInput(SSiHighwayNeuron *other) { return m_in.delInput(other); }
     virtual double net() { return m_in.net(); }
     virtual void reset() { SSiHighwayNeuron::reset(); m_in.reset(); }
@@ -95,7 +95,7 @@ public:
           m_hwn(NULL), m_cn(NULL)
     {
     }
-    virtual bool addInput(SSiHighwayNeuron *other, double v) { return m_in.addInput(other,v); }
+    virtual bool addInput(SSiHighwayNeuron *other, double v, SScTrainableParameter::Type t) { return m_in.addInput(other,v,t); }
     virtual bool delInput(SSiHighwayNeuron *other) { return m_in.delInput(other); }
     virtual double net() { return m_in.net(); }
     virtual QList<SSiHighwayNeuron*> inputs() const { return m_in.keys(); }
@@ -188,7 +188,7 @@ class SScInputNeuron : public SSiHighwayNeuron
 {
 public:
     SScInputNeuron() : SSiHighwayNeuron(NeuronType_Input) {}
-    bool addInput(SSiHighwayNeuron *, double ) { return false; }
+    bool addInput(SSiHighwayNeuron *, double, SScTrainableParameter::Type) { return false; }
     bool delInput(SSiHighwayNeuron *) { return false; }
 
     virtual bool    setInput    (double v)          { m_input = v; return true; }
@@ -209,7 +209,7 @@ class SScBiasNeuron : public SSiHighwayNeuron
 {
 public:
     SScBiasNeuron() : SSiHighwayNeuron(NeuronType_Bias) {}
-    virtual bool    addInput    (SSiHighwayNeuron*, double)  { Q_ASSERT(false); return false; }
+    virtual bool    addInput    (SSiHighwayNeuron*, double,SScTrainableParameter::Type)  { Q_ASSERT(false); return false; }
     virtual bool    delInput    (SSiHighwayNeuron*)           { Q_ASSERT(false); return false; }
     virtual bool    setInput    (double)                { Q_ASSERT(false); return false; }
     virtual bool    setTarget   (double)                { Q_ASSERT(false); return false; }

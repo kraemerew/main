@@ -30,6 +30,7 @@ public:
     virtual ~SScActivation() { delete m_gain; }
     virtual QString name() const { return name(m_t); }
 
+    void setTrainingType(SScTrainableParameter::Type t);
     inline double activate  (double pot) { m_pot = pot; priv_activate(); return m_act; }
     inline double dev       () { return priv_dev(); }
     inline double gain      () const { return m_gain->value(); }
