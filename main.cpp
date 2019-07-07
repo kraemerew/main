@@ -139,7 +139,7 @@ void carryTest(int pow = 10)
 {
     const int pmax = qPow(2,pow), plast = pmax-1;
     SScHighwayNetwork net;
-    net.setTrainingType(SScTrainableParameter::CON_AMSGRAD);
+    net.setTrainingType(SScTrainableParameter::CON_RPROP);
     net.setHiddenActivationType(SScActivation::ACT_RBF);
     net.setOutputActivationType(SScActivation::ACT_MHAT);
    // net.setConnectionRange(1,0);
