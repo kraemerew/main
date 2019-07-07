@@ -50,8 +50,8 @@ public:
 private:
     bool isFeedForward() const;
     int addNeuron(SSiHighwayNeuron::SSeNeuronType type, const QString& name = QString());
-
-    QList<SSiHighwayNeuron*>  m_neurons;
+    inline int nextFreeIdx() const { for (int i=0; i<INT_MAX; ++i) if (!m_neurons.contains(i)) return i; Q_ASSERT(false); return -1; }
+    QMap<int,SSiHighwayNeuron*>  m_neurons;
 };
 
 #endif // HIGHWAYNETWORK_HPP

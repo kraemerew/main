@@ -8,7 +8,7 @@ SScHighwayNetwork::SScHighwayNetwork() : SScNetworkBase()
 }
 SScHighwayNetwork::~SScHighwayNetwork()
 {
-    foreach(SSiHighwayNeuron*n, m_neurons) delete n;
+    foreach(SSiHighwayNeuron* n, m_neurons) delete n;
     m_neurons.clear();
 }
 
@@ -32,17 +32,17 @@ int SScHighwayNetwork::addNeuron   (SSiHighwayNeuron::SSeNeuronType type, const 
         break;
     }
     n->act()->setTrainingType(trainingType());
-    m_neurons << n;
-    return m_neurons.size()-1;
+    const int ret = nextFreeIdx();
+    m_neurons[ret] = n;
+    return ret;
 }
 
 bool SScHighwayNetwork::delNeuron   (int idx)
 {
-
     SSiHighwayNeuron* n = idx2n(idx);
     if (!n) return false;
     foreach(SSiHighwayNeuron* other, m_neurons) (void) disconnect(n,other);
-    m_neurons.removeAt(idx);
+    m_neurons.remove(idx);
     delete n;
     return true;
 }
@@ -121,19 +121,17 @@ int                 SScHighwayNetwork::addBiasNeuron    (const QString& name)   
 int                 SScHighwayNetwork::addCarryNeuron   (const QString& name)           { return addNeuron(SSiHighwayNeuron::NeuronType_Carry,  name); }
 
 bool                SScHighwayNetwork::delNeuron        (SSiHighwayNeuron* n)           { return delNeuron(n2idx(n)); }
-int                 SScHighwayNetwork::n2idx            (SSiHighwayNeuron* n) const     { return m_neurons.indexOf(n); }
-SSiHighwayNeuron*   SScHighwayNetwork::idx2n            (int idx) const                 { if ((idx<0) || (idx>=m_neurons.size())) return NULL; return m_neurons[idx]; }
-bool                SScHighwayNetwork::contains         (SSiHighwayNeuron *n) const     { return m_neurons.contains(n); }
+int                 SScHighwayNetwork::n2idx            (SSiHighwayNeuron* n) const     { foreach(int i, m_neurons.keys()) if (m_neurons[i]==n) return i; return -1; }
+SSiHighwayNeuron*   SScHighwayNetwork::idx2n            (int idx) const                 { if ((idx<0) || !m_neurons.contains(idx)) return NULL; return m_neurons[idx]; }
+bool                SScHighwayNetwork::contains         (SSiHighwayNeuron *n) const     { return m_neurons.values().contains(n); }
 bool                SScHighwayNetwork::connect          (int from, int to, double v)    { return SScHighwayNetwork::connect   (idx2n(from), idx2n(to), v ); }
 bool                SScHighwayNetwork::connect          (int from, int to)              { return connect(from,to,getRandomConnectionValue()); }
 bool                SScHighwayNetwork::disconnect       (int from, int to)              { return SScHighwayNetwork::disconnect(idx2n(from), idx2n(to)); }
 void                SScHighwayNetwork::reset            ()                              { foreach(SSiHighwayNeuron* n, m_neurons) n->reset(); }
 void                SScHighwayNetwork::trainingStep     (bool endOfCycle)
 {
-    //foreach(SSiHighwayNeuron* n, m_neurons)  qWarning("%s NET %lf OUT %lf", qPrintable(n->name()), n->net(),n->out());
-    //foreach(SSiHighwayNeuron* n, m_neurons) qWarning("%s CARRY %lf HW %lf OUT %lf", qPrintable(n->name()), n->carry(), n->highway(), n->out());
-QSet<QString> toTrain;
-//toTrain <<"C" << "H1" << "H2" << "H3" << "H4" << "Out";
+    QSet<QString> toTrain;
+    //toTrain <<"C" << "H1" << "H2" << "H3" << "H4" << "Out";
     foreach(SSiHighwayNeuron* n, m_neurons) if (toTrain.isEmpty() || toTrain.contains(n->name())) n->trainingStep();
     if (endOfCycle) foreach(SSiHighwayNeuron* n, m_neurons) if (toTrain.isEmpty() || toTrain.contains(n->name())) n->endOfCycle();
 }

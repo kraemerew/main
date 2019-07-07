@@ -96,7 +96,15 @@ public:
     {
     }
     virtual bool addInput(SSiHighwayNeuron *other, double v, SScTrainableParameter::Type t) { return m_in.addInput(other,v,t); }
-    virtual bool delInput(SSiHighwayNeuron *other) { return m_in.delInput(other); }
+    virtual bool delInput(SSiHighwayNeuron *other)
+    {
+        bool ret = false;
+        if (other==m_cn) { m_cn=NULL; ret = true; }
+        if (other==m_hwn) { m_hwn=NULL; ret = true; }
+        if (m_in.delInput(other)) ret = true;
+        return ret;
+    }
+
     virtual double net() { return m_in.net(); }
     virtual QList<SSiHighwayNeuron*> inputs() const { return m_in.keys(); }
     virtual QList<SSiHighwayNeuron*> allInputs() const

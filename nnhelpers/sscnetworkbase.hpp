@@ -21,7 +21,7 @@ public:
     inline SScActivation::Type hActType() const { return m_htype; }
     inline SScActivation::Type cActType() const { return m_ctype; }
     inline SScActivation::Type oActType() const { return m_otype; }
-    inline SScTrainableParameter::Type trainingType() { return m_tptype; }
+    inline SScTrainableParameter::Type trainingType() const { return m_tptype; }
 
 private:
     double getRandom(double,double) const;

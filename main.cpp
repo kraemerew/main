@@ -51,7 +51,8 @@ private:
 void parityTest()
 {
     SScHighwayNetwork net;
-net.setHiddenActivationType(SScActivation::ACT_RBF);
+    net.setTrainingType(SScTrainableParameter::CON_ADAM);
+    net.setHiddenActivationType(SScActivation::ACT_MHAT);
     const int bi = net.addBiasNeuron    ("Bias"),
               i1 = net.addInputNeuron   ("In1"),
               i2 = net.addInputNeuron   ("In2"),
