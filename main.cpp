@@ -140,10 +140,10 @@ void carryTest(int pow)
     const int pmax = qPow(2,pow), plast = pmax-1;
     SScHighwayNetwork net;
     net.setTrainingType(SScTrainableParameter::CON_ADAM);
-    net.setHiddenActivationType(SScActivation::ACT_RBF);
+    net.setHiddenActivationType(SScActivation::ACT_MHAT);
     net.setOutputActivationType(SScActivation::ACT_MHAT);
-   // net.setConnectionRange(1,0);
-   // net.setGainRange(0,1);
+    // net.setConnectionRange(1,0);
+    // net.setGainRange(0,1);
     const int o1 = net.addOutputNeuron  ("Out");
     const int bi = net.addBiasNeuron    ("Bias");
     const int cn = net.addCarryNeuron   ("Carry");
@@ -151,14 +151,12 @@ void carryTest(int pow)
     QList<int> il, hl;
     for (int i=0;i<pow; ++i) il << net.addInputNeuron (QString("I%1").arg(i));
     for (int i=0;i<pow; ++i) hl << net.addHiddenNeuron(QString("H%1").arg(i));
+    for (int i=0;i<pow; ++i) net.setHighway(hl[i],il[i],cn);
 
-    for (int i=0;i<pow; ++i)
-    {
-        net.setHighway(hl[i],il[i],cn);
-    }
     // Bias to hidden and out
     net.connect(bi,o1);
     net.connect(bi,cn);
+
     foreach(int to, hl) net.connect(bi,to);
 
     // Input to hidden, out and carry
