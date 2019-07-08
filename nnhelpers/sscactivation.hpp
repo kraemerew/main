@@ -2,6 +2,7 @@
 #define SSCACTIVATION_HPP
 
 #include <QString>
+#include <QVariantMap>
 #include "ssctrainableparameter.hpp"
 
 class SScActivation
@@ -51,6 +52,9 @@ public:
      */
     virtual bool canCarry() const { return canCarry(m_t); }
     virtual bool nonLinear() const { return nonLinear(m_t); }
+
+    virtual QVariantMap toVM() const;
+    virtual bool fromVM(const QVariantMap&);
 
 protected:
     virtual void priv_activate() = 0;

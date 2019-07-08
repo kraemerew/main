@@ -165,3 +165,16 @@ void SScActivation::setTrainingType(SScTrainableParameter::Type t)
         Q_CHECK_PTR(m_gain);
     }
 }
+
+QVariantMap SScActivation::toVM() const
+{
+    QVariantMap vm;
+    vm["TYPE"] = type2Id(m_t);
+    vm["GAIN"] = m_gain->toVM();
+    return vm;
+}
+
+bool SScActivation::fromVM(const QVariantMap& vm)
+{
+    return false;
+}

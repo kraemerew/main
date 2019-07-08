@@ -2,6 +2,7 @@
 #define SSCTPAR_HPP
 #include <qglobal.h>
 #include <QString>
+#include <QVariantMap>
 
 class SScTrainableParameter
 {
@@ -14,6 +15,7 @@ public:
         CON_AMSGRAD,
         CON_ADAM,
         CON_ADAMCORR,
+        CON_ADAMAX,
         CON_LAST
     };
 
@@ -27,8 +29,12 @@ public:
     virtual bool reset() { return false; }
     QString name() const { return name(m_t); }
 
+    virtual QVariantMap toVM() const;
+    virtual bool fromVM(const QVariantMap&);
+
     static QString  name(Type t);
     static SScTrainableParameter* create(Type type, double v);
+    static SScTrainableParameter* create(const QVariantMap&);
     inline SScTrainableParameter::Type trainingType() const { return m_t; }
 
     static Type id2Type(const QString& id, bool& ok);
@@ -39,6 +45,5 @@ protected:
     int     m_ctr;
     double  m_eta, m_updatesum, m_value;
 };
-
 
 #endif // SSCTPAR_HPP

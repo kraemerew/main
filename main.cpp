@@ -135,11 +135,11 @@ void parityTest(int pow)
     std::exit(0);
 }
 
-void carryTest(int pow = 10)
+void carryTest(int pow)
 {
     const int pmax = qPow(2,pow), plast = pmax-1;
     SScHighwayNetwork net;
-    net.setTrainingType(SScTrainableParameter::CON_ADAMCORR);
+    net.setTrainingType(SScTrainableParameter::CON_ADAM);
     net.setHiddenActivationType(SScActivation::ACT_RBF);
     net.setOutputActivationType(SScActivation::ACT_MHAT);
    // net.setConnectionRange(1,0);
@@ -228,7 +228,7 @@ int main(int argc, char *argv[])
 {
     Q_UNUSED(argc);
     Q_UNUSED(argv);
-    carryTest(10);
+    carryTest(8);
     /*SScRBiasNeuron* bn = new (std::nothrow) SScRBiasNeuron();
     QList<SScRNeuron*> nl;
     for (int i=0; i<2; ++i) nl << new (std::nothrow) SScRNeuron();
