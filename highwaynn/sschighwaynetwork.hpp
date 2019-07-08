@@ -1,9 +1,11 @@
 #ifndef HIGHWAYNETWORK_HPP
 #define HIGHWAYNETWORK_HPP
 #include "sschighwayneuron.hpp"
-#include "../nnhelpers/sscvm.hpp"
 #include "../nnhelpers/sscnetworkbase.hpp"
+
+#include <QVariantMap>
 #include <QMap>
+
 class SScHighwayNetwork : public SScNetworkBase
 {
 public:
@@ -39,8 +41,8 @@ public:
     bool delHighway(int neuron);
     bool disconnect(int from, int to);
 
-    SScVM tpVM() const;
-    bool fromVM(const SScVM& vm);
+    QVariantMap toVM() const;
+    bool fromVM(const QVariantMap& vm);
 
     void trainingStep(bool endOfCycle);
 

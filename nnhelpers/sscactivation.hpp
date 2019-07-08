@@ -17,7 +17,8 @@ public:
         ACT_SWISH,
         ACT_MHAT,
         ACT_GDER,
-        ACT_X
+        ACT_X,
+        ACT_LAST
     };
 
     SScActivation(Type t)
@@ -40,6 +41,8 @@ public:
 
     static SScActivation* create(Type type);
     static QString name(Type type);
+    static QString type2Id(Type type);
+    static Type id2Type(const QString& id, bool& ok);
     static bool canCarry(Type type);
     static bool nonLinear(Type type);
     /*!

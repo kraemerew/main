@@ -1,6 +1,7 @@
 #ifndef SSCNETWORKBASE_HPP
 #define SSCNETWORKBASE_HPP
 #include "sscactivation.hpp"
+#include <QVariantMap>
 
 class SScNetworkBase
 {
@@ -22,6 +23,9 @@ public:
     inline SScActivation::Type cActType() const { return m_ctype; }
     inline SScActivation::Type oActType() const { return m_otype; }
     inline SScTrainableParameter::Type trainingType() const { return m_tptype; }
+
+    QVariantMap toVM() const;
+    bool fromVM(const QVariantMap& vm);
 
 private:
     double getRandom(double,double) const;

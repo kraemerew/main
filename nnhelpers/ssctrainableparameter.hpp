@@ -13,7 +13,8 @@ public:
         CON_RMSPROP,
         CON_AMSGRAD,
         CON_ADAM,
-        CON_ADAMCORR
+        CON_ADAMCORR,
+        CON_LAST
     };
 
     SScTrainableParameter(double value, SScTrainableParameter::Type t = SScTrainableParameter::CON_RMSPROP) : m_t(t), m_ctr(0), m_eta(.01), m_updatesum(0), m_value(value) {}
@@ -29,6 +30,9 @@ public:
     static QString  name(Type t);
     static SScTrainableParameter* create(Type type, double v);
     inline SScTrainableParameter::Type trainingType() const { return m_t; }
+
+    static Type id2Type(const QString& id, bool& ok);
+    static QString type2Id(Type type);
 
 protected:
     SScTrainableParameter::Type m_t;

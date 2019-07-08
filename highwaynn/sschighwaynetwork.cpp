@@ -1,6 +1,7 @@
 #include "sschighwaynetwork.hpp"
 #include "sschighwayneuron.hpp"
 #include "../nnhelpers/ssccycledetector.hpp"
+#include "../nnhelpers/sscvm.hpp"
 #include <QSet>
 
 SScHighwayNetwork::SScHighwayNetwork() : SScNetworkBase()
@@ -132,4 +133,13 @@ void                SScHighwayNetwork::trainingStep     (bool endOfCycle)
 {
     foreach(SSiHighwayNeuron* n, m_neurons.values()) n->trainingStep();
     if (endOfCycle) foreach(SSiHighwayNeuron* n, m_neurons.values()) n->endOfCycle();
+}
+
+
+QVariantMap SScHighwayNetwork::toVM() const
+{
+    QVariantMap ret;
+
+    ret["NET_PRESETS"] = SScNetworkBase::toVM();
+    return ret;
 }

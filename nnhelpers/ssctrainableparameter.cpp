@@ -216,6 +216,7 @@ QString SScTrainableParameter::name(Type t)
     case CON_AMSGRAD:   return "AMSGrad";   break;
     case CON_ADAM:      return "Adam";      break;
     case CON_ADAMCORR:  return "AdamCorr";  break;
+    default:break;
     }
     return "";
 }
@@ -230,6 +231,21 @@ SScTrainableParameter* SScTrainableParameter::create(Type type, double v)
     case CON_AMSGRAD:   return new SScConnectionAMSGrad (v); break;
     case CON_ADAMCORR:  return new SScConnectionAdamCorr(v); break;
     case CON_ADAM:      return new SScConnectionAdam    (v); break;
+    default:break;
     }
     return NULL;
+}
+
+QString SScTrainableParameter::type2Id(Type type)
+{
+  return name(type).toUpper();
+}
+
+SScTrainableParameter::Type SScTrainableParameter::id2Type(const QString &id, bool &ok)
+{
+    ok = true;
+    for (int i = (int)CON_STD; i<(int)CON_LAST; ++i)
+        if (type2Id((Type)i)==id.toUpper()) return (Type)i;
+    ok = false;
+    return CON_LAST;
 }

@@ -120,6 +120,7 @@ SScActivation* SScActivation::create(Type type)
     case ACT_MHAT:      return new SScActivationMHat(); break;
     case ACT_GDER:      return new SScActivationGaussianDerivative(); break;
     case ACT_X:         return new SScActivationX(); break;
+    default: break;
     }
     return NULL;
 }
@@ -137,10 +138,23 @@ QString SScActivation::name(Type type)
     case ACT_MHAT:      return "MexHat"; break;
     case ACT_GDER:      return "GDer"; break;
     case ACT_X:         return "X"; break;
+    default: break;
     }
     return "";
 }
 
+QString SScActivation::type2Id(Type type)
+{
+    return name(type).toUpper();
+}
+SScActivation::Type SScActivation::id2Type(const QString &id, bool &ok)
+{
+   ok = true;
+   for (int i = (int) ACT_IDENTITY; i<(int)ACT_LAST; ++i)
+       if (id.toUpper()==type2Id((Type)i)) return (Type)i;
+   ok = false;
+   return ACT_LAST;
+}
 void SScActivation::setTrainingType(SScTrainableParameter::Type t)
 {
     if (m_gain->trainingType()!=t)

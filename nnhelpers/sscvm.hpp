@@ -7,6 +7,7 @@
 class SScVM : public QVariantMap
 {
 public:
+    explicit SScVM(const QVariantMap& vm = QVariantMap()) : QVariantMap(vm) {}
     bool            hasToken    (const QString& t, bool norm = true) const { return norm ? contains(normToken(t)) : contains(t); }
     QVariant        token       (const QString& t, bool norm = true) const { const QString t2 = norm ? normToken(t):t; return contains(t2) ? (*this)[t2] : QVariant(); }
     bool            boolToken   (const QString& t, bool                 dval = false,           bool norm = true) const { const QVariant v = token(t,norm); return v.canConvert<bool>() ? v.toBool() : dval; }
