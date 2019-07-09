@@ -7,7 +7,7 @@
 #include <QMap>
 #include <QSharedPointer>
 #include <QtMath>
-
+class SScHighwayNetwork;
 
 class SSiHighwayNeuron
 {
@@ -18,10 +18,12 @@ public:
         NeuronType_Hidden,
         NeuronType_Output,
         NeuronType_Bias,
-        NeuronType_Carry
+        NeuronType_Carry,
+        NeuronType_Last
     };
-    explicit SSiHighwayNeuron(SSeNeuronType type, SScActivation::Type acttype = SScActivation::ACT_IDENTITY)
-        : m_type(type),
+    explicit SSiHighwayNeuron(SScHighwayNetwork* net, SSeNeuronType type, SScActivation::Type acttype = SScActivation::ACT_IDENTITY)
+        : m_net(net),
+          m_type(type),
           m_dedoset(false),
           m_transformset(false),
           m_outset(false),
@@ -30,6 +32,7 @@ public:
           m_o(0.0),
           m_act(SScActivation::create(acttype))
     {
+       Q_CHECK_PTR(net);
         reset();
     }
     virtual ~SSiHighwayNeuron() { if (m_act) delete m_act; m_act=NULL; }
@@ -68,18 +71,26 @@ public:
     virtual QList<SSiHighwayNeuron*> inputs() const { return QList<SSiHighwayNeuron*>(); }
     virtual QList<SSiHighwayNeuron*> allInputs() const { return inputs(); }
 
-    static SSiHighwayNeuron* create(SSeNeuronType type, const QString& name = QString());
+    static SSiHighwayNeuron* create(SScHighwayNetwork* net, SSeNeuronType type, const QString& name = QString());
     virtual void connectForward (const QList<SSiHighwayNeuron*>& fwd) { qWarning("N %s FORWARD %d", qPrintable(name()), fwd.size()); m_out = fwd; }
     virtual void trainingStep   () {}
     virtual void endOfCycle     () {}
     inline void setName(const QString& name) { m_name=name; }
     inline QString name() const { return m_name; }
+    int index();
+
+    virtual QVariantMap toVM() const;
+    virtual bool fromVM(const QVariantMap&);
+
+    static QString type2Id(SSeNeuronType t);
+    static SSeNeuronType id2Type(const QString& id);
 
 protected:
     // Partial derivative of network error by o_j (with j being the index of this neuron)
     // The same for all neurons with exception of output neurons where it is redefined
     virtual double priv_dedo();
 
+    SScHighwayNetwork*          m_net;
     SSeNeuronType               m_type;
     bool                        m_dedoset, m_transformset, m_outset;
     double                      m_dedo, m_t, m_o;

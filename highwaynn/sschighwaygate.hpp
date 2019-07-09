@@ -28,11 +28,13 @@ public:
      */
     virtual void endOfCycle();
 
+    QVariantMap toVM() const;
+    bool fromVM(const QVariantMap& vm);
+
 private:
     SSiHighwayNeuron*   m_parent;
     bool                m_dirty;
-    double              m_net;
-    //QVector<double>     m_a, m_b;
+    double              m_net;    
 };
 
 #endif // SSCHWGATE_HPP

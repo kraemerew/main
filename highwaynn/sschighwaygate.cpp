@@ -3,7 +3,8 @@
 
 SScHighwayGate::SScHighwayGate(SSiHighwayNeuron* parent)
     : QMap<SSiHighwayNeuron*,QSharedPointer<SScTrainableParameter> >(),
-      m_parent(parent), m_dirty(true), m_net(0.0) {}
+      m_parent(parent), m_dirty(true), m_net(0.0)
+{}
 
 SScHighwayGate::~SScHighwayGate() {}
 
@@ -50,4 +51,20 @@ void SScHighwayGate::endOfCycle()
 void SScHighwayGate::reset()
 {
     m_dirty=true;
+}
+
+QVariantMap SScHighwayGate::toVM() const
+{
+    QVariantMap vm;
+    foreach(SSiHighwayNeuron* n, this->keys())
+    {
+        vm[QString("CON%1").arg(n->index())] = (*this)[n]->toVM();
+    }
+    return vm;
+}
+bool SScHighwayGate::fromVM(const QVariantMap& vm)
+{
+    //TODO
+    Q_UNUSED(vm);
+    return false;
 }

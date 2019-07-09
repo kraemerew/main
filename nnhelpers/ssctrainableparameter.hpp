@@ -16,6 +16,7 @@ public:
         CON_ADAM,
         CON_ADAMCORR,
         CON_ADAMAX,
+        CON_ADAMAXCORR,
         CON_LAST
     };
 

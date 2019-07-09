@@ -15,7 +15,7 @@ SScHighwayNetwork::~SScHighwayNetwork()
 
 int SScHighwayNetwork::addNeuron   (SSiHighwayNeuron::SSeNeuronType type, const QString& name)
 {
-    SSiHighwayNeuron* n = SSiHighwayNeuron::create(type,name);
+    SSiHighwayNeuron* n = SSiHighwayNeuron::create(this,type,name);
     Q_CHECK_PTR(n);
     switch(type)
     {
