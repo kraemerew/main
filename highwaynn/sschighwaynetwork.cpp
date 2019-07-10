@@ -140,11 +140,57 @@ void                SScHighwayNetwork::trainingStep     (bool endOfCycle)
     if (endOfCycle) foreach(SSiHighwayNeuron* n, m_neurons.values()) n->endOfCycle();
 }
 
+bool SScHighwayNetwork::connect(int from, int to, const QVariantMap& vm)
+{
+    disconnect(from,to);
+    SSiHighwayNeuron* n1 = idx2n(from), *n2 = idx2n(to);
+    if (!n1 || !n2) return false;
+    SScTrainableParameter* tp = SScTrainableParameter::create(vm);
+    if (tp)
+    {
+        n2->addInput(n1,tp);
+
+        if (!isFeedForward())
+        {
+            (void) disconnect(from,to);
+            return false;
+        }
+
+        return true;
+    }
+    return false;
+}
 
 QVariantMap SScHighwayNetwork::toVM() const
 {
     QVariantMap ret;
-
     ret["NET_PRESETS"] = SScNetworkBase::toVM();
+    foreach(int key, m_neurons.keys()) ret[QString("NEURON_%1").arg(key)] = m_neurons[key]->toVM();
     return ret;
+}
+
+bool SScHighwayNetwork::fromVM(const QVariantMap& vm)
+{
+    QMap<int,QVariantMap> cache;
+    foreach(const QString& key, vm.keys())
+    {
+        if (key=="NET_PRESETS") SScNetworkBase::fromVM(vm[key].toMap());
+        else if (key.startsWith("NEURON"))
+        {
+            bool ok = false;
+            const int idx = key.split("_").last().toInt(&ok);
+            if (ok && (idx>=0))
+            {
+                SSiHighwayNeuron* n = SSiHighwayNeuron::create(this,vm[key].toMap());
+                if (n)
+                {
+                    m_neurons[idx]=n;
+                    cache[idx] = vm[key].toMap();
+                }
+            }
+        }
+    }
+
+    foreach(SSiHighwayNeuron* n, m_neurons) n->fromVM(cache[n2idx(n)]);
+    return true;
 }

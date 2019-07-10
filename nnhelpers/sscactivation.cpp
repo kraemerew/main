@@ -1,4 +1,5 @@
 #include "sscactivation.hpp"
+#include "../nnhelpers/sscvm.hpp"
 #include <QtMath>
 
 class SScActivationIdentity : public SScActivation
@@ -118,20 +119,30 @@ bool SScActivation::canCarry(Type type)
     default: return false; break;
     }
 }
+SScActivation* SScActivation::create(const QVariantMap& vm)
+{
+    SScVM sscvm(vm);
+    bool ok = false;
+    auto t = id2Type(sscvm.stringToken("TYPE",""),ok);
+    if (!ok || (t==LAST)) t = IDENTITY;
+    SScActivation* ret = create(t);
+    if (ret) ret->fromVM(vm);
+    return ret;
+}
 SScActivation* SScActivation::create(Type type)
 {
     switch (type)
     {
-    case IDENTITY:  return new SScActivationIdentity(); break;
-    case RELU:      return new SScActivationRelu(); break;
-    case LOGISTIC:   return new SScActivationSigmoid(); break;
-    case TANH:      return new SScActivationTanh(); break;
-    case RBF:       return new SScActivationRbf(); break;
-    case SOFTPLUS:  return new SScActivationSoftPlus(); break;
-    case SWISH:     return new SScActivationSwish(); break;
-    case MHAT:      return new SScActivationMHat(); break;
-    case GDER:      return new SScActivationGaussianDerivative(); break;
-    case X:         return new SScActivationX(); break;
+    case IDENTITY:  return new SScActivationIdentity();             break;
+    case RELU:      return new SScActivationRelu();                 break;
+    case LOGISTIC:   return new SScActivationSigmoid();             break;
+    case TANH:      return new SScActivationTanh();                 break;
+    case RBF:       return new SScActivationRbf();                  break;
+    case SOFTPLUS:  return new SScActivationSoftPlus();             break;
+    case SWISH:     return new SScActivationSwish();                break;
+    case MHAT:      return new SScActivationMHat();                 break;
+    case GDER:      return new SScActivationGaussianDerivative();   break;
+    case X:         return new SScActivationX();                    break;
     default: break;
     }
     return NULL;

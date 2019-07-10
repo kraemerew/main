@@ -1,8 +1,7 @@
 #include "sschighwayneuron.hpp"
 #include "sschighwaynetwork.hpp"
 #include "sschighwaynetwork.hpp"
-#include <future>
-#include <thread>
+#include "../nnhelpers/sscvm.hpp"
 
 class SScCarryNeuron : public SSiHighwayNeuron
 {
@@ -24,6 +23,12 @@ public:
     virtual double out()
     {
         return transform();
+    }
+    virtual bool addInput(SSiHighwayNeuron* other, SScTrainableParameter* tp)
+    {
+        SScCarryNeuron* cn = dynamic_cast<SScCarryNeuron*>(other);
+        if (cn) return false;
+        return m_in.addInput(other,tp);
     }
     virtual bool addInput(SSiHighwayNeuron *other, double v, SScTrainableParameter::Type t)
     {
@@ -76,10 +81,15 @@ public:
     virtual QVariantMap toVM() const
     {
         QVariantMap vm = SSiHighwayNeuron::toVM();
-        vm["CON"] = m_in.toVM();
+        vm["GATE"] = m_in.toVM();
         return vm;
     }
-
+    virtual bool fromVM(const QVariantMap &vm)
+    {
+        bool ret = SSiHighwayNeuron::fromVM(vm);
+        if (!m_in.fromVM(m_net,vm["GATE"].toMap())) ret = false;
+        return ret;
+    }
 
 protected:
     virtual double priv_dedo()
@@ -99,6 +109,12 @@ public:
           m_in(SScHighwayGate(this)),
           m_hwn(NULL), m_cn(NULL)
     {
+    }
+    virtual bool addInput(SSiHighwayNeuron* other, SScTrainableParameter* tp)
+    {
+        SScCarryNeuron* cn = dynamic_cast<SScCarryNeuron*>(other);
+        if (cn) return false;
+        return m_in.addInput(other,tp);
     }
     virtual bool addInput(SSiHighwayNeuron *other, double v, SScTrainableParameter::Type t)
     {
@@ -197,7 +213,7 @@ public:
     virtual QVariantMap toVM() const
     {
         QVariantMap vm = SSiHighwayNeuron::toVM();
-        vm["CON"] = m_in.toVM();
+        vm["GATE"] = m_in.toVM();
         if (m_hwn && m_cn)
         {
             vm["HIGHWAY"] = m_hwn->index();
@@ -205,7 +221,23 @@ public:
         }
         return vm;
     }
-
+    virtual bool fromVM(const QVariantMap &vm)
+    {
+        bool ret = SSiHighwayNeuron::fromVM(vm);
+        if (!m_in.fromVM(m_net,vm["GATE"].toMap())) ret = false;
+        if (vm.contains("HIGHWAY") && vm.contains("CARRY"))
+        {
+            bool ok1 = false, ok2 = false;
+            const int hwidx = vm["HIGHWAY"].toInt(&ok1),
+                      cidx  = vm["CARRY"].  toInt(&ok2);
+            if (ok1 && ok2 && (hwidx>=0) && (cidx>=0) && (hwidx!=cidx))
+            {
+                m_net->setHighway(index(),hwidx,cidx);
+            }
+            else ret = false;
+        }
+        return ret;
+    }
     SScHighwayGate      m_in;
     SSiHighwayNeuron*   m_hwn;
     SSiHighwayNeuron*   m_cn;
@@ -227,6 +259,8 @@ class SScInputNeuron : public SSiHighwayNeuron
 public:
     SScInputNeuron(SScHighwayNetwork* net) : SSiHighwayNeuron(net,Input) {}
     bool addInput(SSiHighwayNeuron *, double, SScTrainableParameter::Type) { return false; }
+    bool addInput(SSiHighwayNeuron*, SScTrainableParameter*) { return false; }
+
     bool delInput(SSiHighwayNeuron *) { return false; }
 
     virtual bool    setInput    (double v)          { m_input = v; return true; }
@@ -248,6 +282,7 @@ class SScBiasNeuron : public SSiHighwayNeuron
 public:
     SScBiasNeuron(SScHighwayNetwork* net) : SSiHighwayNeuron(net,Bias) {}
     virtual bool    addInput    (SSiHighwayNeuron*, double,SScTrainableParameter::Type)  { Q_ASSERT(false); return false; }
+    virtual bool    addInput    (SSiHighwayNeuron*, SScTrainableParameter*) { return false; }
     virtual bool    delInput    (SSiHighwayNeuron*)           { Q_ASSERT(false); return false; }
     virtual bool    setInput    (double)                { Q_ASSERT(false); return false; }
     virtual bool    setTarget   (double)                { Q_ASSERT(false); return false; }
@@ -293,6 +328,17 @@ bool SSiHighwayNeuron::setActivation(SScActivation::Type type, double gain)
     return m_act!=NULL;
 }
 
+SSiHighwayNeuron* SSiHighwayNeuron::create(SScHighwayNetwork* net, const QVariantMap& vm)
+{
+    SScVM sscvm(vm);
+    const Type t = id2Type(sscvm.stringToken("TYPE",""));
+    if (t!=SSiHighwayNeuron::Last)
+    {
+        SSiHighwayNeuron* n = create(net,t,"");
+        return n;
+    }
+    return NULL;
+}
 SSiHighwayNeuron* SSiHighwayNeuron::create(SScHighwayNetwork* net, Type type, const QString& name)
 {
     SSiHighwayNeuron* ret = NULL;
@@ -339,9 +385,15 @@ QVariantMap SSiHighwayNeuron::toVM() const
 
 bool SSiHighwayNeuron::fromVM(const QVariantMap & vm)
 {
-    //TODO
-  Q_UNUSED(vm);
-    return false;
+    foreach(const QString& key, vm.keys())
+    {
+        if (key=="ACT")
+        {
+            if (m_act) delete m_act;
+            m_act = SScActivation::create(vm[key].toMap());
+        }
+    }
+    return true;
 }
 
 QString SSiHighwayNeuron::type2Id(Type t)

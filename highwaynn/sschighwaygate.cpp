@@ -1,5 +1,6 @@
 #include "sschighwaygate.hpp"
 #include "sschighwayneuron.hpp"
+#include "sschighwaynetwork.hpp"
 
 SScHighwayGate::SScHighwayGate(SSiHighwayNeuron* parent)
     : QMap<SSiHighwayNeuron*,QSharedPointer<SScTrainableParameter> >(),
@@ -8,6 +9,15 @@ SScHighwayGate::SScHighwayGate(SSiHighwayNeuron* parent)
 
 SScHighwayGate::~SScHighwayGate() {}
 
+bool SScHighwayGate::addInput(SSiHighwayNeuron *other, SScTrainableParameter* tp)
+{
+    Q_CHECK_PTR(other);
+    Q_CHECK_PTR(tp);
+    if ((m_parent==other) || contains(other)) return false;
+    m_dirty=true;
+    (*this)[other]=QSharedPointer<SScTrainableParameter>(tp);
+    return true;
+}
 bool SScHighwayGate::addInput(SSiHighwayNeuron *other, double v, SScTrainableParameter::Type t)
 {
     Q_CHECK_PTR(other);
@@ -58,13 +68,21 @@ QVariantMap SScHighwayGate::toVM() const
     QVariantMap vm;
     foreach(SSiHighwayNeuron* n, this->keys())
     {
-        vm[QString("CON%1").arg(n->index())] = (*this)[n]->toVM();
+        vm[QString("CON_%1").arg(n->index())] = (*this)[n]->toVM();
     }
     return vm;
 }
-bool SScHighwayGate::fromVM(const QVariantMap& vm)
-{
-    //TODO
-    Q_UNUSED(vm);
-    return false;
+bool SScHighwayGate::fromVM(SScHighwayNetwork* net, const QVariantMap& vm)
+{    
+    clear();
+    foreach(const QString& key, vm.keys()) if (key.startsWith("CON"))
+    {
+        bool ok = false;
+        const int idx = key.split("_").last().toInt(&ok);
+        if (idx>=0)
+        {
+            net->connect(idx,m_parent->index(),vm[key].toMap());
+        }
+    }
+    return true;
 }

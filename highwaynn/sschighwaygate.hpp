@@ -1,6 +1,7 @@
 #ifndef SSCHWGATE_HPP
 #define SSCHWGATE_HPP
 
+class SScHighwayNetwork;
 #include "../nnhelpers/ssctrainableparameter.hpp"
 #include "../nnhelpers/sscactivation.hpp"
 #include "blas/blasvector.hpp"
@@ -17,6 +18,7 @@ public:
     virtual ~SScHighwayGate();
 
     virtual bool addInput(SSiHighwayNeuron *other, double v, SScTrainableParameter::Type t);
+    virtual bool addInput(SSiHighwayNeuron *other, SScTrainableParameter* tp);
     virtual bool delInput(SSiHighwayNeuron *other);
     virtual double net();
     /*!
@@ -29,12 +31,13 @@ public:
     virtual void endOfCycle();
 
     QVariantMap toVM() const;
-    bool fromVM(const QVariantMap& vm);
+
+    bool fromVM(SScHighwayNetwork*,const QVariantMap& vm);
 
 private:
     SSiHighwayNeuron*   m_parent;
     bool                m_dirty;
-    double              m_net;    
+    double              m_net;        
 };
 
 #endif // SSCHWGATE_HPP

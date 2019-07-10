@@ -27,6 +27,7 @@ public:
     bool contains(SSiHighwayNeuron* n) const;
     bool connect(SSiHighwayNeuron* from, SSiHighwayNeuron* to, double v);    
     bool disconnect(SSiHighwayNeuron* from, SSiHighwayNeuron* to);
+    bool connect(int from, int to, const QVariantMap&);
     bool connect(int from, int to, double v);
     bool connect(int from, int to);
 

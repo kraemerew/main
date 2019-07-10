@@ -42,6 +42,7 @@ public:
     inline void   endOfCycle() { m_gain->endOfCycle(); }
 
     static SScActivation* create(Type type);
+    static SScActivation* create(const QVariantMap& vm);
     static QString name(Type type);
     static QString type2Id(Type type);
     static Type id2Type(const QString& id, bool& ok);

@@ -58,6 +58,7 @@ public:
     virtual bool setActivation(SScActivation::Type type, double gain = 1.0);
     virtual double deltaw(SSiHighwayNeuron* n) = 0;
     virtual double deltag() = 0;
+    virtual bool addInput(SSiHighwayNeuron* other, SScTrainableParameter* tp) = 0;
     virtual bool addInput(SSiHighwayNeuron* other, double v, SScTrainableParameter::Type t) = 0;
     virtual bool delInput(SSiHighwayNeuron* other) = 0;
     virtual double net() { return 0.0; }
@@ -70,7 +71,7 @@ public:
 
     virtual QList<SSiHighwayNeuron*> inputs() const { return QList<SSiHighwayNeuron*>(); }
     virtual QList<SSiHighwayNeuron*> allInputs() const { return inputs(); }
-
+    static SSiHighwayNeuron* create(SScHighwayNetwork* net, const QVariantMap&);
     static SSiHighwayNeuron* create(SScHighwayNetwork* net, Type type, const QString& name = QString());
     virtual void connectForward (const QList<SSiHighwayNeuron*>& fwd) { qWarning("N %s FORWARD %d", qPrintable(name()), fwd.size()); m_out = fwd; }
     virtual void trainingStep   () {}
@@ -84,6 +85,10 @@ public:
 
     static QString type2Id(Type t);
     static Type id2Type(const QString& id);
+    /*!
+     * \brief Called after loading after all neurons are created
+     */
+    virtual void doConnection() {}
 
 protected:
     // Partial derivative of network error by o_j (with j being the index of this neuron)
