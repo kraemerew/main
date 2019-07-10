@@ -33,7 +33,8 @@ SOURCES += main.cpp \
     image/moments.cpp \
     #nn/sscgate.cpp \
     blas/blasvector.cpp \
-    nnhelpers/sscnetworkbase.cpp
+    nnhelpers/sscnetworkbase.cpp \
+    nnhelpers/ssnjsonhandler.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -70,5 +71,6 @@ HEADERS += \
     #nn/ssineuron.hpp \
     #nn/sscgate.hpp \
     blas/blasvector.hpp \
-    nnhelpers/sscnetworkbase.hpp
+    nnhelpers/sscnetworkbase.hpp \
+    nnhelpers/ssnjsonhandler.hpp
 

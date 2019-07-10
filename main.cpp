@@ -60,9 +60,9 @@ void parityTest(int pow)
 {
     const int pmax = qPow(2,pow), plast = pmax-1;
     SScHighwayNetwork net;
-    net.setTrainingType(SScTrainableParameter::CON_ADAM);
-    net.setHiddenActivationType(SScActivation::ACT_RBF);
-    net.setOutputActivationType(SScActivation::ACT_MHAT);
+    net.setTrainingType(SScTrainableParameter::ADAM);
+    net.setHiddenActivationType(SScActivation::RBF);
+    net.setOutputActivationType(SScActivation::MHAT);
    // net.setConnectionRange(1,0);
    // net.setGainRange(0,1);
     const int o1 = net.addOutputNeuron  ("Out");
@@ -135,13 +135,20 @@ void parityTest(int pow)
     std::exit(0);
 }
 
+void loadTest()
+{
+    SScHighwayNetwork net;
+    net.load("test.net");
+    net.dump();
+    std::exit(0);
+}
 void carryTest(int pow)
 {
     const int pmax = qPow(2,pow), plast = pmax-1;
     SScHighwayNetwork net;
-    net.setTrainingType(SScTrainableParameter::CON_ADAM);
-    net.setHiddenActivationType(SScActivation::ACT_MHAT);
-    net.setOutputActivationType(SScActivation::ACT_MHAT);
+    net.setTrainingType(SScTrainableParameter::ADAM);
+    net.setHiddenActivationType(SScActivation::MHAT);
+    net.setOutputActivationType(SScActivation::MHAT);
     // net.setConnectionRange(1,0);
     // net.setGainRange(0,1);
     const int o1 = net.addOutputNeuron  ("Out");
@@ -216,7 +223,9 @@ void carryTest(int pow)
     }
     while (!done);
     qWarning("Training took %d ms", (int)t.elapsed());
-    std::exit(0);
+   net.save("test.net");
+   loadTest();
+   std::exit(0);
 }
 
 #include "filter/filter.hpp"

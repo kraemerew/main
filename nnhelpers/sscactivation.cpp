@@ -200,7 +200,15 @@ QVariantMap SScActivation::toVM() const
 
 bool SScActivation::fromVM(const QVariantMap& vm)
 {
-    Q_UNUSED(vm);
-    //TODO
+    if (vm.contains("GAIN"))
+    {
+        SScTrainableParameter* newgain = SScTrainableParameter::create(vm["GAIN"].toMap());
+        if (newgain)
+        {
+            if (m_gain) delete m_gain;
+            m_gain = newgain;
+            return true;
+        }
+    }
     return false;
 }

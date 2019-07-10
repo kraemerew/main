@@ -89,6 +89,7 @@ public:
      * \brief Called after loading after all neurons are created
      */
     virtual void doConnection() {}
+    virtual void dump();
 
 protected:
     // Partial derivative of network error by o_j (with j being the index of this neuron)

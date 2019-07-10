@@ -21,7 +21,7 @@ void SScTrainableParameter::endOfCycle()
 QVariantMap SScTrainableParameter::toVM() const
 {
     QVariantMap vm;
-    vm["TYPE"] = m_t;
+    vm["TYPE"] = type2Id(m_t);
     vm["VALUE"] = m_value;
     vm["ETA"] = m_eta;
     return vm;
@@ -62,8 +62,6 @@ public:
     QVariantMap toVM() const
     {
         QVariantMap vm = SScTrainableParameter::toVM();
-        vm["TYPE"]  = m_t;
-        vm["VALUE"] = m_value;
         vm["MOMENTUM"]    = m_momentum;
         return vm;
     }
@@ -112,7 +110,7 @@ public:
     QVariantMap toVM() const
     {
         QVariantMap vm;
-        vm["TYPE"]  = m_t;
+        vm["TYPE"]  = type2Id(m_t);
         vm["VALUE"] = m_value;
         vm["E+"]    = m_eplus;
         vm["E-"]    = m_eminus;

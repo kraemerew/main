@@ -2,7 +2,9 @@
 #include "sschighwayneuron.hpp"
 #include "../nnhelpers/ssccycledetector.hpp"
 #include "../nnhelpers/sscvm.hpp"
+#include "../nnhelpers/ssnjsonhandler.hpp"
 #include <QSet>
+#include <QFile>
 
 SScHighwayNetwork::SScHighwayNetwork() : SScNetworkBase()
 {
@@ -171,6 +173,8 @@ QVariantMap SScHighwayNetwork::toVM() const
 
 bool SScHighwayNetwork::fromVM(const QVariantMap& vm)
 {
+    if (vm.isEmpty()) return false;
+    clear();
     QMap<int,QVariantMap> cache;
     foreach(const QString& key, vm.keys())
     {
@@ -193,4 +197,46 @@ bool SScHighwayNetwork::fromVM(const QVariantMap& vm)
 
     foreach(SSiHighwayNeuron* n, m_neurons) n->fromVM(cache[n2idx(n)]);
     return true;
+}
+
+QByteArray  SScHighwayNetwork::toData() const
+{
+    return SSnJsonHandler::toData(toVM());
+}
+
+bool SScHighwayNetwork::fromData(const QByteArray& data)
+{
+    bool ok = false;
+    const QVariantMap vm = SSnJsonHandler::fromData(data,ok);
+    return (!ok || vm.isEmpty()) ? false : fromVM(vm);
+}
+
+bool SScHighwayNetwork::save(const QString &filename, bool compressed)
+{
+    QFile f(filename);
+    if (f.open(QIODevice::WriteOnly))
+    {
+        QByteArray ba = toData();
+        if (compressed) ba = qCompress(ba);
+        f.write(ba);
+        return true;
+    }
+    return false;
+}
+
+bool SScHighwayNetwork::load(const QString& filename)
+{
+    QFile f(filename);
+    if (f.open(QIODevice::ReadOnly))
+    {
+        const QByteArray ba = f.readAll(), uc = qUncompress(ba);
+        return uc.isEmpty() ? fromData(ba) : fromData(uc);
+    }
+    return false;
+}
+
+void SScHighwayNetwork::dump()
+{
+    qWarning("Highway network: %d neurons", size());
+    foreach(SSiHighwayNeuron* n, m_neurons) n->dump();
 }

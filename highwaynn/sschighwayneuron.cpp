@@ -87,8 +87,16 @@ public:
     virtual bool fromVM(const QVariantMap &vm)
     {
         bool ret = SSiHighwayNeuron::fromVM(vm);
-        if (!m_in.fromVM(m_net,vm["GATE"].toMap())) ret = false;
+        m_in.clear();
+        SScVM sscvm(vm);
+        if (!m_in.fromVM(m_net,sscvm.vmToken("GATE"))) ret = false;
         return ret;
+    }
+
+    void dump()
+    {
+        SSiHighwayNeuron::dump();
+        qWarning("> %d connections", m_in.size());
     }
 
 protected:
@@ -191,7 +199,6 @@ public:
     }
     virtual double deltaw(SSiHighwayNeuron* n)
     {
-        //TODO
         // dE/dw_ij=dE/doj*doj/dw_ij=dedo()*doj/dnetj*dnetj/dwij
         // = dedo()*doj/dnetj*oi
         return -dedo()*n->out()*m_act->dev()*m_act->gain()*(1.0-carry());
@@ -223,21 +230,28 @@ public:
     }
     virtual bool fromVM(const QVariantMap &vm)
     {
+        SScVM sscvm(vm);
         bool ret = SSiHighwayNeuron::fromVM(vm);
-        if (!m_in.fromVM(m_net,vm["GATE"].toMap())) ret = false;
-        if (vm.contains("HIGHWAY") && vm.contains("CARRY"))
+        m_in.clear();
+        if (!m_in.fromVM(m_net,sscvm.vmToken("GATE"))) ret = false;
+        const int hwidx = sscvm.intToken("HIGHWAY",-1),
+                  cidx  = sscvm.intToken("CARRY",  -1);
+        if ((hwidx>=0) && (cidx>=0))
         {
-            bool ok1 = false, ok2 = false;
-            const int hwidx = vm["HIGHWAY"].toInt(&ok1),
-                      cidx  = vm["CARRY"].  toInt(&ok2);
-            if (ok1 && ok2 && (hwidx>=0) && (cidx>=0) && (hwidx!=cidx))
-            {
-                m_net->setHighway(index(),hwidx,cidx);
-            }
+            if (hwidx!=cidx) m_net->setHighway(index(),hwidx,cidx);
             else ret = false;
         }
         return ret;
     }
+
+    void dump()
+    {
+        SSiHighwayNeuron::dump();
+        qWarning("> %d connections", m_in.size());
+        if (m_hwn && m_cn) qWarning("> Highway connected");
+    }
+
+protected:
     SScHighwayGate      m_in;
     SSiHighwayNeuron*   m_hwn;
     SSiHighwayNeuron*   m_cn;
@@ -379,19 +393,20 @@ QVariantMap SSiHighwayNeuron::toVM() const
 {
     QVariantMap vm;
     vm["TYPE"] = type2Id(m_type);
+    vm["NAME"] = m_name;
     vm["ACT"] = m_act->toVM();
     return vm;
 }
 
 bool SSiHighwayNeuron::fromVM(const QVariantMap & vm)
 {
-    foreach(const QString& key, vm.keys())
+    SScVM sscvm(vm);
+    m_name = sscvm.stringToken("NAME","");
+    const QVariantMap avm = sscvm.vmToken("ACT");
+    if (!avm.isEmpty())
     {
-        if (key=="ACT")
-        {
-            if (m_act) delete m_act;
-            m_act = SScActivation::create(vm[key].toMap());
-        }
+        if (m_act) delete m_act;
+        m_act = SScActivation::create(avm);
     }
     return true;
 }
@@ -415,4 +430,10 @@ SSiHighwayNeuron::Type SSiHighwayNeuron::id2Type(const QString &id)
     for (int i= (int)Input; i<(int)Last; ++i)
         if (id.toUpper()==type2Id((Type)i)) return (Type)i;
     return Last;
+}
+
+void SSiHighwayNeuron::dump()
+{
+    if (m_name.isEmpty())   qWarning("> Type %s", qPrintable(type2Id(m_type)));
+    else                    qWarning("> Type %s / Name %s", qPrintable(type2Id(m_type)), qPrintable(m_name));
 }

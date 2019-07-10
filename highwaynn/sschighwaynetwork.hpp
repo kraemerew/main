@@ -12,6 +12,13 @@ public:
     SScHighwayNetwork();
     virtual ~SScHighwayNetwork();
 
+    QByteArray toData() const;
+    bool fromData(const QByteArray&);
+    bool load(const QString& filename);
+    bool save(const QString& filename, bool compressed = true);
+    inline int size() const { return m_neurons.size(); }
+
+    inline void clear() { foreach(SSiHighwayNeuron* n, m_neurons) delete n; m_neurons.clear(); }
     int addInputNeuron   (const QString& name = QString());
     int addHiddenNeuron  (const QString& name = QString());
     int addOutputNeuron  (const QString& name = QString());
@@ -49,6 +56,8 @@ public:
 
     bool setInput (int idx, double d);
     bool setTarget(int idx, double d);    
+
+    void dump();
 
 private:
     bool isFeedForward() const;
