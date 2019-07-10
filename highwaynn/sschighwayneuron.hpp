@@ -12,16 +12,16 @@ class SScHighwayNetwork;
 class SSiHighwayNeuron
 {
 public:
-    enum SSeNeuronType
+    enum Type
     {
-        NeuronType_Input,
-        NeuronType_Hidden,
-        NeuronType_Output,
-        NeuronType_Bias,
-        NeuronType_Carry,
-        NeuronType_Last
+        Input,
+        Hidden,
+        Output,
+        Bias,
+        Carry,
+        Last
     };
-    explicit SSiHighwayNeuron(SScHighwayNetwork* net, SSeNeuronType type, SScActivation::Type acttype = SScActivation::ACT_IDENTITY)
+    explicit SSiHighwayNeuron(SScHighwayNetwork* net, Type type, SScActivation::Type acttype = SScActivation::ACT_IDENTITY)
         : m_net(net),
           m_type(type),
           m_dedoset(false),
@@ -71,7 +71,7 @@ public:
     virtual QList<SSiHighwayNeuron*> inputs() const { return QList<SSiHighwayNeuron*>(); }
     virtual QList<SSiHighwayNeuron*> allInputs() const { return inputs(); }
 
-    static SSiHighwayNeuron* create(SScHighwayNetwork* net, SSeNeuronType type, const QString& name = QString());
+    static SSiHighwayNeuron* create(SScHighwayNetwork* net, Type type, const QString& name = QString());
     virtual void connectForward (const QList<SSiHighwayNeuron*>& fwd) { qWarning("N %s FORWARD %d", qPrintable(name()), fwd.size()); m_out = fwd; }
     virtual void trainingStep   () {}
     virtual void endOfCycle     () {}
@@ -82,8 +82,8 @@ public:
     virtual QVariantMap toVM() const;
     virtual bool fromVM(const QVariantMap&);
 
-    static QString type2Id(SSeNeuronType t);
-    static SSeNeuronType id2Type(const QString& id);
+    static QString type2Id(Type t);
+    static Type id2Type(const QString& id);
 
 protected:
     // Partial derivative of network error by o_j (with j being the index of this neuron)
@@ -91,7 +91,7 @@ protected:
     virtual double priv_dedo();
 
     SScHighwayNetwork*          m_net;
-    SSeNeuronType               m_type;
+    Type                        m_type;
     bool                        m_dedoset, m_transformset, m_outset;
     double                      m_dedo, m_t, m_o;
     SScActivation*              m_act;

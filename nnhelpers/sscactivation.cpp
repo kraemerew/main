@@ -13,11 +13,22 @@ private:
 class SScActivationSigmoid : public SScActivation
 {
 public:
-    SScActivationSigmoid() : SScActivation(ACT_SIGMOID) {}
+    SScActivationSigmoid() : SScActivation(ACT_LOGISTIC) {}
 
 private:
     virtual void priv_activate() { m_act = 1.0/(1.0+exp(-m_pot*m_gain->value())); }
     virtual double priv_dev() { return m_act*(1.0-m_act); }    
+};
+
+
+class SScActivationRelu : public SScActivation
+{
+public:
+    SScActivationRelu(): SScActivation(ACT_RELU) {}
+
+private:
+    virtual void priv_activate() { m_act = (m_pot<0) ? 0.0 : m_gain->value()*m_pot; }
+    virtual double priv_dev() { return (m_pot<0) ? 0 : m_gain->value(); }
 };
 
 class SScActivationTanh : public SScActivation
@@ -102,7 +113,7 @@ bool SScActivation::canCarry(Type type)
 {
     switch (type)
     {
-    case ACT_SIGMOID:
+    case ACT_LOGISTIC:
     case ACT_RBF:       return true; break;
     default: return false; break;
     }
@@ -112,7 +123,8 @@ SScActivation* SScActivation::create(Type type)
     switch (type)
     {
     case ACT_IDENTITY:  return new SScActivationIdentity(); break;
-    case ACT_SIGMOID:   return new SScActivationSigmoid(); break;
+    case ACT_RELU:      return new SScActivationRelu(); break;
+    case ACT_LOGISTIC:   return new SScActivationSigmoid(); break;
     case ACT_TANH:      return new SScActivationTanh(); break;
     case ACT_RBF:       return new SScActivationRbf(); break;
     case ACT_SOFTPLUS:  return new SScActivationSoftPlus(); break;
@@ -130,7 +142,8 @@ QString SScActivation::name(Type type)
     switch (type)
     {
     case ACT_IDENTITY:  return "Id"; break;
-    case ACT_SIGMOID:   return "Logistic"; break;
+    case ACT_RELU:      return "Relu"; break;
+    case ACT_LOGISTIC:  return "Logistic"; break;
     case ACT_TANH:      return "Tanh"; break;
     case ACT_RBF:       return "Rbf"; break;
     case ACT_SOFTPLUS:  return "SoftPlus"; break;
@@ -176,5 +189,7 @@ QVariantMap SScActivation::toVM() const
 
 bool SScActivation::fromVM(const QVariantMap& vm)
 {
+    Q_UNUSED(vm);
+    //TODO
     return false;
 }

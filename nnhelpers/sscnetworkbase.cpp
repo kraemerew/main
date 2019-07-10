@@ -8,7 +8,7 @@ SScNetworkBase::SScNetworkBase() :
     m_gmin  (-1),
     m_gmax  ( 1),
     m_htype (SScActivation::ACT_TANH),
-    m_ctype (SScActivation::ACT_SIGMOID),
+    m_ctype (SScActivation::ACT_LOGISTIC),
     m_otype (SScActivation::ACT_SWISH),
     m_tptype(SScTrainableParameter::CON_ADAM)
 {}

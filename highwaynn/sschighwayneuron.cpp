@@ -7,9 +7,9 @@
 class SScCarryNeuron : public SSiHighwayNeuron
 {
 public:
-    SScCarryNeuron(SScHighwayNetwork* net) : SSiHighwayNeuron(net, NeuronType_Carry), m_in(SScHighwayGate(this))
+    SScCarryNeuron(SScHighwayNetwork* net) : SSiHighwayNeuron(net, Carry), m_in(SScHighwayGate(this))
     {
-        setActivation(SScActivation::ACT_SIGMOID,1.0);
+        setActivation(SScActivation::ACT_LOGISTIC,1.0);
     }
     virtual double transform()
     {
@@ -94,7 +94,7 @@ protected:
 class SScConnectedNeuron : public SSiHighwayNeuron
 {
 public:
-    SScConnectedNeuron(SScHighwayNetwork* net, SSeNeuronType type, SScActivation::Type acttype)
+    SScConnectedNeuron(SScHighwayNetwork* net, Type type, SScActivation::Type acttype)
         : SSiHighwayNeuron(net,type,acttype),
           m_in(SScHighwayGate(this)),
           m_hwn(NULL), m_cn(NULL)
@@ -214,7 +214,7 @@ public:
 class SScHiddenNeuron : public SScConnectedNeuron
 {
 public:
-    SScHiddenNeuron(SScHighwayNetwork* net) : SScConnectedNeuron(net,NeuronType_Hidden, SScActivation::ACT_TANH)
+    SScHiddenNeuron(SScHighwayNetwork* net) : SScConnectedNeuron(net,Hidden, SScActivation::ACT_TANH)
     {}
 
     virtual bool  setInput(double) { Q_ASSERT(false); return false; }
@@ -225,7 +225,7 @@ public:
 class SScInputNeuron : public SSiHighwayNeuron
 {
 public:
-    SScInputNeuron(SScHighwayNetwork* net) : SSiHighwayNeuron(net,NeuronType_Input) {}
+    SScInputNeuron(SScHighwayNetwork* net) : SSiHighwayNeuron(net,Input) {}
     bool addInput(SSiHighwayNeuron *, double, SScTrainableParameter::Type) { return false; }
     bool delInput(SSiHighwayNeuron *) { return false; }
 
@@ -246,7 +246,7 @@ private:
 class SScBiasNeuron : public SSiHighwayNeuron
 {
 public:
-    SScBiasNeuron(SScHighwayNetwork* net) : SSiHighwayNeuron(net,NeuronType_Bias) {}
+    SScBiasNeuron(SScHighwayNetwork* net) : SSiHighwayNeuron(net,Bias) {}
     virtual bool    addInput    (SSiHighwayNeuron*, double,SScTrainableParameter::Type)  { Q_ASSERT(false); return false; }
     virtual bool    delInput    (SSiHighwayNeuron*)           { Q_ASSERT(false); return false; }
     virtual bool    setInput    (double)                { Q_ASSERT(false); return false; }
@@ -264,7 +264,7 @@ class SScOutputNeuron : public SScConnectedNeuron
 {
 public:
     SScOutputNeuron(SScHighwayNetwork* net)
-        : SScConnectedNeuron(net,NeuronType_Output,SScActivation::ACT_MHAT)
+        : SScConnectedNeuron(net,Output,SScActivation::ACT_MHAT)
     {}
 
     virtual bool    setInput(double) { Q_ASSERT(false); return false; }
@@ -293,18 +293,19 @@ bool SSiHighwayNeuron::setActivation(SScActivation::Type type, double gain)
     return m_act!=NULL;
 }
 
-SSiHighwayNeuron* SSiHighwayNeuron::create(SScHighwayNetwork* net, SSeNeuronType type, const QString& name)
+SSiHighwayNeuron* SSiHighwayNeuron::create(SScHighwayNetwork* net, Type type, const QString& name)
 {
     SSiHighwayNeuron* ret = NULL;
     switch(type)
     {
-        case NeuronType_Hidden: ret = new (std::nothrow) SScHiddenNeuron (net); break;
-        case NeuronType_Input:  ret = new (std::nothrow) SScInputNeuron  (net); break;
-        case NeuronType_Output: ret = new (std::nothrow) SScOutputNeuron (net); break;
-        case NeuronType_Bias:   ret = new (std::nothrow) SScBiasNeuron   (net); break;
-        case NeuronType_Carry:  ret = new (std::nothrow) SScCarryNeuron  (net); break;
-    default: break;
+        case Hidden: ret = new (std::nothrow) SScHiddenNeuron (net); break;
+        case Input:  ret = new (std::nothrow) SScInputNeuron  (net); break;
+        case Output: ret = new (std::nothrow) SScOutputNeuron (net); break;
+        case Bias:   ret = new (std::nothrow) SScBiasNeuron   (net); break;
+        case Carry:  ret = new (std::nothrow) SScCarryNeuron  (net); break;
+        default:                                                     break;
     }
+    Q_CHECK_PTR(ret);
     if (ret) ret->setName(name);
     return ret;
 }
@@ -343,23 +344,23 @@ bool SSiHighwayNeuron::fromVM(const QVariantMap & vm)
     return false;
 }
 
-QString SSiHighwayNeuron::type2Id(SSeNeuronType t)
+QString SSiHighwayNeuron::type2Id(Type t)
 {
     switch(t)
     {
-    case NeuronType_Input:   return "INPUT";    break;
-    case NeuronType_Hidden:  return "HIDDEN";   break;
-    case NeuronType_Output:  return "OUTPUT";   break;
-    case NeuronType_Bias:    return "BIAS";     break;
-    case NeuronType_Carry:   return "CARRY";    break;
-    default:                                    break;
+    case Input:   return "INPUT";   break;
+    case Hidden:  return "HIDDEN";  break;
+    case Output:  return "OUTPUT";  break;
+    case Bias:    return "BIAS";    break;
+    case Carry:   return "CARRY";   break;
+    default:                        break;
     }
     return "";
 }
 
-SSiHighwayNeuron::SSeNeuronType SSiHighwayNeuron::id2Type(const QString &id)
+SSiHighwayNeuron::Type SSiHighwayNeuron::id2Type(const QString &id)
 {
-    for (int i= (int)SSiHighwayNeuron::NeuronType_Input; i<(int)SSiHighwayNeuron::NeuronType_Last; ++i)
-        if (id.toUpper()==type2Id((SSiHighwayNeuron::SSeNeuronType)i)) return (SSeNeuronType)i;
-    return NeuronType_Last;
+    for (int i= (int)Input; i<(int)Last; ++i)
+        if (id.toUpper()==type2Id((Type)i)) return (Type)i;
+    return Last;
 }
