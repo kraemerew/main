@@ -21,7 +21,7 @@ public:
         Carry,
         Last
     };
-    explicit SSiHighwayNeuron(SScHighwayNetwork* net, Type type, SScActivation::Type acttype = SScActivation::ACT_IDENTITY)
+    explicit SSiHighwayNeuron(SScHighwayNetwork* net, Type type, SScActivation::Type acttype = SScActivation::IDENTITY)
         : m_net(net),
           m_type(type),
           m_dedoset(false),

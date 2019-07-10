@@ -10,24 +10,24 @@ class SScActivation
 public:
     enum Type
     {
-        ACT_IDENTITY,
-        ACT_RELU,
-        ACT_LOGISTIC,
-        ACT_TANH,
-        ACT_RBF,
-        ACT_SOFTPLUS,
-        ACT_SWISH,
-        ACT_MHAT,
-        ACT_GDER,
-        ACT_X,        
-        ACT_LAST
+        IDENTITY,
+        RELU,
+        LOGISTIC,
+        TANH,
+        RBF,
+        SOFTPLUS,
+        SWISH,
+        MHAT,
+        GDER,
+        X,
+        LAST
     };
 
     SScActivation(Type t)
         : m_t   (t),
           m_pot (0),
           m_act (0),
-          m_gain(SScTrainableParameter::create(SScTrainableParameter::CON_ADAM,1.0))
+          m_gain(SScTrainableParameter::create(SScTrainableParameter::ADAM,1.0))
     {}
 
     virtual ~SScActivation() { delete m_gain; }

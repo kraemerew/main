@@ -9,7 +9,7 @@ class SScCarryNeuron : public SSiHighwayNeuron
 public:
     SScCarryNeuron(SScHighwayNetwork* net) : SSiHighwayNeuron(net, Carry), m_in(SScHighwayGate(this))
     {
-        setActivation(SScActivation::ACT_LOGISTIC,1.0);
+        setActivation(SScActivation::LOGISTIC,1.0);
     }
     virtual double transform()
     {
@@ -214,7 +214,7 @@ public:
 class SScHiddenNeuron : public SScConnectedNeuron
 {
 public:
-    SScHiddenNeuron(SScHighwayNetwork* net) : SScConnectedNeuron(net,Hidden, SScActivation::ACT_TANH)
+    SScHiddenNeuron(SScHighwayNetwork* net) : SScConnectedNeuron(net,Hidden, SScActivation::MHAT)
     {}
 
     virtual bool  setInput(double) { Q_ASSERT(false); return false; }
@@ -264,7 +264,7 @@ class SScOutputNeuron : public SScConnectedNeuron
 {
 public:
     SScOutputNeuron(SScHighwayNetwork* net)
-        : SScConnectedNeuron(net,Output,SScActivation::ACT_MHAT)
+        : SScConnectedNeuron(net,Output,SScActivation::SWISH)
     {}
 
     virtual bool    setInput(double) { Q_ASSERT(false); return false; }

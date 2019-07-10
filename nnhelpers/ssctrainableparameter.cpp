@@ -34,11 +34,57 @@ bool SScTrainableParameter::fromVM(const QVariantMap &vm)
     return true;
 }
 
-class SScConnectionRProp : public SScTrainableParameter
+
+class SScTrainableParameterMomentum : public SScTrainableParameter
 {
 public:
-    SScConnectionRProp(double v, double eminus = 0.5, double eplus = 1.2, double uval = .1)
-        : SScTrainableParameter (v,CON_RPROP),
+    SScTrainableParameterMomentum(double v, double momentum = .2)
+        : SScTrainableParameter (v,MOMENTUM),
+          m_momentum            (momentum),
+          m_momentumc           (1.0-momentum),
+          m_last                (0)
+    {
+        Q_ASSERT(momentum>=0);
+        Q_ASSERT(momentum<1);
+    }
+    virtual void endOfCycle()
+    {
+        if (m_ctr>0)
+        {
+            const double now = m_updatesum/(double)m_ctr,
+                         dlt = m_eta*(now*m_momentumc + m_last*m_momentum);
+            m_value+=dlt;
+            m_last=now;
+            m_updatesum=0.0;
+            m_ctr = 0;
+        }
+    }
+    QVariantMap toVM() const
+    {
+        QVariantMap vm = SScTrainableParameter::toVM();
+        vm["TYPE"]  = m_t;
+        vm["VALUE"] = m_value;
+        vm["MOMENTUM"]    = m_momentum;
+        return vm;
+    }
+    bool fromVM(const QVariantMap &vm)
+    {
+        SScVM sscvm(vm);
+        m_value  = sscvm.doubleToken("VALUE", m_value);
+        m_momentum = sscvm.doubleToken("MOMENTUM",    m_momentum);
+        m_momentumc = 1.0-m_momentum;
+        return true;
+    }
+
+private:
+    double m_momentum, m_momentumc, m_last;
+};
+
+class SScTrainableParameterRProp : public SScTrainableParameter
+{
+public:
+    SScTrainableParameterRProp(double v, double eminus = 0.5, double eplus = 1.2, double uval = .1)
+        : SScTrainableParameter (v,RPROP),
           m_eplus               (eplus),
           m_eminus              (eminus),
           m_uval                (uval),
@@ -90,11 +136,11 @@ private:
     double m_eplus, m_eminus, m_uval, m_last;
 };
 
-class SScConnectionRMSProp : public SScTrainableParameter
+class SScTrainableParameterRMSProp : public SScTrainableParameter
 {
 public:
-    SScConnectionRMSProp(double v, double beta = 0.9)
-        : SScTrainableParameter(v,CON_RMSPROP),
+    SScTrainableParameterRMSProp(double v, double beta = 0.9)
+        : SScTrainableParameter(v,RMSPROP),
           m_beta    (beta),
           m_betac   (1.0-m_beta),
           m_v       (0)
@@ -139,11 +185,11 @@ private:
 };
 
 
-class SScConnectionAdamCorr : public SScTrainableParameter
+class SScTrainableParameterAdamCorr : public SScTrainableParameter
 {
 public:
-    SScConnectionAdamCorr(double v, double beta1 = 0.9, double beta2 = 0.99)
-        : SScTrainableParameter(v,CON_ADAMCORR),
+    SScTrainableParameterAdamCorr(double v, double beta1 = 0.9, double beta2 = 0.99)
+        : SScTrainableParameter(v,ADAMCORR),
           m_beta1   (beta1),
           m_beta2   (beta2),
           m_beta1c  (1-m_beta1),
@@ -206,11 +252,11 @@ private:
 };
 
 
-class SScConnectionAdam : public SScTrainableParameter
+class SScTrainableParameterAdam : public SScTrainableParameter
 {
 public:
-    SScConnectionAdam(double v, double beta1 = 0.9, double beta2 = 0.99)
-        : SScTrainableParameter(v,CON_ADAM),
+    SScTrainableParameterAdam(double v, double beta1 = 0.9, double beta2 = 0.99)
+        : SScTrainableParameter(v,ADAM),
           m_beta1   (beta1),
           m_beta2   (beta2),
           m_beta1c  (1-m_beta1),
@@ -266,11 +312,11 @@ private:
 };
 
 
-class SScConnectionAdamax : public SScTrainableParameter
+class SScTrainableParameterAdamax : public SScTrainableParameter
 {
 public:
-    SScConnectionAdamax(double v, double beta1 = 0.9, double beta2 = 0.99)
-        : SScTrainableParameter(v,CON_ADAMAX),
+    SScTrainableParameterAdamax(double v, double beta1 = 0.9, double beta2 = 0.99)
+        : SScTrainableParameter(v,ADAMAX),
           m_beta1   (beta1),
           m_beta2   (beta2),
           m_beta1c  (1-m_beta1),
@@ -324,11 +370,11 @@ private:
 };
 
 
-class SScConnectionAdamaxCorr : public SScTrainableParameter
+class SScTrainableParameterAdamaxCorr : public SScTrainableParameter
 {
 public:
-    SScConnectionAdamaxCorr(double v, double beta1 = 0.9, double beta2 = 0.99)
-        : SScTrainableParameter(v,CON_ADAMAXCORR),
+    SScTrainableParameterAdamaxCorr(double v, double beta1 = 0.9, double beta2 = 0.99)
+        : SScTrainableParameter(v,ADAMAXCORR),
           m_beta1   (beta1),
           m_beta2   (beta2),
           m_beta1c  (1-m_beta1),
@@ -384,11 +430,11 @@ private:
 };
 
 
-class SScConnectionAMSGrad : public SScTrainableParameter
+class SScTrainableParameterAMSGrad : public SScTrainableParameter
 {
 public:
-    SScConnectionAMSGrad(double v, double beta1 = 0.9, double beta2 = 0.99)
-        : SScTrainableParameter(v,CON_ADAM),
+    SScTrainableParameterAMSGrad(double v, double beta1 = 0.9, double beta2 = 0.99)
+        : SScTrainableParameter(v,ADAM),
           m_beta1   (beta1),
           m_beta2   (beta2),
           m_beta1c  (1-m_beta1),
@@ -450,15 +496,16 @@ QString SScTrainableParameter::name(Type t)
 {
     switch(t)
     {
-        case CON_STD:       return "Std";       break;
-        case CON_RPROP:     return "RProp";     break;
-        case CON_RMSPROP:   return "RmsProp";   break;
-        case CON_AMSGRAD:   return "AMSGrad";   break;
-        case CON_ADAM:      return "Adam";      break;
-        case CON_ADAMCORR:  return "AdamCorr";  break;
-        case CON_ADAMAX:    return "AdaMax";    break;
-    case CON_ADAMAXCORR:return "AdaMaxCorr";break;
-        default:                                break;
+        case STD:       return "Std";       break;
+        case MOMENTUM:  return "Momentum";  break;
+        case RPROP:     return "RProp";     break;
+        case RMSPROP:   return "RmsProp";   break;
+        case AMSGRAD:   return "AMSGrad";   break;
+        case ADAM:      return "Adam";      break;
+        case ADAMCORR:  return "AdamCorr";  break;
+        case ADAMAX:    return "AdaMax";    break;
+        case ADAMAXCORR:return "AdaMaxCorr";break;
+        default:                            break;
     }
     return "";
 }
@@ -480,14 +527,15 @@ SScTrainableParameter* SScTrainableParameter::create(Type type, double v)
 {
     switch(type)
     {
-    case CON_STD:       return new SScTrainableParameter    (v); break;
-    case CON_RPROP:     return new SScConnectionRProp       (v); break;
-    case CON_RMSPROP:   return new SScConnectionRMSProp     (v); break;
-    case CON_AMSGRAD:   return new SScConnectionAMSGrad     (v); break;
-    case CON_ADAMCORR:  return new SScConnectionAdamCorr    (v); break;
-    case CON_ADAM:      return new SScConnectionAdam        (v); break;
-    case CON_ADAMAXCORR:return new SScConnectionAdamaxCorr  (v); break;
-    case CON_ADAMAX:    return new SScConnectionAdamax      (v); break;
+    case STD:       return new SScTrainableParameter            (v); break;
+    case MOMENTUM:  return new SScTrainableParameterMomentum    (v); break;
+    case RPROP:     return new SScTrainableParameterRProp       (v); break;
+    case RMSPROP:   return new SScTrainableParameterRMSProp     (v); break;
+    case AMSGRAD:   return new SScTrainableParameterAMSGrad     (v); break;
+    case ADAMCORR:  return new SScTrainableParameterAdamCorr    (v); break;
+    case ADAM:      return new SScTrainableParameterAdam        (v); break;
+    case ADAMAXCORR:return new SScTrainableParameterAdamaxCorr  (v); break;
+    case ADAMAX:    return new SScTrainableParameterAdamax      (v); break;
 
     default:break;
     }
@@ -502,8 +550,8 @@ QString SScTrainableParameter::type2Id(Type type)
 SScTrainableParameter::Type SScTrainableParameter::id2Type(const QString &id, bool &ok)
 {
     ok = true;
-    for (int i = (int)CON_STD; i<(int)CON_LAST; ++i)
+    for (int i = (int)STD; i<(int)LAST; ++i)
         if (type2Id((Type)i)==id.toUpper()) return (Type)i;
     ok = false;
-    return CON_LAST;
+    return LAST;
 }

@@ -4,7 +4,7 @@
 class SScActivationIdentity : public SScActivation
 {
 public:
-    SScActivationIdentity(): SScActivation(ACT_IDENTITY) {}
+    SScActivationIdentity(): SScActivation(IDENTITY) {}
 
 private:
     virtual void priv_activate() { m_act = m_pot*m_gain->value(); }
@@ -13,7 +13,7 @@ private:
 class SScActivationSigmoid : public SScActivation
 {
 public:
-    SScActivationSigmoid() : SScActivation(ACT_LOGISTIC) {}
+    SScActivationSigmoid() : SScActivation(LOGISTIC) {}
 
 private:
     virtual void priv_activate() { m_act = 1.0/(1.0+exp(-m_pot*m_gain->value())); }
@@ -24,7 +24,7 @@ private:
 class SScActivationRelu : public SScActivation
 {
 public:
-    SScActivationRelu(): SScActivation(ACT_RELU) {}
+    SScActivationRelu(): SScActivation(RELU) {}
 
 private:
     virtual void priv_activate() { m_act = (m_pot<0) ? 0.0 : m_gain->value()*m_pot; }
@@ -34,7 +34,7 @@ private:
 class SScActivationTanh : public SScActivation
 {
 public:
-    SScActivationTanh(): SScActivation(ACT_TANH) {}
+    SScActivationTanh(): SScActivation(TANH) {}
 
 private:
     virtual void priv_activate() { m_act = tanh(m_pot*m_gain->value()); }
@@ -44,7 +44,7 @@ private:
 class SScActivationRbf: public SScActivation
 {
 public:
-    SScActivationRbf() : SScActivation(ACT_RBF) {}
+    SScActivationRbf() : SScActivation(RBF) {}
 
 private:
     virtual void priv_activate() { m_gp = m_pot*m_gain->value(); m_act = exp(-qPow(m_gp,2.0)); }
@@ -56,7 +56,7 @@ private:
 class SScActivationMHat: public SScActivation
 {
 public:
-    SScActivationMHat() : SScActivation(ACT_MHAT) {}
+    SScActivationMHat() : SScActivation(MHAT) {}
 
 private:
     virtual void priv_activate() { m_gp = m_pot*m_gain->value(); m_gp2 = qPow(m_gp,2.0); m_act = (1.0-m_gp2)*exp(-m_gp2); }
@@ -67,7 +67,7 @@ private:
 class SScActivationGaussianDerivative : public SScActivation
 {
 public:
-    SScActivationGaussianDerivative() : SScActivation(ACT_GDER) {}
+    SScActivationGaussianDerivative() : SScActivation(GDER) {}
 
 private:
     virtual void priv_activate() { m_x = m_pot*m_gain->value(); m_act = -2.0*m_x*exp(-qPow(m_x,2.0)); }
@@ -78,7 +78,7 @@ private:
 class SScActivationSoftPlus : public SScActivation
 {
 public:
-    SScActivationSoftPlus() : SScActivation(ACT_SOFTPLUS) {}
+    SScActivationSoftPlus() : SScActivation(SOFTPLUS) {}
 
 private:
     virtual void priv_activate() { m_e = exp(m_pot*m_gain->value()); m_act = log(1+m_e); }
@@ -89,7 +89,7 @@ private:
 class SScActivationX : public SScActivation
 {
 public:
-    SScActivationX() : SScActivation(ACT_X) {}
+    SScActivationX() : SScActivation(X) {}
 
 private:
     virtual void priv_activate() { m_x = m_pot*m_gain->value(); m_xp=qPow(m_x,2.0);  m_act = 2.0*(m_x/(m_xp+1.0)); }
@@ -100,7 +100,7 @@ private:
 class SScActivationSwish : public SScActivation
 {
 public:
-    SScActivationSwish() : SScActivation(ACT_SWISH) {}
+    SScActivationSwish() : SScActivation(SWISH) {}
 
 private:
     virtual void priv_activate() { const double m_x = m_pot*m_gain->value();  m_actsig = 1.0/(1.0+exp(-m_x)); m_act = m_x*m_actsig; }
@@ -108,13 +108,13 @@ private:
     double m_x, m_actsig;
 };
 
-bool SScActivation::nonLinear(Type type) { return type!=ACT_IDENTITY; }
+bool SScActivation::nonLinear(Type type) { return type!=IDENTITY; }
 bool SScActivation::canCarry(Type type)
 {
     switch (type)
     {
-    case ACT_LOGISTIC:
-    case ACT_RBF:       return true; break;
+    case LOGISTIC:
+    case RBF:       return true; break;
     default: return false; break;
     }
 }
@@ -122,16 +122,16 @@ SScActivation* SScActivation::create(Type type)
 {
     switch (type)
     {
-    case ACT_IDENTITY:  return new SScActivationIdentity(); break;
-    case ACT_RELU:      return new SScActivationRelu(); break;
-    case ACT_LOGISTIC:   return new SScActivationSigmoid(); break;
-    case ACT_TANH:      return new SScActivationTanh(); break;
-    case ACT_RBF:       return new SScActivationRbf(); break;
-    case ACT_SOFTPLUS:  return new SScActivationSoftPlus(); break;
-    case ACT_SWISH:     return new SScActivationSwish(); break;
-    case ACT_MHAT:      return new SScActivationMHat(); break;
-    case ACT_GDER:      return new SScActivationGaussianDerivative(); break;
-    case ACT_X:         return new SScActivationX(); break;
+    case IDENTITY:  return new SScActivationIdentity(); break;
+    case RELU:      return new SScActivationRelu(); break;
+    case LOGISTIC:   return new SScActivationSigmoid(); break;
+    case TANH:      return new SScActivationTanh(); break;
+    case RBF:       return new SScActivationRbf(); break;
+    case SOFTPLUS:  return new SScActivationSoftPlus(); break;
+    case SWISH:     return new SScActivationSwish(); break;
+    case MHAT:      return new SScActivationMHat(); break;
+    case GDER:      return new SScActivationGaussianDerivative(); break;
+    case X:         return new SScActivationX(); break;
     default: break;
     }
     return NULL;
@@ -141,16 +141,16 @@ QString SScActivation::name(Type type)
 {
     switch (type)
     {
-    case ACT_IDENTITY:  return "Id"; break;
-    case ACT_RELU:      return "Relu"; break;
-    case ACT_LOGISTIC:  return "Logistic"; break;
-    case ACT_TANH:      return "Tanh"; break;
-    case ACT_RBF:       return "Rbf"; break;
-    case ACT_SOFTPLUS:  return "SoftPlus"; break;
-    case ACT_SWISH:     return "Swish"; break;
-    case ACT_MHAT:      return "MexHat"; break;
-    case ACT_GDER:      return "GDer"; break;
-    case ACT_X:         return "X"; break;
+    case IDENTITY:  return "Id"; break;
+    case RELU:      return "Relu"; break;
+    case LOGISTIC:  return "Logistic"; break;
+    case TANH:      return "Tanh"; break;
+    case RBF:       return "Rbf"; break;
+    case SOFTPLUS:  return "SoftPlus"; break;
+    case SWISH:     return "Swish"; break;
+    case MHAT:      return "MexHat"; break;
+    case GDER:      return "GDer"; break;
+    case X:         return "X"; break;
     default: break;
     }
     return "";
@@ -163,10 +163,10 @@ QString SScActivation::type2Id(Type type)
 SScActivation::Type SScActivation::id2Type(const QString &id, bool &ok)
 {
    ok = true;
-   for (int i = (int) ACT_IDENTITY; i<(int)ACT_LAST; ++i)
+   for (int i = (int) IDENTITY; i<(int)LAST; ++i)
        if (id.toUpper()==type2Id((Type)i)) return (Type)i;
    ok = false;
-   return ACT_LAST;
+   return LAST;
 }
 void SScActivation::setTrainingType(SScTrainableParameter::Type t)
 {
