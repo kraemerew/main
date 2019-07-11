@@ -109,6 +109,126 @@ protected:
     SScHighwayGate m_in;
 };
 
+
+class SScPoolNeuron : public SSiHighwayNeuron
+{
+public:
+    SScPoolNeuron(SScHighwayNetwork* net) : SSiHighwayNeuron(net, Pool)
+    {
+        setActivation(SScActivation::LOGISTIC,1.0);
+    }
+    virtual double transform()
+    {
+        if (!m_transformset)
+        {
+            m_t = m_act->activate(net());
+            m_transformset = true;
+        }
+        return m_t;
+    }
+
+    virtual double out()
+    {
+        return transform();
+    }
+    virtual bool addInput(SSiHighwayNeuron* other, SScTrainableParameter*)
+    {
+        if (m_in.contains(other)) return true;
+        SScCarryNeuron* cn = dynamic_cast<SScCarryNeuron*>(other);
+        if (cn) return false;
+        m_in << other;
+        return true;
+    }
+    virtual bool addInput(SSiHighwayNeuron *other, double, SScTrainableParameter::Type)
+    {
+        if (m_in.contains(other)) return true;
+        SScCarryNeuron* cn = dynamic_cast<SScCarryNeuron*>(other);
+        if (cn) return false;
+        m_in << other;
+        return true;
+    }
+    virtual bool delInput(SSiHighwayNeuron *other) { return m_in.removeAll(other); }
+    virtual double net()
+    {
+        double ret = 0;
+        if (!m_in.isEmpty())
+            ret = m_in.first()->out();
+        foreach(SSiHighwayNeuron*n, m_in) if (n->out()>ret) ret = n->out();
+        return ret;
+    }
+    virtual void reset() { SSiHighwayNeuron::reset(); }
+    virtual bool  setInput(double) { Q_ASSERT(false); return false; }
+    virtual bool  setTarget(double) { Q_ASSERT(false); return false; }
+    virtual bool    connectHighway(SSiHighwayNeuron*, SSiHighwayNeuron*) { Q_ASSERT(false); return false; }
+    virtual double  deltag()
+    {
+        return 0;
+        //return -dedo()*net()*m_act->dev();
+    }
+    virtual double deltaw(SSiHighwayNeuron*)
+    {
+        return 0;
+       //return -dedo()*n->out()*m_act->dev()*m_act->gain();
+    }
+
+    virtual bool setActivation(SScActivation::Type, double)
+    {
+        return false;
+    }
+    virtual QList<SSiHighwayNeuron*> inputs() const
+    {
+        return m_in;
+    }
+    virtual QList<SSiHighwayNeuron*> allInputs() const { return inputs(); }
+    virtual double icon(SSiHighwayNeuron *other)
+    { return m_in.contains(other) ? 1.0 : 0.0; }
+
+
+    virtual void trainingStep()
+    {
+        //m_act->update(deltag());
+    }
+    virtual void endOfCycle()
+    {
+        //TODO POOLING: m_in.endOfCycle();
+        //m_act->endOfCycle();
+    }
+    virtual QVariantMap toVM() const
+    {
+        QVariantMap vm = SSiHighwayNeuron::toVM();
+        QList<int> il;
+        foreach(SSiHighwayNeuron* n, m_in) il << n->index();
+        //vm["GATE"] = il;
+        return vm;
+    }
+    virtual bool fromVM(const QVariantMap &vm)
+    {
+        bool ret = SSiHighwayNeuron::fromVM(vm);
+        m_in.clear();
+        SScVM sscvm(vm);
+
+        //TODO POOLING: if (!m_in.fromVM(m_net,sscvm.vmToken("GATE"))) ret = false;
+        return ret;
+    }
+
+    void dump()
+    {
+        SSiHighwayNeuron::dump();
+        qWarning("> %d connections", m_in.size());
+    }
+
+protected:
+    virtual double priv_dedo()
+    {
+        double ret = 0;
+        //TODO POOLING:
+        return ret;
+    }
+    QList<SSiHighwayNeuron*> m_in;
+};
+
+
+
 class SScConnectedNeuron : public SSiHighwayNeuron
 {
 public:
@@ -363,6 +483,7 @@ SSiHighwayNeuron* SSiHighwayNeuron::create(SScHighwayNetwork* net, Type type, co
         case Output: ret = new (std::nothrow) SScOutputNeuron (net); break;
         case Bias:   ret = new (std::nothrow) SScBiasNeuron   (net); break;
         case Carry:  ret = new (std::nothrow) SScCarryNeuron  (net); break;
+        case Pool:   ret = new (std::nothrow) SScPoolNeuron   (net); break;
         default:                                                     break;
     }
     Q_CHECK_PTR(ret);
@@ -420,6 +541,7 @@ QString SSiHighwayNeuron::type2Id(Type t)
     case Output:  return "OUTPUT";  break;
     case Bias:    return "BIAS";    break;
     case Carry:   return "CARRY";   break;
+    case Pool:    return "POOL";    break;
     default:                        break;
     }
     return "";

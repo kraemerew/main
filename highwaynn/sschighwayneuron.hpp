@@ -19,6 +19,7 @@ public:
         Output,
         Bias,
         Carry,
+        Pool,
         Last
     };
     explicit SSiHighwayNeuron(SScHighwayNetwork* net, Type type, SScActivation::Type acttype = SScActivation::IDENTITY)
