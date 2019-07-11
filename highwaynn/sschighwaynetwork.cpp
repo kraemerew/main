@@ -176,26 +176,30 @@ bool SScHighwayNetwork::fromVM(const QVariantMap& vm)
     if (vm.isEmpty()) return false;
     clear();
     QMap<int,QVariantMap> cache;
-    foreach(const QString& key, vm.keys())
+    SScVM sscvm(vm);
+    SScNetworkBase::fromVM(sscvm.vmToken("NET_PRESETS"));
+
+    foreach(const QString& key, sscvm.keys()) if (key.startsWith("NEURON"))
     {
-        if (key=="NET_PRESETS") SScNetworkBase::fromVM(vm[key].toMap());
-        else if (key.startsWith("NEURON"))
+        bool ok = false;
+        const int idx = key.split("_").last().toInt(&ok);
+        if (ok && (idx>=0))
         {
-            bool ok = false;
-            const int idx = key.split("_").last().toInt(&ok);
-            if (ok && (idx>=0))
+            cache[idx] = sscvm.vmToken(key);
+            SSiHighwayNeuron* n = SSiHighwayNeuron::create(this,cache[idx]);
+            if (n)
             {
-                SSiHighwayNeuron* n = SSiHighwayNeuron::create(this,vm[key].toMap());
-                if (n)
-                {
-                    m_neurons[idx]=n;
-                    cache[idx] = vm[key].toMap();
-                }
+                m_neurons[idx]=n;
             }
         }
     }
+    // Complete the initialization as well as the connection
+    foreach(int idx, m_neurons.keys())
+    {
+        m_neurons[idx]->fromVM(cache[idx]);
+        qWarning(">>>>INDEX %d NAME %s", idx, qPrintable(m_neurons[idx]->name()));
+    }
 
-    foreach(SSiHighwayNeuron* n, m_neurons) n->fromVM(cache[n2idx(n)]);
     return true;
 }
 

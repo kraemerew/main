@@ -15,7 +15,7 @@ public:
     QByteArray toData() const;
     bool fromData(const QByteArray&);
     bool load(const QString& filename);
-    bool save(const QString& filename, bool compressed = true);
+    bool save(const QString& filename, bool compressed = false);
     inline int size() const { return m_neurons.size(); }
 
     inline void clear() { foreach(SSiHighwayNeuron* n, m_neurons) delete n; m_neurons.clear(); }

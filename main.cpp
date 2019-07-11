@@ -140,6 +140,9 @@ void loadTest()
     SScHighwayNetwork net;
     net.load("test.net");
     net.dump();
+    net.save("test2.net");
+
+
     std::exit(0);
 }
 void carryTest(int pow)
