@@ -66,11 +66,12 @@ SScConvUnit::SScConvUnit(int kx, int ky, int unitsx, int unitsy, int overlap, in
         while (m_unitsx%m_pooling!=0) ++m_unitsx;
         while (m_unitsy%m_pooling!=0) ++m_unitsy;
     }
+    for (int i=0; i<m_kx*m_ky; ++i) m_w << (double)qrand()/(double)RAND_MAX; //<< TODO - reset
 }
 
-bool SScConvUnit::addPattern(const QImage &im)
+QString SScConvUnit::addPattern(const QImage &im)
 {
-    bool ret = true;
+    bool success = true;
     SScConvPattern p(im);
     p.convert(xpixels(),ypixels());
     auto key = QUuid::createUuid().toString();
@@ -79,12 +80,39 @@ bool SScConvUnit::addPattern(const QImage &im)
     {
         const int topleftx = x*m_kx-x*m_ovl, toplefty = y*m_ky-y*m_ovl;
         auto v = p.vect(topleftx, toplefty, m_kx, m_ky, m_color);
-        if (v.isEmpty()) ret = false; else m_patterns[key] << v;
+        if (v.isEmpty()) success = false; else m_patterns[key] << v;
     }
-    if (!ret)
+    if (!success)
     {
         m_images.remove(key);
         m_patterns.remove(key);
     }
-    return ret;
+    else m_pkeys = m_patterns.keys();
+    return success ? key : QString();
+}
+
+QString SScConvUnit::nextPattern()
+{
+    if (!m_pkeys.isEmpty())
+    {
+        const QString key = m_pkeys.takeFirst();
+        m_pkeys << key;
+        if (activatePattern(key)) return key;
+    }
+    return QString();
+}
+bool SScConvUnit::activatePattern(const QString& uuid)
+{
+    if (m_patterns.contains(uuid) && (m_patterns[uuid].size()==units()))
+    {
+        m_n.clear();
+        m_n.reserve(units());
+
+        foreach(const QVector<double>& dv, m_patterns[uuid])
+        {
+            m_n << SSnBlas::dot(m_w,dv);
+        }
+        return true;
+    }
+    return false;
 }
