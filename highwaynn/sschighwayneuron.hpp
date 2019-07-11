@@ -46,6 +46,7 @@ public:
         if (!m_dedoset) { m_dedo = priv_dedo(); m_dedoset = true; }
         return m_dedo;
     }
+    virtual double forwardSelectedDedo(SSiHighwayNeuron*) { return 0.0; }
     virtual void    reset   () { m_dedoset = false; m_outset=false;  m_transformset = false; }
     virtual double  err     () { return 0.0; }
     inline double   perr    () { return qPow(err(),2.0); }

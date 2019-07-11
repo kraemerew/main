@@ -113,9 +113,11 @@ protected:
 class SScPoolNeuron : public SSiHighwayNeuron
 {
 public:
-    SScPoolNeuron(SScHighwayNetwork* net) : SSiHighwayNeuron(net, Pool)
+    SScPoolNeuron(SScHighwayNetwork* net)
+        : SSiHighwayNeuron(net, Pool),
+          m_sel(NULL)
     {
-        setActivation(SScActivation::LOGISTIC,1.0);
+        setActivation(SScActivation::IDENTITY,1.0);
     }
     virtual double transform()
     {
@@ -135,7 +137,8 @@ public:
     {
         if (m_in.contains(other)) return true;
         SScCarryNeuron* cn = dynamic_cast<SScCarryNeuron*>(other);
-        if (cn) return false;
+        SScPoolNeuron* pn = dynamic_cast<SScPoolNeuron*>(other);
+        if (cn || pn) return false;
         m_in << other;
         return true;
     }
@@ -143,7 +146,8 @@ public:
     {
         if (m_in.contains(other)) return true;
         SScCarryNeuron* cn = dynamic_cast<SScCarryNeuron*>(other);
-        if (cn) return false;
+        SScPoolNeuron* pn = dynamic_cast<SScPoolNeuron*>(other);
+        if (cn || pn) return false;
         m_in << other;
         return true;
     }
@@ -151,9 +155,17 @@ public:
     virtual double net()
     {
         double ret = 0;
+        m_sel = NULL;
         if (!m_in.isEmpty())
-            ret = m_in.first()->out();
-        foreach(SSiHighwayNeuron*n, m_in) if (n->out()>ret) ret = n->out();
+        {
+            m_sel = m_in.first();
+            ret   = m_sel->out();
+            for(int i=1; i<m_in.size(); ++i) if (m_in[i]->out()>ret)
+            {
+                m_sel = m_in[i];
+                ret   = m_sel->out();
+            }
+        }
         return ret;
     }
     virtual void reset() { SSiHighwayNeuron::reset(); }
@@ -180,9 +192,26 @@ public:
         return m_in;
     }
     virtual QList<SSiHighwayNeuron*> allInputs() const { return inputs(); }
-    virtual double icon(SSiHighwayNeuron *other)
-    { return m_in.contains(other) ? 1.0 : 0.0; }
+    virtual double icon(SSiHighwayNeuron *) { return 0.0; }
+    virtual double forwardSelectedDedo(SSiHighwayNeuron* ref)
+    {
+        if (m_sel!=ref) return false;
+        if (m_sel==NULL) transform();
 
+        // If ref is the neuron having achieved max, it takes effectively the place of the pool and
+        // we behave as if it is directly connected to the neurons following the pool
+        if (!m_dedoset)
+        {
+            m_dedo = 0;
+            m_dedoset = true;
+            foreach(SSiHighwayNeuron* l, m_out)
+            {
+                const double w_jl = l->icon(this);
+                m_dedo += w_jl*l->dedo()*l->act()->dev()*l->act()->gain()*(1.0-l->carry());
+            }
+        }
+        return m_dedo;
+    }
 
     virtual void trainingStep()
     {
@@ -224,6 +253,7 @@ protected:
         //TODO POOLING:
         return ret;
     }
+    SSiHighwayNeuron* m_sel;                  // The neuron which achieved the maximum
     QList<SSiHighwayNeuron*> m_in;
 };
 
@@ -502,8 +532,9 @@ double SSiHighwayNeuron::priv_dedo()
 
     foreach(SSiHighwayNeuron* l, m_out)
     {
-       const double w_jl = l->icon(this);
-       ret += w_jl*l->dedo()*l->act()->dev()*l->act()->gain()*(1.0-l->carry());
+        ret += l->forwardSelectedDedo(this);    // only the pool neuron delivers something here, if this neuron achieved maximum in pool
+        const double w_jl = l->icon(this);
+        ret += w_jl*l->dedo()*l->act()->dev()*l->act()->gain()*(1.0-l->carry());
     }
     return ret;
 }
