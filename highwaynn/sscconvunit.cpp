@@ -2,6 +2,41 @@
 #include "../blas/blasvector.hpp"
 #include <QUuid>
 
+namespace SSnConvHelpers
+{
+    double max(const QVector<double>& v)
+    {
+        Q_ASSERT(!v.isEmpty());
+        double ret = v[0];
+        for (int i=0; i<v.size(); ++i) if (v[i]>ret) ret = v[i];
+        return ret;
+    }
+    QVector<double> pooled(int xunits, int yunits, int pool, const QVector<double>& v)
+    {
+        if (pool<2) return v;
+        Q_ASSERT(v.size()==xunits*yunits);
+        Q_ASSERT(xunits%pool==0);
+        Q_ASSERT(yunits%pool==0);
+        QMap<int,QVector<double> > poolcache;
+        const int newwidth = xunits/pool;
+        int nr=-1;
+
+        for (int y=0; y<yunits; ++y)
+        {
+            const int pooloffs = newwidth*(y/pool);
+            for (int x=0; x<xunits; ++x)
+            {
+                const int poolx = x/pool;
+                poolcache[pooloffs+poolx] << v[++nr];
+            }
+        }
+        QVector<double> ret;
+        ret.reserve(poolcache.size());
+        foreach(int idx, poolcache.keys()) ret << SSnConvHelpers::max(poolcache[idx]);
+        return ret;
+    }
+}
+
 class SScConvPattern
 {
 public:
@@ -111,8 +146,11 @@ bool SScConvUnit::activatePattern(const QString& uuid)
         foreach(const QVector<double>& dv, m_patterns[uuid])
         {
             m_n << SSnBlas::dot(m_w,dv);
+            m_npooled = SSnConvHelpers::pooled(m_unitsx,m_unitsy,m_pooling,m_n);
         }
         return true;
     }
     return false;
 }
+
+

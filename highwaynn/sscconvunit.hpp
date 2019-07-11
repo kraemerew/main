@@ -20,12 +20,15 @@ public:
     QString nextPattern();
 
 protected:
+
     int                                     m_kx, m_ky, m_unitsx, m_unitsy, m_ovl, m_pooling;
     bool                                    m_color;
     QMap<QString,QImage>                    m_images;
     QMap<QString,QList<QVector<double> > >  m_patterns;
     QList<QString>                          m_pkeys;
-    QVector<double>                         m_w, m_n;
+    QVector<double>                         m_w,
+                                            m_n,
+                                            m_npooled;
 };
 
 #endif // SSCCONVUNIT_HPP
