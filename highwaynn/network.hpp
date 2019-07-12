@@ -25,6 +25,7 @@ public:
     int addBiasNeuron    (const QString& name = QString());
     int addCarryNeuron   (const QString& name = QString());
     int addMinPoolNeuron (const QString& name = QString());
+    int addMedPoolNeuron (const QString& name = QString());
     int addMaxPoolNeuron (const QString& name = QString());
 
     bool delNeuron(SSiHighwayNeuron* n);

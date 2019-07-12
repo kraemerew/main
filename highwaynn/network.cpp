@@ -35,6 +35,7 @@ int SScHighwayNetwork::addNeuron   (SSiHighwayNeuron::Type type, const QString& 
         break;
         case SSiHighwayNeuron::MinPool: break;
         case SSiHighwayNeuron::MaxPool: break;
+        case SSiHighwayNeuron::MedPool: break;
         case SSiHighwayNeuron::Last: break;
     }
     if (n)
@@ -131,6 +132,7 @@ int                 SScHighwayNetwork::addBiasNeuron    (const QString& name)   
 int                 SScHighwayNetwork::addCarryNeuron   (const QString& name)           { return addNeuron(SSiHighwayNeuron::Carry,  name); }
 int                 SScHighwayNetwork::addMinPoolNeuron (const QString& name)           { return addNeuron(SSiHighwayNeuron::MinPool,name); }
 int                 SScHighwayNetwork::addMaxPoolNeuron (const QString& name)           { return addNeuron(SSiHighwayNeuron::MaxPool,name); }
+int                 SScHighwayNetwork::addMedPoolNeuron (const QString& name)           { return addNeuron(SSiHighwayNeuron::MedPool,name); }
 
 bool                SScHighwayNetwork::delNeuron        (SSiHighwayNeuron* n)           { return delNeuron(n2idx(n)); }
 int                 SScHighwayNetwork::n2idx            (SSiHighwayNeuron* n) const     { foreach(int i, m_neurons.keys()) if (m_neurons[i]==n) return i; return -1; }

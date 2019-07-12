@@ -49,20 +49,7 @@ public:
     {}
 
 protected:
-    virtual void priv_poolselect()
-    {
-        m_sel = NULL;
-        if (!m_in.isEmpty())
-        {
-            m_sel = m_in.first();
-            double max = m_sel->out();
-            for(int i=1; i<m_in.size(); ++i) if (m_in[i]->out()>max)
-            {
-                m_sel = m_in[i];
-                max   = m_sel->out();
-            }
-        }
-    }
+    virtual void priv_poolselect();
 };
 
 class SScMinPoolNeuron : public SScPoolNeuron
@@ -72,20 +59,17 @@ public:
     {}
 
 protected:
-    virtual void priv_poolselect()
-    {
-        m_sel = NULL;
-        if (!m_in.isEmpty())
-        {
-            m_sel = m_in.first();
-            double min = m_sel->out();
-            for(int i=1; i<m_in.size(); ++i) if (m_in[i]->out()<min)
-            {
-                m_sel = m_in[i];
-                min   = m_sel->out();
-            }
-        }
-    }
+    virtual void priv_poolselect();
+};
+
+class SScMedPoolNeuron : public SScPoolNeuron
+{
+public:
+    SScMedPoolNeuron(SScHighwayNetwork* net) : SScPoolNeuron(net,MedPool)
+    {}
+
+protected:
+    virtual void priv_poolselect();
 };
 
 

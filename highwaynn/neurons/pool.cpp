@@ -8,7 +8,7 @@ SScPoolNeuron::SScPoolNeuron(SScHighwayNetwork* net, SSiHighwayNeuron::Type t)
       m_selected        (false),
       m_sel             (NULL)
 {
-    Q_ASSERT ((t==MinPool) || (t==MaxPool));
+    Q_ASSERT ((t==MinPool) || (t==MaxPool) || (t==MedPool));
     setActivation(SScActivation::IDENTITY,1.0);
 }
 
@@ -99,4 +99,57 @@ void SScPoolNeuron::dump()
 {
     SSiHighwayNeuron::dump();
     qWarning("> %d connections", m_in.size());
+}
+
+
+class SScSortableNeuron
+{
+public:
+    SScSortableNeuron(SSiHighwayNeuron* n) : m_n(n), m_o(n->out()) {}
+    bool operator < (const SScSortableNeuron& other) const { return m_o < other.m_o; }
+
+    SSiHighwayNeuron* m_n;
+    double m_o;
+};
+
+void SScMaxPoolNeuron::priv_poolselect()
+{
+    m_sel = NULL;
+    if (!m_in.isEmpty())
+    {
+        m_sel = m_in.first();
+        double max = m_sel->out();
+        for(int i=1; i<m_in.size(); ++i) if (m_in[i]->out()>max)
+        {
+            m_sel = m_in[i];
+            max   = m_sel->out();
+        }
+    }
+}
+void SScMinPoolNeuron::priv_poolselect()
+{
+    m_sel = NULL;
+    if (!m_in.isEmpty())
+    {
+        m_sel = m_in.first();
+        double min = m_sel->out();
+        for(int i=1; i<m_in.size(); ++i) if (m_in[i]->out()<min)
+        {
+            m_sel = m_in[i];
+            min   = m_sel->out();
+        }
+    }
+}
+void SScMedPoolNeuron::priv_poolselect()
+{
+    m_sel = NULL;
+
+    if (!m_in.isEmpty())
+    {
+        QList<SScSortableNeuron> nl;
+        nl.reserve(m_in.size());
+        foreach(SSiHighwayNeuron* n, m_in) nl << n;
+        std::sort(nl.begin(),nl.end());
+        m_sel = nl[nl.size()/2].m_n;
+    }
 }

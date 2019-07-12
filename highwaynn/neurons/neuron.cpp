@@ -41,6 +41,7 @@ SSiHighwayNeuron* SSiHighwayNeuron::create(SScHighwayNetwork* net, Type type, co
         case Carry:  ret = new (std::nothrow) SScCarryNeuron  (net); break;
         case MinPool:ret = new (std::nothrow) SScMinPoolNeuron(net); break;
         case MaxPool:ret = new (std::nothrow) SScMaxPoolNeuron(net); break;
+        case MedPool:ret = new (std::nothrow) SScMedPoolNeuron(net); break;
         default:                                                     break;
     }
     Q_CHECK_PTR(ret);
@@ -92,14 +93,15 @@ QString SSiHighwayNeuron::type2Id(Type t)
 {
     switch(t)
     {
-    case Input:   return "INPUT";   break;
-    case Hidden:  return "HIDDEN";  break;
-    case Output:  return "OUTPUT";  break;
-    case Bias:    return "BIAS";    break;
-    case Carry:   return "CARRY";   break;
-    case MaxPool: return "MAXPOOL"; break;
-    case MinPool: return "MINPOOL"; break;
-    default:                        break;
+    case Input:   return "INPUT";       break;
+    case Hidden:  return "HIDDEN";      break;
+    case Output:  return "OUTPUT";      break;
+    case Bias:    return "BIAS";        break;
+    case Carry:   return "CARRY";       break;
+    case MaxPool: return "MAXPOOL";     break;
+    case MinPool: return "MINPOOL";     break;
+    case MedPool: return "MEDIANPOOL";  break;
+    default:                            break;
     }
     return "";
 }

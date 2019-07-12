@@ -21,6 +21,7 @@ public:
         Carry,
         MaxPool,
         MinPool,
+        MedPool,
         Last
     };
     explicit SSiHighwayNeuron(SScHighwayNetwork* net, Type type, SScActivation::Type acttype = SScActivation::IDENTITY)
