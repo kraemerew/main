@@ -1,6 +1,6 @@
 #ifndef HWN_INPUT_HPP
 #define HWN_INPUT_HPP
-#include "highwayneuron.hpp"
+#include "neuron.hpp"
 
 class SScInputNeuron : public SSiHighwayNeuron
 {

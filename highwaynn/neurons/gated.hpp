@@ -1,8 +1,8 @@
 #ifndef HWN_GATED_HPP
 #define HWN_GATED_HPP
 
-#include "highwayneuron.hpp"
-#include "sschighwaygate.hpp"
+#include "neuron.hpp"
+#include "gate.hpp"
 
 class SScGatedNeuron : public SSiHighwayNeuron
 {
@@ -39,7 +39,7 @@ public:
     void dump();
 
 protected:
-    SScHighwayGate      m_in;
+    SScGate      m_in;
     SSiHighwayNeuron*   m_hwn;
     SSiHighwayNeuron*   m_cn;
 };

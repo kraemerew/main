@@ -1,6 +1,6 @@
 #include <QApplication>
 #include <QElapsedTimer>
-#include "highwaynn//sschighwaynetwork.hpp"
+#include "highwaynn//network.hpp"
 #include "image/image.hpp"
 #include "filter/selector.hpp"
 #include "cam/cam.hpp"
@@ -238,22 +238,24 @@ void poolTest()
 {
     SScHighwayNetwork net;
     net.setTrainingType(SScTrainableParameter::ADAM);
-    net.setHiddenActivationType(SScActivation::MHAT);
-    net.setOutputActivationType(SScActivation::MHAT);
+    net.setHiddenActivationType(SScActivation::RBF);
+    net.setOutputActivationType(SScActivation::LOGISTIC);
     // net.setConnectionRange(1,0);
     // net.setGainRange(0,1);
     const int i1 = net.addInputNeuron   ("I1"),
               i2 = net.addInputNeuron   ("I2"),
               o1 = net.addOutputNeuron  ("Out"),
               bi = net.addBiasNeuron    ("Bias"),
-              pn = net.addPoolNeuron    ("Pool");
-              /*h1 = net.addHiddenNeuron("H1"),
+              pn = net.addMaxPoolNeuron ("MaxPool"),
+              h1 = net.addHiddenNeuron("H1");/*
               h2 = net.addHiddenNeuron("H2"),
               h3 = net.addHiddenNeuron("H3");*/
     net.connect(i1,pn);
     net.connect(i2,pn);
     net.connect(pn,o1);
-    foreach(int idx, QList<int>() /*<< h1 << h2 << h3*/ << o1)
+    net.connect(h1,o1);
+
+    foreach(int idx, QList<int>() /*<< h1 << h2 << h3*/ << o1 << h1)
     {
         net.connect(bi,idx);
         net.connect(i1,idx);

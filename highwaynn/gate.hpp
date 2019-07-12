@@ -11,11 +11,11 @@ class SScHighwayNetwork;
 
 class SSiHighwayNeuron;
 
-class SScHighwayGate : public QMap<SSiHighwayNeuron*,QSharedPointer<SScTrainableParameter> >
+class SScGate : public QMap<SSiHighwayNeuron*,QSharedPointer<SScTrainableParameter> >
 {
 public:
-    explicit SScHighwayGate(SSiHighwayNeuron* parent);
-    virtual ~SScHighwayGate();
+    explicit SScGate(SSiHighwayNeuron* parent);
+    virtual ~SScGate();
 
     virtual bool addInput(SSiHighwayNeuron *other, double v, SScTrainableParameter::Type t);
     virtual bool addInput(SSiHighwayNeuron *other, SScTrainableParameter* tp);

@@ -1,7 +1,7 @@
 #ifndef HWNEURON_HPP
 #define HWNEURON_HPP
 
-#include "sschighwaygate.hpp"
+#include "gate.hpp"
 #include "../nnhelpers/sscactivation.hpp"
 
 #include <QMap>
@@ -19,7 +19,8 @@ public:
         Output,
         Bias,
         Carry,
-        Pool,
+        MaxPool,
+        MinPool,
         Last
     };
     explicit SSiHighwayNeuron(SScHighwayNetwork* net, Type type, SScActivation::Type acttype = SScActivation::IDENTITY)

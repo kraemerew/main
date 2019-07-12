@@ -1,5 +1,5 @@
-#include "sschighwaynetwork.hpp"
-#include "highwayneuron.hpp"
+#include "network.hpp"
+#include "neuron.hpp"
 #include "../nnhelpers/ssccycledetector.hpp"
 #include "../nnhelpers/sscvm.hpp"
 #include "../nnhelpers/ssnjsonhandler.hpp"
@@ -33,7 +33,8 @@ int SScHighwayNetwork::addNeuron   (SSiHighwayNeuron::Type type, const QString& 
         case SSiHighwayNeuron::Output:
             n->setActivation(oActType(),getRandomGainValue());
         break;
-        case SSiHighwayNeuron::Pool: break;
+        case SSiHighwayNeuron::MinPool: break;
+        case SSiHighwayNeuron::MaxPool: break;
         case SSiHighwayNeuron::Last: break;
     }
     if (n)
@@ -128,7 +129,8 @@ int                 SScHighwayNetwork::addHiddenNeuron  (const QString& name)   
 int                 SScHighwayNetwork::addOutputNeuron  (const QString& name)           { return addNeuron(SSiHighwayNeuron::Output, name); }
 int                 SScHighwayNetwork::addBiasNeuron    (const QString& name)           { return addNeuron(SSiHighwayNeuron::Bias,   name); }
 int                 SScHighwayNetwork::addCarryNeuron   (const QString& name)           { return addNeuron(SSiHighwayNeuron::Carry,  name); }
-int                 SScHighwayNetwork::addPoolNeuron    (const QString& name)           { return addNeuron(SSiHighwayNeuron::Pool,   name); }
+int                 SScHighwayNetwork::addMinPoolNeuron (const QString& name)           { return addNeuron(SSiHighwayNeuron::MinPool,name); }
+int                 SScHighwayNetwork::addMaxPoolNeuron (const QString& name)           { return addNeuron(SSiHighwayNeuron::MaxPool,name); }
 
 bool                SScHighwayNetwork::delNeuron        (SSiHighwayNeuron* n)           { return delNeuron(n2idx(n)); }
 int                 SScHighwayNetwork::n2idx            (SSiHighwayNeuron* n) const     { foreach(int i, m_neurons.keys()) if (m_neurons[i]==n) return i; return -1; }

@@ -1,13 +1,12 @@
-#include "highwayneuron.hpp"
-#include "sschighwaynetwork.hpp"
-#include "sschighwaynetwork.hpp"
+#include "neuron.hpp"
+#include "network.hpp"
+#include "network.hpp"
 #include "../nnhelpers/sscvm.hpp"
 #include "bias.hpp"
 #include "input.hpp"
 #include "carry.hpp"
 #include "gated.hpp"
 #include "pool.hpp"
-
 
 bool SSiHighwayNeuron::setActivation(SScActivation::Type type, double gain)
 {
@@ -29,6 +28,7 @@ SSiHighwayNeuron* SSiHighwayNeuron::create(SScHighwayNetwork* net, const QVarian
     }
     return NULL;
 }
+
 SSiHighwayNeuron* SSiHighwayNeuron::create(SScHighwayNetwork* net, Type type, const QString& name)
 {
     SSiHighwayNeuron* ret = NULL;
@@ -39,15 +39,14 @@ SSiHighwayNeuron* SSiHighwayNeuron::create(SScHighwayNetwork* net, Type type, co
         case Output: ret = new (std::nothrow) SScOutputNeuron (net); break;
         case Bias:   ret = new (std::nothrow) SScBiasNeuron   (net); break;
         case Carry:  ret = new (std::nothrow) SScCarryNeuron  (net); break;
-        case Pool:   ret = new (std::nothrow) SScPoolNeuron   (net); break;
+        case MinPool:ret = new (std::nothrow) SScMinPoolNeuron(net); break;
+        case MaxPool:ret = new (std::nothrow) SScMaxPoolNeuron(net); break;
         default:                                                     break;
     }
     Q_CHECK_PTR(ret);
     if (ret) ret->setName(name);
     return ret;
 }
-
-
 
 double SSiHighwayNeuron::priv_dedo()
 {
@@ -98,7 +97,8 @@ QString SSiHighwayNeuron::type2Id(Type t)
     case Output:  return "OUTPUT";  break;
     case Bias:    return "BIAS";    break;
     case Carry:   return "CARRY";   break;
-    case Pool:    return "POOL";    break;
+    case MaxPool: return "MAXPOOL"; break;
+    case MinPool: return "MINPOOL"; break;
     default:                        break;
     }
     return "";

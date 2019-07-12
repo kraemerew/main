@@ -1,15 +1,15 @@
-#include "sschighwaygate.hpp"
-#include "highwayneuron.hpp"
-#include "sschighwaynetwork.hpp"
+#include "gate.hpp"
+#include "neuron.hpp"
+#include "network.hpp"
 
-SScHighwayGate::SScHighwayGate(SSiHighwayNeuron* parent)
+SScGate::SScGate(SSiHighwayNeuron* parent)
     : QMap<SSiHighwayNeuron*,QSharedPointer<SScTrainableParameter> >(),
       m_parent(parent), m_dirty(true), m_net(0.0)
 {}
 
-SScHighwayGate::~SScHighwayGate() {}
+SScGate::~SScGate() {}
 
-bool SScHighwayGate::addInput(SSiHighwayNeuron *other, SScTrainableParameter* tp)
+bool SScGate::addInput(SSiHighwayNeuron *other, SScTrainableParameter* tp)
 {
     Q_CHECK_PTR(other);
     Q_CHECK_PTR(tp);
@@ -18,7 +18,7 @@ bool SScHighwayGate::addInput(SSiHighwayNeuron *other, SScTrainableParameter* tp
     (*this)[other]=QSharedPointer<SScTrainableParameter>(tp);
     return true;
 }
-bool SScHighwayGate::addInput(SSiHighwayNeuron *other, double v, SScTrainableParameter::Type t)
+bool SScGate::addInput(SSiHighwayNeuron *other, double v, SScTrainableParameter::Type t)
 {
     Q_CHECK_PTR(other);
     if ((m_parent==other) || contains(other)) return false;
@@ -26,7 +26,7 @@ bool SScHighwayGate::addInput(SSiHighwayNeuron *other, double v, SScTrainablePar
     (*this)[other]=QSharedPointer<SScTrainableParameter>(SScTrainableParameter::create(t,v));
     return true;
 }
-bool SScHighwayGate::delInput(SSiHighwayNeuron *other)
+bool SScGate::delInput(SSiHighwayNeuron *other)
 {
     Q_CHECK_PTR(other);
     if (!contains(other)) return false;
@@ -34,7 +34,7 @@ bool SScHighwayGate::delInput(SSiHighwayNeuron *other)
     remove(other);
     return true;
 }
-double SScHighwayGate::net()
+double SScGate::net()
 {
     if (m_dirty)
     {
@@ -53,17 +53,17 @@ double SScHighwayGate::net()
     return m_net;
 }
 
-void SScHighwayGate::endOfCycle()
+void SScGate::endOfCycle()
 {
     for(QMap<SSiHighwayNeuron*,QSharedPointer<SScTrainableParameter> >::iterator it = begin(); it != end(); ++it)
         it.value()->endOfCycle();    
 }
-void SScHighwayGate::reset()
+void SScGate::reset()
 {
     m_dirty=true;
 }
 
-QVariantMap SScHighwayGate::toVM() const
+QVariantMap SScGate::toVM() const
 {
     QVariantMap vm;
     foreach(SSiHighwayNeuron* n, this->keys())
@@ -72,7 +72,7 @@ QVariantMap SScHighwayGate::toVM() const
     }
     return vm;
 }
-bool SScHighwayGate::fromVM(SScHighwayNetwork* net, const QVariantMap& vm)
+bool SScGate::fromVM(SScHighwayNetwork* net, const QVariantMap& vm)
 {    
     clear();
     foreach(const QString& key, vm.keys()) if (key.startsWith("CON"))

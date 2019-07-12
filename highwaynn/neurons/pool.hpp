@@ -1,12 +1,12 @@
 #ifndef HWN_POOL_HPP
 #define HWN_POOL_HPP
 
-#include "highwayneuron.hpp"
+#include "neuron.hpp"
 
 class SScPoolNeuron : public SSiHighwayNeuron
 {
 public:
-    SScPoolNeuron(SScHighwayNetwork* net);
+    SScPoolNeuron(SScHighwayNetwork* net, SSiHighwayNeuron::Type t);
     virtual bool    addInput            (SSiHighwayNeuron* other, SScTrainableParameter*);
     virtual bool    addInput            (SSiHighwayNeuron* other, double, SScTrainableParameter::Type);
     virtual bool    delInput            (SSiHighwayNeuron* other);
@@ -35,10 +35,58 @@ public:
     void dump();
 
 protected:
+    virtual void priv_poolselect() = 0;
     virtual double priv_dedo() { return 0; }
     bool                        m_selected;
     SSiHighwayNeuron*           m_sel;                  // The neuron which achieved the maximum
     QList<SSiHighwayNeuron*>    m_in;
 };
+
+class SScMaxPoolNeuron : public SScPoolNeuron
+{
+public:
+    SScMaxPoolNeuron(SScHighwayNetwork* net) : SScPoolNeuron(net,MaxPool)
+    {}
+
+protected:
+    virtual void priv_poolselect()
+    {
+        m_sel = NULL;
+        if (!m_in.isEmpty())
+        {
+            m_sel = m_in.first();
+            double max = m_sel->out();
+            for(int i=1; i<m_in.size(); ++i) if (m_in[i]->out()>max)
+            {
+                m_sel = m_in[i];
+                max   = m_sel->out();
+            }
+        }
+    }
+};
+
+class SScMinPoolNeuron : public SScPoolNeuron
+{
+public:
+    SScMinPoolNeuron(SScHighwayNetwork* net) : SScPoolNeuron(net,MinPool)
+    {}
+
+protected:
+    virtual void priv_poolselect()
+    {
+        m_sel = NULL;
+        if (!m_in.isEmpty())
+        {
+            m_sel = m_in.first();
+            double min = m_sel->out();
+            for(int i=1; i<m_in.size(); ++i) if (m_in[i]->out()<min)
+            {
+                m_sel = m_in[i];
+                min   = m_sel->out();
+            }
+        }
+    }
+};
+
 
 #endif  // HWN_POOL_HPP

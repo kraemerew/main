@@ -1,13 +1,14 @@
 #include "pool.hpp"
 #include "sscvm.hpp"
 #include "carry.hpp"
-#include "../sschighwaynetwork.hpp"
+#include "../network.hpp"
 
-SScPoolNeuron::SScPoolNeuron(SScHighwayNetwork* net)
-    : SSiHighwayNeuron  (net, Pool),
+SScPoolNeuron::SScPoolNeuron(SScHighwayNetwork* net, SSiHighwayNeuron::Type t)
+    : SSiHighwayNeuron  (net, t),
       m_selected        (false),
       m_sel             (NULL)
 {
+    Q_ASSERT ((t==MinPool) || (t==MaxPool));
     setActivation(SScActivation::IDENTITY,1.0);
 }
 
@@ -47,19 +48,8 @@ double SScPoolNeuron::net()
     if (!m_selected)
     {
         m_selected = true;
-        m_sel = NULL;
-        if (!m_in.isEmpty())
-        {
-            m_sel = m_in.first();
-            double max = m_sel->out();
-            for(int i=1; i<m_in.size(); ++i) if (m_in[i]->out()>max)
-            {
-                m_sel = m_in[i];
-                max   = m_sel->out();
-            }
-        }
+        priv_poolselect();
     }
-    if (!m_sel) qWarning(">>>>SELECTION FAILED"); else
     return m_sel ? m_sel->out() : 0.0;
 }
 

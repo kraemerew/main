@@ -1,7 +1,7 @@
 #ifndef HWN_BIAS_HPP
 #define HWN_BIAS_HPP
 
-#include "highwayneuron.hpp"
+#include "neuron.hpp"
 
 class SScBiasNeuron : public SSiHighwayNeuron
 {

@@ -1,11 +1,11 @@
 #include "gated.hpp"
 #include "carry.hpp"
 #include "sscvm.hpp"
-#include "sschighwaynetwork.hpp"
+#include "network.hpp"
 
 SScGatedNeuron::SScGatedNeuron(SScHighwayNetwork* net, Type type, SScActivation::Type acttype)
     : SSiHighwayNeuron  (net,type,acttype),
-      m_in              (SScHighwayGate(this)),
+      m_in              (SScGate(this)),
       m_hwn             (NULL),
       m_cn              (NULL)
 {}

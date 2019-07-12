@@ -1,10 +1,10 @@
 #include "carry.hpp"
 #include "sscvm.hpp"
-#include "sschighwaygate.hpp"
+#include "gate.hpp"
 
 SScCarryNeuron::SScCarryNeuron(SScHighwayNetwork* net)
     : SSiHighwayNeuron(net, Carry),
-      m_in(SScHighwayGate(this))
+      m_in(SScGate(this))
 {
     setActivation(SScActivation::LOGISTIC,1.0);
 }

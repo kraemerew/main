@@ -1,8 +1,8 @@
 #ifndef HWN_CARRY_HPP
 #define HWN_CARRY_HPP
 
-#include "highwayneuron.hpp"
-#include "sschighwaygate.hpp"
+#include "neuron.hpp"
+#include "gate.hpp"
 
 class SScCarryNeuron : public SSiHighwayNeuron
 {
@@ -34,7 +34,7 @@ public:
 
 protected:
     virtual double priv_dedo();
-    SScHighwayGate m_in;
+    SScGate m_in;
 };
 
 #endif // HWN_CARRY_HPP
