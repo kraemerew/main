@@ -4,7 +4,6 @@
 #include "../nnhelpers/sscvm.hpp"
 #include "bias.hpp"
 #include "input.hpp"
-#include "output.hpp"
 #include "carry.hpp"
 #include "gated.hpp"
 #include "pool.hpp"

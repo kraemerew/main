@@ -234,11 +234,100 @@ void carryTest(int pow)
 #include "filter/filter.hpp"
 //#include "rnn/rneuron.hpp"
 
+void poolTest()
+{
+    SScHighwayNetwork net;
+    net.setTrainingType(SScTrainableParameter::ADAM);
+    net.setHiddenActivationType(SScActivation::MHAT);
+    net.setOutputActivationType(SScActivation::MHAT);
+    // net.setConnectionRange(1,0);
+    // net.setGainRange(0,1);
+    const int i1 = net.addInputNeuron   ("I1"),
+              i2 = net.addInputNeuron   ("I2"),
+              o1 = net.addOutputNeuron  ("Out"),
+              bi = net.addBiasNeuron    ("Bias"),
+              pn = net.addPoolNeuron    ("Pool");
+              /*h1 = net.addHiddenNeuron("H1"),
+              h2 = net.addHiddenNeuron("H2"),
+              h3 = net.addHiddenNeuron("H3");*/
+    net.connect(i1,pn);
+    net.connect(i2,pn);
+    net.connect(pn,o1);
+    foreach(int idx, QList<int>() /*<< h1 << h2 << h3*/ << o1)
+    {
+        net.connect(bi,idx);
+        net.connect(i1,idx);
+        net.connect(i2,idx);
+
+    }
+    //foreach(int idx, QList<int>() << h1 << h2 << h3)
+    //  net.connect(idx,o1);
+
+    // training preparation
+    net.connectForward();
+
+
+
+    // training
+    QElapsedTimer t, et; t.start(); et.start();
+    int c=0, failcount=0;
+    double err = 0, lasterr = 0, in1 = 0.0, in2 = 1-in1;
+    bool done = false;
+    do
+    {
+        in1+=.1;
+        if (in1>1.0)
+        {
+            in1=0.0;
+            in2+=0.1;
+            if (in2>1) in2 =0;
+        }
+        ++c;
+        const bool endOfCycle = (in1==0.0) && (in2==0);
+
+        const double trg = qMax(in1,in2);
+        net.setInput(i1,in1);
+        net.setInput(i2,in2);
+        net.setTarget(o1,trg);
+
+        net.reset();
+
+
+        const double pout = net.idx2n(o1)->out(), perr = net.idx2n(o1)->perr();
+        const bool success = qRound(qMax(10*in1,10*in2))==qRound(10.0*pout);
+        if (!success) ++failcount;
+ //       if (!success) qWarning("Cycle %d In1 %d In2 %d Out %lf %s", c, qRound(10.0*in1), qRound(10.0*in2), 10.0*pout, success ? "SUCCESS":"FAILURE");
+        err+=perr;
+
+        if (endOfCycle)
+        {
+            if (failcount==0) done = true;
+            if (done || (et.elapsed()>200))
+            {
+                et.restart();
+                qWarning("End of cycle %d - failures %d error %lf last %lf %s", c, failcount, err, lasterr, err<lasterr ? "lower":"higher");
+            }
+            if (done) qWarning("Done");
+
+            lasterr = err;
+            err=0;
+            failcount=0;
+            //if (c>1000) std::exit(1);
+        }
+
+
+        net.trainingStep(endOfCycle);
+    }
+    while (!done);
+    qWarning("Training took %d ms", (int)t.elapsed());
+   std::exit(0);
+
+}
 int main(int argc, char *argv[])
 {
     Q_UNUSED(argc);
     Q_UNUSED(argv);
-    carryTest(8);
+    poolTest();
     /*SScRBiasNeuron* bn = new (std::nothrow) SScRBiasNeuron();
     QList<SScRNeuron*> nl;
     for (int i=0; i<2; ++i) nl << new (std::nothrow) SScRNeuron();

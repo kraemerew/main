@@ -1,13 +1,16 @@
 #include "pool.hpp"
 #include "sscvm.hpp"
 #include "carry.hpp"
+#include "../sschighwaynetwork.hpp"
 
 SScPoolNeuron::SScPoolNeuron(SScHighwayNetwork* net)
-    : SSiHighwayNeuron(net, Pool),
-      m_sel(NULL)
+    : SSiHighwayNeuron  (net, Pool),
+      m_selected        (false),
+      m_sel             (NULL)
 {
     setActivation(SScActivation::IDENTITY,1.0);
 }
+
 double SScPoolNeuron::transform()
 {
     if (!m_transformset)
@@ -21,7 +24,7 @@ bool SScPoolNeuron::addInput(SSiHighwayNeuron* other, SScTrainableParameter*)
 {
     if (m_in.contains(other)) return true;
     SScCarryNeuron* cn = dynamic_cast<SScCarryNeuron*>(other);
-    SScPoolNeuron* pn = dynamic_cast<SScPoolNeuron*>(other);
+    SScPoolNeuron*  pn = dynamic_cast<SScPoolNeuron*> (other);
     if (cn || pn) return false;
     m_in << other;
     return true;
@@ -35,22 +38,29 @@ bool SScPoolNeuron::addInput(SSiHighwayNeuron *other, double, SScTrainableParame
     m_in << other;
     return true;
 }
-bool SScPoolNeuron::delInput(SSiHighwayNeuron *other) { return m_in.removeAll(other); }
+bool SScPoolNeuron::delInput(SSiHighwayNeuron *other)
+{
+    return m_in.removeAll(other);
+}
 double SScPoolNeuron::net()
 {
-    double ret = 0;
-    m_sel = NULL;
-    if (!m_in.isEmpty())
+    if (!m_selected)
     {
-        m_sel = m_in.first();
-        ret   = m_sel->out();
-        for(int i=1; i<m_in.size(); ++i) if (m_in[i]->out()>ret)
+        m_selected = true;
+        m_sel = NULL;
+        if (!m_in.isEmpty())
         {
-            m_sel = m_in[i];
-            ret   = m_sel->out();
+            m_sel = m_in.first();
+            double max = m_sel->out();
+            for(int i=1; i<m_in.size(); ++i) if (m_in[i]->out()>max)
+            {
+                m_sel = m_in[i];
+                max   = m_sel->out();
+            }
         }
     }
-    return ret;
+    if (!m_sel) qWarning(">>>>SELECTION FAILED"); else
+    return m_sel ? m_sel->out() : 0.0;
 }
 
 double SScPoolNeuron::forwardSelectedDedo(SSiHighwayNeuron* ref)
@@ -76,9 +86,10 @@ double SScPoolNeuron::forwardSelectedDedo(SSiHighwayNeuron* ref)
 QVariantMap SScPoolNeuron::toVM() const
 {
     QVariantMap vm = SSiHighwayNeuron::toVM();
-    QList<int> il;
+    QVariantList il;
     foreach(SSiHighwayNeuron* n, m_in) il << n->index();
-    //vm["GATE"] = il;
+
+    vm["GATE"] = il;
     return vm;
 }
 bool SScPoolNeuron::fromVM(const QVariantMap &vm)
@@ -86,8 +97,11 @@ bool SScPoolNeuron::fromVM(const QVariantMap &vm)
     bool ret = SSiHighwayNeuron::fromVM(vm);
     m_in.clear();
     SScVM sscvm(vm);
-
-    //TODO POOLING: if (!m_in.fromVM(m_net,sscvm.vmToken("GATE"))) ret = false;
+    auto vl = sscvm.vlToken("GATE");
+    foreach(const auto& v, vl) if (!v.canConvert<int>()) ret = false; else
+    {
+        if (!m_net->connect(v.toInt(),index())) ret = false;
+    }
     return ret;
 }
 

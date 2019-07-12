@@ -18,7 +18,7 @@ public:
     virtual double  transform   ();
     virtual double  net         ();
     virtual double  out         ()                  { return transform(); }
-    virtual void    reset       ()                  { SSiHighwayNeuron::reset(); m_sel = NULL; }
+    virtual void    reset       ()                  { SSiHighwayNeuron::reset(); m_selected=false; m_sel = NULL; }
     virtual bool    setInput    (double)            { return false; }
     virtual bool    setTarget   (double)            { return false; }
     virtual double  deltag      ()                  { return 0; }
@@ -36,6 +36,7 @@ public:
 
 protected:
     virtual double priv_dedo() { return 0; }
+    bool                        m_selected;
     SSiHighwayNeuron*           m_sel;                  // The neuron which achieved the maximum
     QList<SSiHighwayNeuron*>    m_in;
 };
