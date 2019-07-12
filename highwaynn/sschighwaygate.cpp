@@ -1,5 +1,5 @@
 #include "sschighwaygate.hpp"
-#include "sschighwayneuron.hpp"
+#include "highwayneuron.hpp"
 #include "sschighwaynetwork.hpp"
 
 SScHighwayGate::SScHighwayGate(SSiHighwayNeuron* parent)

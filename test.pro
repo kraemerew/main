@@ -7,7 +7,7 @@ CONFIG += c++11
 TARGET = test
 CONFIG += console
 CONFIG -= app_bundle
-
+INCLUDEPATH +=nnhelpers blas highwaynn highwaynn/neurons
 TEMPLATE = app
 
 LIBS += -lv4l1 -lcblas
@@ -19,8 +19,10 @@ SOURCES += main.cpp \
     nnhelpers/ssccycledetector.cpp \
     #nn/sscnetwork.cpp \
     #nn/sscneuron.cpp \
+    highwaynn/neurons/gated.cpp \
+    highwaynn/neurons/carry.cpp \
+    highwaynn/neurons/pool.cpp \
     highwaynn/sschighwaynetwork.cpp \
-    highwaynn/sschighwayneuron.cpp \
     highwaynn/sschighwaygate.cpp \
     image/matrix.cpp \
     image/image.cpp \
@@ -35,7 +37,8 @@ SOURCES += main.cpp \
     blas/blasvector.cpp \
     nnhelpers/sscnetworkbase.cpp \
     nnhelpers/ssnjsonhandler.cpp \
-    highwaynn/sscconvunit.cpp
+    highwaynn/sscconvunit.cpp \
+    highwaynn/neurons/highwayneuron.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -57,8 +60,12 @@ HEADERS += \
     #nn/sscnetwork.hpp \
     #nn/sscnetwork_global.h \
     #nn/sscneuron.hpp \
+    highwaynn/neurons/gated.hpp \
+    highwaynn/neurons/input.hpp \
+    highwaynn/neurons/bias.hpp \
+    highwaynn/neurons/carry.hpp \
+    highwaynn/neurons/pool.hpp \
     highwaynn/sschighwaynetwork.hpp \
-    highwaynn/sschighwayneuron.hpp \
     highwaynn/sschighwaygate.hpp \
     image/matrix.hpp \
     image/image.hpp \
@@ -74,5 +81,6 @@ HEADERS += \
     blas/blasvector.hpp \
     nnhelpers/sscnetworkbase.hpp \
     nnhelpers/ssnjsonhandler.hpp \
-    highwaynn/sscconvunit.hpp
+    highwaynn/sscconvunit.hpp \
+    highwaynn/neurons/highwayneuron.hpp
 

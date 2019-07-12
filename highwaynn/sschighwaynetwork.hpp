@@ -1,6 +1,6 @@
 #ifndef HIGHWAYNETWORK_HPP
 #define HIGHWAYNETWORK_HPP
-#include "sschighwayneuron.hpp"
+#include "highwayneuron.hpp"
 #include "../nnhelpers/sscnetworkbase.hpp"
 
 #include <QVariantMap>
@@ -24,6 +24,7 @@ public:
     int addOutputNeuron  (const QString& name = QString());
     int addBiasNeuron    (const QString& name = QString());
     int addCarryNeuron   (const QString& name = QString());
+    int addPoolNeuron    (const QString& name = QString());
 
     bool delNeuron(SSiHighwayNeuron* n);
     bool delNeuron(int idx);

@@ -1,5 +1,5 @@
 #include "sschighwaynetwork.hpp"
-#include "sschighwayneuron.hpp"
+#include "highwayneuron.hpp"
 #include "../nnhelpers/ssccycledetector.hpp"
 #include "../nnhelpers/sscvm.hpp"
 #include "../nnhelpers/ssnjsonhandler.hpp"
@@ -128,6 +128,7 @@ int                 SScHighwayNetwork::addHiddenNeuron  (const QString& name)   
 int                 SScHighwayNetwork::addOutputNeuron  (const QString& name)           { return addNeuron(SSiHighwayNeuron::Output, name); }
 int                 SScHighwayNetwork::addBiasNeuron    (const QString& name)           { return addNeuron(SSiHighwayNeuron::Bias,   name); }
 int                 SScHighwayNetwork::addCarryNeuron   (const QString& name)           { return addNeuron(SSiHighwayNeuron::Carry,  name); }
+int                 SScHighwayNetwork::addPoolNeuron    (const QString& name)           { return addNeuron(SSiHighwayNeuron::Pool,   name); }
 
 bool                SScHighwayNetwork::delNeuron        (SSiHighwayNeuron* n)           { return delNeuron(n2idx(n)); }
 int                 SScHighwayNetwork::n2idx            (SSiHighwayNeuron* n) const     { foreach(int i, m_neurons.keys()) if (m_neurons[i]==n) return i; return -1; }
