@@ -242,7 +242,7 @@ void poolTest()
     net.setOutputActivationType(SScActivation::IDENTITY);
 
     // net.setConnectionRange(1,0);
-    net.setGainRange(1,1);
+    net.setGainRange(1,0);
     const int i1 = net.addInputNeuron   ("I1"),
               i2 = net.addInputNeuron   ("I2"),
               o1 = net.addOutputNeuron  ("Out"),

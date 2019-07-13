@@ -14,7 +14,7 @@ SScNetworkBase::SScNetworkBase() :
 {}
 
 bool    SScNetworkBase::setTrainingType(SScTrainableParameter::Type t) { m_tptype=t; return true; }
-bool    SScNetworkBase::setOutputActivationType(SScActivation::Type t) { /*if (!SScActivation::nonLinear(t)) return false;*/ m_htype = t; return true; }
+bool    SScNetworkBase::setOutputActivationType(SScActivation::Type t) { /*if (!SScActivation::nonLinear(t)) return false;*/ m_otype = t; return true; }
 bool    SScNetworkBase::setHiddenActivationType(SScActivation::Type t) { /*if (!SScActivation::nonLinear(t)) return false;*/ m_htype = t; return true; }
 bool    SScNetworkBase::setCarryActivationType (SScActivation::Type t) { if (!SScActivation::canCarry (t)) return false; m_ctype = t; return true; }
 
