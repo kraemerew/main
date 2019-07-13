@@ -239,27 +239,27 @@ void poolTest()
     SScHighwayNetwork net;
     net.setTrainingType(SScTrainableParameter::ADAM);
     net.setHiddenActivationType(SScActivation::RBF);
-    net.setOutputActivationType(SScActivation::LOGISTIC);
+    net.setOutputActivationType(SScActivation::IDENTITY);
+
     // net.setConnectionRange(1,0);
-    // net.setGainRange(0,1);
+    net.setGainRange(1,1);
     const int i1 = net.addInputNeuron   ("I1"),
               i2 = net.addInputNeuron   ("I2"),
               o1 = net.addOutputNeuron  ("Out"),
-              bi = net.addBiasNeuron    ("Bias"),
-              pn = net.addMaxPoolNeuron ("MaxPool"),
-              h1 = net.addHiddenNeuron("H1");/*
+              //bi = net.addBiasNeuron    ("Bias"),
+              pn = net.addMaxPoolNeuron ("MaxPool");
+             /* h1 = net.addHiddenNeuron("H1"),
               h2 = net.addHiddenNeuron("H2"),
               h3 = net.addHiddenNeuron("H3");*/
     net.connect(i1,pn);
     net.connect(i2,pn);
-    net.connect(pn,o1);
-    net.connect(h1,o1);
+    net.connect(pn,o1,1.0);
 
-    foreach(int idx, QList<int>() /*<< h1 << h2 << h3*/ << o1 << h1)
+    foreach(int idx, QList<int>() /*<< h1 << h2 << h3*/ << o1 )
     {
-        net.connect(bi,idx);
-        net.connect(i1,idx);
-        net.connect(i2,idx);
+        //net.connect(bi,idx);
+        //net.connect(i1,idx);
+        //net.connect(i2,idx);
 
     }
     //foreach(int idx, QList<int>() << h1 << h2 << h3)
@@ -298,7 +298,9 @@ void poolTest()
         const double pout = net.idx2n(o1)->out(), perr = net.idx2n(o1)->perr();
         const bool success = qRound(qMax(10*in1,10*in2))==qRound(10.0*pout);
         if (!success) ++failcount;
- //       if (!success) qWarning("Cycle %d In1 %d In2 %d Out %lf %s", c, qRound(10.0*in1), qRound(10.0*in2), 10.0*pout, success ? "SUCCESS":"FAILURE");
+        qWarning("Cycle %d In1 %d In2 %d PN %lf Out %lf %s", c, qRound(10.0*in1), qRound(10.0*in2), 10.0*net.idx2n(pn)->out(), 10.0*pout, success ? "SUCCESS":"FAILURE");
+
+        if (c==11) std::exit(0);
         err+=perr;
 
         if (endOfCycle)

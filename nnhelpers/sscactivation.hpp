@@ -40,6 +40,7 @@ public:
     inline bool   setGain   (double v) { m_gain->set(v); return true; }
     inline void   update(double v) { m_gain->update(v); }
     inline void   endOfCycle() { m_gain->endOfCycle(); }
+    inline QString type2Id() const { return type2Id(m_t); }
 
     static SScActivation* create(Type type);
     static SScActivation* create(const QVariantMap& vm);

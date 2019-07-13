@@ -35,10 +35,10 @@ SOURCES += main.cpp \
     blas/blasvector.cpp \
     nnhelpers/sscnetworkbase.cpp \
     nnhelpers/ssnjsonhandler.cpp \
-    highwaynn/sscconvunit.cpp \
     highwaynn/gate.cpp \
     highwaynn/network.cpp \
-    highwaynn/neurons/neuron.cpp
+    highwaynn/neurons/neuron.cpp \
+    highwaynn/convunit.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -79,8 +79,8 @@ HEADERS += \
     blas/blasvector.hpp \
     nnhelpers/sscnetworkbase.hpp \
     nnhelpers/ssnjsonhandler.hpp \
-    highwaynn/sscconvunit.hpp \
     highwaynn/gate.hpp \
     highwaynn/network.hpp \
-    highwaynn/neurons/neuron.hpp
+    highwaynn/neurons/neuron.hpp \
+    highwaynn/convunit.hpp
 

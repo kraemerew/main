@@ -1,0 +1,61 @@
+
+
+\documentclass[a4paper,11pt]{article}
+\usepackage{import}
+\usepackage{example}
+ 
+\usepackage{makeidx}
+
+ 
+\begin{document}
+
+\title{Derivation of the Backpropagation Algorithm for Highway Networks with Gain}
+\author{Subsymbolics GmbH Germany}
+\maketitle
+\begin{abstract}
+This was written as an online documentation during a development process.
+In this document the Backpropagation algorithm will be derived for a Highway architecture
+using arbitrary activation functions as well as one gain parameter per neuron. The reader is expected to understand normal backpropagation. 
+\end{abstract}
+
+\section{Introduction}
+Highway networks are an extended feed-worward architecture influenced by the recurrent LSTM (Long-Short-Term Memory) architecture, both developed by J\"urgen Schmidhuber. They are proposed as a solution to the vanishing gradient problem in very deep networks. 
+In a Highway network, the neuron model allows for input selection from either the highway or the neuron potential. The highway is just the output of a neuron from some layer behind the neuron, usually very far behind. The selection is done via a so-called Carry-neuron, connected to the dedicated selection gate of a neuron. Other than that, the network behaves quite normally, there are input neurons, usually a bias neuron, hidden neurons and output neurons defining the network target values.\\
+A neuron $j$ calculates its potential $net_j$ the usual way, using the outputs of incoming neurons $i$ weighted by the synaptic weights $w_{ij}$:
+\[
+net_j=\sum_i w_{ij}o_i
+\]
+The potential is then scaled by the gain $g_j$ and passed through the activation $\phi_j()$. But while we would be done here in classic feed-forward networks, a highway neuron has two optional input gates, $c_j$ and $hw_j$, both connected to other neurons via an untrainable connection weighted with 1.0. This defines the highway connection, and if it is not used, the factor $c_j$ is assumed to be 0.
+\[ o_j = (1-c_j)\phi_j(g_j net_j) + c_j hw_j\]
+\newpage
+As we can see, for $c_j=0$ the neuron behave just like any other neuron, but for 1 it would deliver the output of the highway $hw_j$. Think of both of these parameters just as some other output in the network (with the condition that we keep it feed-forward).\\
+Like most other architectures, there is a set of input neurons $I$ and output neurons $O$, with output neurons having a target value $t_j$ defined. The cumulative error of the network $E$ is simply the sum over all single errors $E_j$. For display purposes this error should be divided by the number of putput neurons, but in our case we will not do this as it does not influence the training:
+\[ E=\sum_{j\in O} E_j = \sum_{j\in O} (o_j-t_j)^2 \]
+In the following section we will derive the rules to minimize this error.
+\section{Backpropagation}
+Training a neuron $j$ with gradient descent means following the negated partial derivative of the network error $E$ by the trainable parameter $w_{ij}$ or $g_j$, in the most simple case scaled by a positive learning rate parameter $\eta$ near zero. The updates are therefore calculated as:
+\[ \Delta w_{ij}=-\eta\frac{\partial E}{\partial w_{ij}}  \hspace{1cm}  \Delta g_j = -\eta\frac{\partial E}{\partial g_j} \]
+In the real world, update rules like ADAM, RMSGrad, RProp etc vastly out-perform this method, but these algorithms are also just using the gradient information. What we are interested in is therefore the partial derivatives. We begin in the usual fashion by expanding the derivatives:
+\[ \frac{\partial E}{\partial w_{ij}} = \frac{\partial E}{\partial o_j}\frac{\partial o_j}{\partial net_j}\frac{\partial net_j}{\partial w_{ij}} = \frac{\partial E}{\partial o_j} (1-c_j)\phi_j'(g_jnet_j)g_jo_i \]
+\[ \frac{\partial E}{\partial g_j} = \frac{\partial E}{\partial o_j}\frac{\partial o_j}{\partial g_j}= \frac{\partial E}{\partial o_j}(1-c_j)\phi'(g_jnet_j)net_j  \]
+It should be noted that both calculations need the factor $\partial E/\partial o_j$, which will difffer depending on whether neuron $j$ is an output, hidden or carry. 
+\subsection{ Neuron $j$ is in the set of Output Neurons}
+If the neuron is one of the network outputs and because outputs are not further connected to any other neurons, the derivative depends only the the output neuron's error signal:
+\[ \frac{\partial E}{\partial o_j}=\frac{\partial E_j}{\partial o_j}= 2(o_j-t_j) \]
+It should be noted that the scaling by $2$, while mathematically correct, is not really necessary in an implementation, as we are not interested in the gradient amplitude, just the direction.
+\subsection{ Neuron $j$ is in the set of Hidden Neurons}
+If the neuron is a hidden element, we shall begin by finding the set $L$ of neurons being fed by neuron $j$. Only these are influenced by neuron $j$ directly and therefore only these matter, as long as we can take care of those influened indirectly by recursion.
+\[ \frac{\partial E}{\partial o_j}=\sum_{l\in L}\frac{\partial E}{\partial o_l}\frac{\partial o_l}{\partial o_j} = \sum_{l\in L}\frac{\partial E}{\partial o_l}\frac{\partial o_l}{\partial net_l}\frac{\partial net_l}{\partial o_j} = \sum_{l\in L}\frac{\partial E}{\partial o_l} (1-c_l)\phi_l'(g_lnet_l)g_lw_{jl} \] 
+We therefore have a recursion calculating $\partial E/\partial o_j$ via a weighted sum of the same derivative over all outgoing connections of $j$. The recursion is closed because at some point the outputt neurons will be hit, where the derivatine would simply be $2(o_l-t_l)$. In a real-world application for performance rasons these derivatives should be calculated only once and stored as long as the input pattern and the weights don't change.
+\subsection{ Neuron $j$ is in the set of Carry neurons}
+This is the last case and differs from the hidden case because the carry neurons influence the other neurons in a different way. It is actually more simple, as for a neuron $l$ neuron connected to a carry neeuron $j$, the potential $net_l$ is not affected by the carry signal $c_l=o_j$.
+Again we use the sum over all connected neurons $l$:
+\[ \frac{\partial E}{\partial o_j}=\sum_{l\in L}\frac{\partial E}{\partial o_l}\frac{\partial o_l}{\partial o_j} \]
+Keep in mind that for all neurons in $L$, the output $o_j$ is the same as $c_l$. The calculation thus becomes very simple:
+\[ \frac{\partial E}{\partial o_j}=\sum_{l\in L}\frac{\partial E}{\partial o_l}\frac{\partial((1-o_j)\phi_l(g_lnet_l)+o_jhw_l)}{\partial o_j} = \sum_{l\in L}\frac{\partial E}{\partial o_l} (hw_l-\phi_l(g_lnet_l)) \]
+\section{Final remarks}
+The way we have calculated the highway mechanism is a bit different from standard highway network where there is a single carry neuron for a whole layer with a single highway connection to some earlier layer. In our case, each neuron can have a different carry / highway connection, including shortcuts to different layers from the same layer. Initial tests indicate that the highway will be used quickly provided the carry neurons are connected to the right inputs to make a decision.
+
+\end{document}
+
+

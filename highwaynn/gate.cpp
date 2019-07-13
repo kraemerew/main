@@ -43,6 +43,7 @@ double SScGate::net()
         b.reserve(size());
         for(QMap<SSiHighwayNeuron*,QSharedPointer<SScTrainableParameter> >::iterator it = begin(); it != end(); ++it)
         {
+            qWarning("???? %s IN FROM %s %lf*%lf = %lf", qPrintable(m_parent->name()), qPrintable(it.key()->name()), it.value()->value(), it.key()->out(), it.value()->value()*it.key()->out());
             a << it.key()->out();
             b << it.value()->value();
         }
