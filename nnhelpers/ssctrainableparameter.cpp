@@ -275,7 +275,7 @@ public:
             m_m = (m_beta1*m_m) + (m_beta1c*g);
             m_v = (m_beta2*m_v) + (m_beta2c*g*g);
 
-            const double dlt   = m_eta*(m_m/(qSqrt(m_v)+1e-10));
+            const double dlt = m_eta*(m_m/(qSqrt(m_v)+1e-10));
             m_value+=dlt;
             m_updatesum = 0;
             m_ctr = 0;
@@ -502,7 +502,7 @@ QString SScTrainableParameter::name(Type t)
         case ADAM:      return "Adam";      break;
         case ADAMCORR:  return "AdamCorr";  break;
         case ADAMAX:    return "AdaMax";    break;
-        case ADAMAXCORR:return "AdaMaxCorr";break;
+        case ADAMAXCORR:return "AdamaxCorr";break;
         default:                            break;
     }
     return "";

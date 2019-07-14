@@ -63,7 +63,6 @@ double SScGatedNeuron::transform()
     if (!m_transformset)
     {
         m_t = m_act->activate(net());
-        qWarning(">>>>TRANS %s: %lf -> %lf", qPrintable(m_act->type2Id()), net(), m_t);
         m_transformset = true;
     }
     return m_t;
@@ -76,8 +75,7 @@ double SScGatedNeuron::out()
     {
         m_o = (transform()*(1.0-carry()))+(carry()*highway());
         m_outset = true;
-        //qWarning(">>>>>>>>> %s: NET %lf TRANSFORM %lf", qPrintable(name()),net(), transform());
-    }
+     }
     return m_o;
 }
 double  SScGatedNeuron::deltag()

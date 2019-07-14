@@ -241,34 +241,19 @@ void poolTest()
     net.setHiddenActivationType(SScActivation::RBF);
     net.setOutputActivationType(SScActivation::IDENTITY);
 
-    // net.setConnectionRange(1,0);
+    net.setConnectionRange(0,2);
     net.setGainRange(1,0);
     const int i1 = net.addInputNeuron   ("I1"),
               i2 = net.addInputNeuron   ("I2"),
               o1 = net.addOutputNeuron  ("Out"),
-              //bi = net.addBiasNeuron    ("Bias"),
               pn = net.addMaxPoolNeuron ("MaxPool");
-             /* h1 = net.addHiddenNeuron("H1"),
-              h2 = net.addHiddenNeuron("H2"),
-              h3 = net.addHiddenNeuron("H3");*/
+
     net.connect(i1,pn);
     net.connect(i2,pn);
-    net.connect(pn,o1,1.0);
-
-    foreach(int idx, QList<int>() /*<< h1 << h2 << h3*/ << o1 )
-    {
-        //net.connect(bi,idx);
-        //net.connect(i1,idx);
-        //net.connect(i2,idx);
-
-    }
-    //foreach(int idx, QList<int>() << h1 << h2 << h3)
-    //  net.connect(idx,o1);
+    net.connect(pn,o1);
 
     // training preparation
     net.connectForward();
-
-
 
     // training
     QElapsedTimer t, et; t.start(); et.start();
@@ -298,19 +283,19 @@ void poolTest()
         const double pout = net.idx2n(o1)->out(), perr = net.idx2n(o1)->perr();
         const bool success = qRound(qMax(10*in1,10*in2))==qRound(10.0*pout);
         if (!success) ++failcount;
-        qWarning("Cycle %d In1 %d In2 %d PN %lf Out %lf %s", c, qRound(10.0*in1), qRound(10.0*in2), 10.0*net.idx2n(pn)->out(), 10.0*pout, success ? "SUCCESS":"FAILURE");
+        //if (!success) qWarning("Cycle %d In1 %d In2 %d PN %lf Out %lf %s", c, qRound(10.0*in1), qRound(10.0*in2), 10.0*net.idx2n(pn)->out(), 10.0*pout, success ? "SUCCESS":"FAILURE");
 
-        if (c==11) std::exit(0);
+        //if (c==200) std::exit(0);
         err+=perr;
 
         if (endOfCycle)
         {
             if (failcount==0) done = true;
-            if (done || (et.elapsed()>200))
+            if (done || (et.elapsed()>20))
             {
                 et.restart();
-                qWarning("End of cycle %d - failures %d error %lf last %lf %s", c, failcount, err, lasterr, err<lasterr ? "lower":"higher");
             }
+            qWarning("End of cycle %d - failures %d error %lf last %lf %s", c, failcount, err, lasterr, err<lasterr ? "lower":"higher");
             if (done) qWarning("Done");
 
             lasterr = err;
@@ -318,7 +303,6 @@ void poolTest()
             failcount=0;
             //if (c>1000) std::exit(1);
         }
-
 
         net.trainingStep(endOfCycle);
     }

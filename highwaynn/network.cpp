@@ -203,7 +203,6 @@ bool SScHighwayNetwork::fromVM(const QVariantMap& vm)
     foreach(int idx, m_neurons.keys())
     {
         m_neurons[idx]->fromVM(cache[idx]);
-        qWarning(">>>>INDEX %d NAME %s", idx, qPrintable(m_neurons[idx]->name()));
     }
 
     return true;
