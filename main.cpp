@@ -237,77 +237,84 @@ void carryTest(int pow)
 void poolTest()
 {
     SScHighwayNetwork net;
-    net.setTrainingType(SScTrainableParameter::RPROP);
-    net.setHiddenActivationType(SScActivation::RBF);
-    net.setOutputActivationType(SScActivation::LOGISTIC);
+    net.setTrainingType(SScTrainableParameter::ADAM);
+    net.setHiddenActivationType(SScActivation::MHAT);
+    net.setOutputActivationType(SScActivation::SWISH);
 
     net.setConnectionRange(0,2);
-    net.setGainRange(1,0);
+    //net.setGainRange(1,0);
     const int i1 = net.addInputNeuron   ("I1"),
               i2 = net.addInputNeuron   ("I2"),
+              i3 = net.addInputNeuron   ("I3"),
               bi = net.addBiasNeuron    ("B"),
-              h1 = net.addHiddenNeuron  ("H1"),
-              h2 = net.addHiddenNeuron  ("H2"),
               o1 = net.addOutputNeuron  ("Out"),
-              pn = net.addMaxPoolNeuron ("MaxPool");
+              min= net.addMinPoolNeuron ("MinPool");
+net.idx2n(o1)->setLock(true);
+    QList<int> hl0, hl1;
+    for (int i=0; i<5; ++i) hl0 << net.addHiddenNeuron(QString("H_0_%1").arg(i));
+    for (int i=0; i<5; ++i) hl1 << net.addHiddenNeuron(QString("H_1_%1").arg(i));
 
-    net.connect(bi,o1);
-    net.connect(i1,pn);
-    net.connect(i2,pn);
-    net.connect(pn,o1);
+    // Bias and input to hidden
+    foreach(int idx, QList<int>() << bi << i1 << i2 << i3) foreach(int toidx, hl0) net.connect(idx,toidx);
+    foreach(int toidx, hl1) net.connect(bi,toidx);
+    foreach(int idx, hl0) foreach(int toidx, hl1) net.connect(idx,toidx);
+    // Hidden to pooling
+    foreach(int idx, hl1) net.connect(idx,min);
 
-    net.connect(pn,o1);
+    // pool and bias to output
+    foreach(int idx, QList<int>() << min << bi) net.connect(idx,o1);
 
     // training preparation
     net.connectForward();
 
     // training
     QElapsedTimer t, et; t.start(); et.start();
-    int tc=0, c=0, failcount=0;
-    double err = 0, lasterr = 0, in1 = 0.0, in2 = 1-in1;
-    bool done = false;
+    int c=0;
+    double err = 0, lasterr = 0;
+    bool done = false, doLogging = false;
+    int failcount = 10000;
     do
     {
-        in1+=.1;
-        if (in1>1.0)
-        {
-            in1=0.0;
-            in2+=0.1;
-            if (in2>1) in2 =0;
-        }
+        const double in1   = (double)rand()/RAND_MAX,
+                     in2   = (double)rand()/RAND_MAX,
+                     in3   = (double)rand()/RAND_MAX,
+                     inmin = qMin(qMin(in1,in2),in3),
+                     inmax = qMax(qMax(in1,in2),in3),
+                     trg   = inmin;
         ++c;
-        const bool endOfCycle = (in1==0.0) && (in2==0);
-
-        const double trg = qMax(in1,in2);
+        const bool endOfCycle = (c%10000)==0;
         net.setInput(i1,in1);
         net.setInput(i2,in2);
+        net.setInput(i3,in3);
         net.setTarget(o1,trg);
-
         net.reset();
 
+        const double minout = net.idx2n(min)->out(),
+                     pout   = net.idx2n(o1) ->out(),
+                     perr   = net.idx2n(o1)->perr();
 
-        const double pout = net.idx2n(o1)->out(), perr = net.idx2n(o1)->perr();
-        const bool success = qRound(qMax(10*in1,10*in2))==qRound(10.0*pout);
-        if (!success) ++failcount;
-        //if (!success) qWarning("Cycle %d In1 %d In2 %d PN %lf Out %lf %s", c, qRound(10.0*in1), qRound(10.0*in2), 10.0*net.idx2n(pn)->out(), 10.0*pout, success ? "SUCCESS":"FAILURE");
-
-        //if (c==200) std::exit(0);
+        if (doLogging)
+            qWarning("Cycle %d: %.2lf %.2lf %.2lf Trg %lf MinOut %lf Out %lf - err %lf", c, in1, in2, in3, trg, minout, pout, perr);
+        //if (c==10) std::exit(0);
         err+=perr;
-
+        if (perr>.01) ++failcount;
         if (endOfCycle)
         {
-            ++tc;
+            err/=10000;
             if (failcount==0) done = true;
-            if (done || (et.elapsed()>20))
+            if (done || (et.elapsed()>200))
             {
+                const bool isLocked = net.idx2n(o1)->conLock();
                 et.restart();
+                qWarning("End of cycle %d / fail %d- error %lf %s %s",
+                         c, failcount, err, err<lasterr ? "lower":"higher", isLocked ? "L":"");
+                if (failcount<6000)  net.idx2n(o1)->setLock(false);
+                if (failcount<200) doLogging=true;
             }
-            qWarning("End of cycle %d - failures %d error %lf last %lf %s", tc, failcount, err, lasterr, err<lasterr ? "lower":"higher");
             if (done) qWarning("Done");
-
+            failcount = 0;
             lasterr = err;
             err=0;
-            failcount=0;
             //if (c>1000) std::exit(1);
         }
 

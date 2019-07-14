@@ -12,13 +12,13 @@ public:
     virtual bool    delInput            (SSiHighwayNeuron* other);
     virtual bool    connectHighway      (SSiHighwayNeuron*, SSiHighwayNeuron*) { return false; }
     virtual bool    setActivation       (SScActivation::Type, double) { return false; }
-    virtual double  icon                (SSiHighwayNeuron*) { return 0.0; }
+    virtual double  icon                (SSiHighwayNeuron*) { return 0; }
     virtual double  forwardSelectedDedo (SSiHighwayNeuron* ref);
 
     virtual double  transform   ();
     virtual double  net         ();
     virtual double  out         ()                  { return transform(); }
-    virtual void    reset       ()                  { SSiHighwayNeuron::reset(); m_selected=false; m_sel = NULL; }
+    virtual void    reset       ()                  {  SSiHighwayNeuron::reset(); m_selected=false; m_sel = NULL; }
     virtual bool    setInput    (double)            { return false; }
     virtual bool    setTarget   (double)            { return false; }
     virtual double  deltag      ()                  { return 0; }

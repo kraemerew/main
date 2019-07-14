@@ -55,11 +55,6 @@ double SScPoolNeuron::net()
 
 double SScPoolNeuron::forwardSelectedDedo(SSiHighwayNeuron* ref)
 {
-    if (m_sel==NULL) transform();
-    if (!m_sel || (m_sel!=ref)) return 0.0;
-
-    // If ref is the neuron having achieved max, it takes effectively the place of the pool and
-    // we behave as if it is directly connected to the neurons following the pool
     if (!m_dedoset)
     {
         m_dedo = 0;
@@ -69,8 +64,12 @@ double SScPoolNeuron::forwardSelectedDedo(SSiHighwayNeuron* ref)
             const double w_jl = l->icon(this);
             m_dedo += w_jl*l->dedo()*l->act()->dev()*l->act()->gain()*(1.0-l->carry());
         }
-        qWarning(">>>>>>>>FORWARDING DEDO %lf", m_dedo);
     }
+    if (m_sel==NULL) transform();
+    //qWarning(">>>>>SELECT %s", qPrintable(m_sel->name()));
+    if (!m_sel || (m_sel!=ref)) return 0.0;
+    // If ref is the neuron selected, it takes effectively the place of the pool and
+    // we behave as if it is directly connected to the neurons following the pool
     return m_dedo;
 }
 
