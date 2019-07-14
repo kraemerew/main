@@ -239,7 +239,7 @@ void poolTest()
     SScHighwayNetwork net;
     net.setTrainingType(SScTrainableParameter::ADAM);
     net.setHiddenActivationType(SScActivation::MHAT);
-    net.setOutputActivationType(SScActivation::SWISH);
+    net.setOutputActivationType(SScActivation::LOGISTIC);
 
     net.setConnectionRange(0,2);
     //net.setGainRange(1,0);
@@ -247,9 +247,11 @@ void poolTest()
               i2 = net.addInputNeuron   ("I2"),
               i3 = net.addInputNeuron   ("I3"),
               bi = net.addBiasNeuron    ("B"),
+              hx = net.addHiddenNeuron("HX"),
               o1 = net.addOutputNeuron  ("Out"),
               min= net.addMinPoolNeuron ("MinPool");
-net.idx2n(o1)->setLock(true);
+
+    //net.idx2n(o1)->setLock(true);
     QList<int> hl0, hl1;
     for (int i=0; i<5; ++i) hl0 << net.addHiddenNeuron(QString("H_0_%1").arg(i));
     for (int i=0; i<5; ++i) hl1 << net.addHiddenNeuron(QString("H_1_%1").arg(i));
@@ -261,8 +263,10 @@ net.idx2n(o1)->setLock(true);
     // Hidden to pooling
     foreach(int idx, hl1) net.connect(idx,min);
 
+    net.connect(min,hx);
+    net.connect(bi,hx);
     // pool and bias to output
-    foreach(int idx, QList<int>() << min << bi) net.connect(idx,o1);
+    foreach(int idx, QList<int>() << min << bi << hx) net.connect(idx,o1);
 
     // training preparation
     net.connectForward();
@@ -275,6 +279,7 @@ net.idx2n(o1)->setLock(true);
     int failcount = 10000;
     do
     {
+       // if (c==10) std::exit(0);
         const double in1   = (double)rand()/RAND_MAX,
                      in2   = (double)rand()/RAND_MAX,
                      in3   = (double)rand()/RAND_MAX,
@@ -308,7 +313,11 @@ net.idx2n(o1)->setLock(true);
                 et.restart();
                 qWarning("End of cycle %d / fail %d- error %lf %s %s",
                          c, failcount, err, err<lasterr ? "lower":"higher", isLocked ? "L":"");
-                if (failcount<6000)  net.idx2n(o1)->setLock(false);
+                if (failcount<4000)
+                {
+                    net.idx2n(o1)->setLock(true);
+                    net.idx2n(hx)->setLock(true);
+                }
                 if (failcount<200) doLogging=true;
             }
             if (done) qWarning("Done");
