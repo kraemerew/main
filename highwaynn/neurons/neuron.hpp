@@ -70,8 +70,8 @@ public:
     virtual void trainingStep   () {}
     virtual void endOfCycle     () {}
     inline void setName(const QString& name) { m_name=name; }
-    inline QString name() const { return m_name; }
-    int index();
+    inline QString name() const { return m_name.isEmpty() ? QString("%1").arg(index()) : m_name; }
+    int index() const;
 
     virtual QVariantMap toVM() const;
     virtual bool fromVM(const QVariantMap&);

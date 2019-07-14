@@ -135,7 +135,7 @@ int                 SScHighwayNetwork::addMaxPoolNeuron (const QString& name)   
 int                 SScHighwayNetwork::addMedPoolNeuron (const QString& name)           { return addNeuron(SSiHighwayNeuron::MedPool,name); }
 
 bool                SScHighwayNetwork::delNeuron        (SSiHighwayNeuron* n)           { return delNeuron(n2idx(n)); }
-int                 SScHighwayNetwork::n2idx            (SSiHighwayNeuron* n) const     { foreach(int i, m_neurons.keys()) if (m_neurons[i]==n) return i; return -1; }
+int                 SScHighwayNetwork::n2idx            (const SSiHighwayNeuron* n)const{ foreach(int i, m_neurons.keys()) if (m_neurons[i]==n) return i; return -1; }
 SSiHighwayNeuron*   SScHighwayNetwork::idx2n            (int idx) const                 { if ((idx<0) || !m_neurons.contains(idx)) return NULL; return m_neurons[idx]; }
 bool                SScHighwayNetwork::contains         (SSiHighwayNeuron *n) const     { return m_neurons.values().contains(n); }
 bool                SScHighwayNetwork::connect          (int from, int to, double v)    { return SScHighwayNetwork::connect   (idx2n(from), idx2n(to), v ); }
@@ -173,6 +173,7 @@ QVariantMap SScHighwayNetwork::toVM() const
 {
     QVariantMap ret;
     ret["NET_PRESETS"] = SScNetworkBase::toVM();
+    if (!name().isEmpty()) ret["NAME"] = name();
     foreach(int key, m_neurons.keys()) ret[QString("NEURON_%1").arg(key)] = m_neurons[key]->toVM();
     return ret;
 }
@@ -184,7 +185,7 @@ bool SScHighwayNetwork::fromVM(const QVariantMap& vm)
     QMap<int,QVariantMap> cache;
     SScVM sscvm(vm);
     SScNetworkBase::fromVM(sscvm.vmToken("NET_PRESETS"));
-
+    setName(sscvm.stringToken("NAME"));
     foreach(const QString& key, sscvm.keys()) if (key.startsWith("NEURON"))
     {
         bool ok = false;

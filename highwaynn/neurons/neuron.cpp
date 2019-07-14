@@ -80,24 +80,21 @@ double SSiHighwayNeuron::priv_dedo()
     double ret = 0;
 
     foreach(SSiHighwayNeuron* l, m_out)
-    {
-        const double seldedo = l->forwardSelectedDedo(this);
-        //if (seldedo>0) qWarning(">>>>>>FWDDEDO %lf %s->%s", seldedo, qPrintable(l->name()), qPrintable(name()));
-        ret += seldedo;    // only the pool neuron delivers something here, if this neuron achieved maximum in pool
-        const double w_jl = l->icon(this);
-        ret +=  w_jl*l->dedo()*l->act()->dev()*l->act()->gain()*(1.0-l->carry());
+    {       
+        ret += l->forwardSelectedDedo(this);;    // only the pool neuron delivers something here, if this neuron achieved maximum in pool
+        ret += l->icon(this)*l->dedo()*l->act()->dev()*l->act()->gain()*(1.0-l->carry());
     }
     return ret;
 }
 
-int SSiHighwayNeuron::index() { return m_net->n2idx(this); }
+int SSiHighwayNeuron::index() const { return m_net->n2idx(this); }
 
 QVariantMap SSiHighwayNeuron::toVM() const
 {
     QVariantMap vm;
     vm["TYPE"] = type2Id(m_type);
-    vm["NAME"] = m_name;
     vm["ACT"]  = m_act->toVM();
+    if (!m_name.isEmpty()) vm["NAME"] = m_name;
     if (m_conlock)  vm["TLOCK_CON"]  = m_conlock;
     if (m_gainlock) vm["TLOCK_GAIN"] = m_gainlock;
     return vm;
@@ -106,7 +103,7 @@ QVariantMap SSiHighwayNeuron::toVM() const
 bool SSiHighwayNeuron::fromVM(const QVariantMap & vm)
 {
     SScVM sscvm(vm);
-    m_name = sscvm.stringToken("NAME","");
+    m_name = sscvm.stringToken("NAME");
     const QVariantMap avm = sscvm.vmToken("ACT");
     if (!avm.isEmpty())
     {
@@ -115,7 +112,6 @@ bool SSiHighwayNeuron::fromVM(const QVariantMap & vm)
     }
     setConLock (sscvm.boolToken("TLOCK_CON", false));
     setGainLock(sscvm.boolToken("TLOCK_GAIN",false));
-
     return true;
 }
 

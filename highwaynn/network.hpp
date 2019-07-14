@@ -12,6 +12,9 @@ public:
     SScHighwayNetwork();
     virtual ~SScHighwayNetwork();
 
+    inline QString name() const { return m_name; }
+    inline void setName(const QString& s) { m_name=s; }
+
     QByteArray toData() const;
     bool fromData(const QByteArray&);
     bool load(const QString& filename);
@@ -30,7 +33,7 @@ public:
 
     bool delNeuron(SSiHighwayNeuron* n);
     bool delNeuron(int idx);
-    int n2idx(SSiHighwayNeuron* n) const;
+    int n2idx(const SSiHighwayNeuron* n) const;
     SSiHighwayNeuron* idx2n(int idx) const;
     void reset();
     void connectForward();
@@ -66,7 +69,9 @@ private:
     bool isFeedForward() const;
     int addNeuron(SSiHighwayNeuron::Type type, const QString& name = QString());
     inline int nextFreeIdx() const { for (int i=0; i<INT_MAX; ++i) if (!m_neurons.contains(i)) return i; Q_ASSERT(false); return -1; }
-    QMap<int,SSiHighwayNeuron*>  m_neurons;
+
+    QString                     m_name;
+    QMap<int,SSiHighwayNeuron*> m_neurons;
 };
 
 #endif // HIGHWAYNETWORK_HPP
