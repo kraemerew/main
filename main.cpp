@@ -60,9 +60,9 @@ void parityTest(int pow)
 {
     const int pmax = qPow(2,pow), plast = pmax-1;
     SScHighwayNetwork net;
-    net.setTrainingType(SScTrainableParameter::ADAM);
-    net.setHiddenActivationType(SScActivation::RBF);
-    net.setOutputActivationType(SScActivation::MHAT);
+    net.setTrainingType(SScTrainableParameter::ADAMCORR);
+    net.setHiddenActivationType(SScActivation::MHAT);
+    net.setOutputActivationType(SScActivation::LOGISTIC);
    // net.setConnectionRange(1,0);
    // net.setGainRange(0,1);
     const int o1 = net.addOutputNeuron  ("Out");
@@ -237,19 +237,25 @@ void carryTest(int pow)
 void poolTest()
 {
     SScHighwayNetwork net;
-    net.setTrainingType(SScTrainableParameter::ADAM);
+    net.setTrainingType(SScTrainableParameter::RPROP);
     net.setHiddenActivationType(SScActivation::RBF);
-    net.setOutputActivationType(SScActivation::IDENTITY);
+    net.setOutputActivationType(SScActivation::LOGISTIC);
 
     net.setConnectionRange(0,2);
     net.setGainRange(1,0);
     const int i1 = net.addInputNeuron   ("I1"),
               i2 = net.addInputNeuron   ("I2"),
+              bi = net.addBiasNeuron    ("B"),
+              h1 = net.addHiddenNeuron  ("H1"),
+              h2 = net.addHiddenNeuron  ("H2"),
               o1 = net.addOutputNeuron  ("Out"),
               pn = net.addMaxPoolNeuron ("MaxPool");
 
+    net.connect(bi,o1);
     net.connect(i1,pn);
     net.connect(i2,pn);
+    net.connect(pn,o1);
+
     net.connect(pn,o1);
 
     // training preparation
@@ -257,7 +263,7 @@ void poolTest()
 
     // training
     QElapsedTimer t, et; t.start(); et.start();
-    int c=0, failcount=0;
+    int tc=0, c=0, failcount=0;
     double err = 0, lasterr = 0, in1 = 0.0, in2 = 1-in1;
     bool done = false;
     do
@@ -290,12 +296,13 @@ void poolTest()
 
         if (endOfCycle)
         {
+            ++tc;
             if (failcount==0) done = true;
             if (done || (et.elapsed()>20))
             {
                 et.restart();
             }
-            qWarning("End of cycle %d - failures %d error %lf last %lf %s", c, failcount, err, lasterr, err<lasterr ? "lower":"higher");
+            qWarning("End of cycle %d - failures %d error %lf last %lf %s", tc, failcount, err, lasterr, err<lasterr ? "lower":"higher");
             if (done) qWarning("Done");
 
             lasterr = err;
@@ -308,9 +315,10 @@ void poolTest()
     }
     while (!done);
     qWarning("Training took %d ms", (int)t.elapsed());
-   std::exit(0);
-
+    net.save("poolTest.net");
+    std::exit(0);
 }
+
 int main(int argc, char *argv[])
 {
     Q_UNUSED(argc);

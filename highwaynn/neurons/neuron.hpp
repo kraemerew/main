@@ -24,21 +24,10 @@ public:
         MedPool,
         Last
     };
-    explicit SSiHighwayNeuron(SScHighwayNetwork* net, Type type, SScActivation::Type acttype = SScActivation::IDENTITY)
-        : m_net(net),
-          m_type(type),
-          m_dedoset(false),
-          m_transformset(false),
-          m_outset(false),
-          m_dedo(0.0),
-          m_t(0.0),
-          m_o(0.0),
-          m_act(SScActivation::create(acttype))
-    {
-       Q_CHECK_PTR(net);
-        reset();
-    }
-    virtual ~SSiHighwayNeuron() { if (m_act) delete m_act; m_act=NULL; }
+    explicit SSiHighwayNeuron(SScHighwayNetwork* net, Type type, SScActivation::Type acttype = SScActivation::IDENTITY);
+
+    virtual ~SSiHighwayNeuron();
+
     /*!
      * \brief Partial derivative or network error by this output
      * \return
@@ -95,6 +84,12 @@ public:
     virtual void doConnection() {}
     virtual void dump();
 
+    inline bool conLock     () const { return m_conlock; }
+    inline bool gainLock    () const { return m_gainlock; }
+    inline void setConLock  (bool b) { m_conlock=b; }
+    inline void setGainLock (bool b) { m_gainlock=b; }
+    inline void setLock     (bool b) { setConLock(b); setGainLock(b); }
+
 protected:
     // Partial derivative of network error by o_j (with j being the index of this neuron)
     // The same for all neurons with exception of output neurons where it is redefined
@@ -102,7 +97,11 @@ protected:
 
     SScHighwayNetwork*          m_net;
     Type                        m_type;
-    bool                        m_dedoset, m_transformset, m_outset;
+    bool                        m_conlock,
+                                m_gainlock,
+                                m_dedoset,
+                                m_transformset,
+                                m_outset;
     double                      m_dedo, m_t, m_o;
     SScActivation*              m_act;
     QString                     m_name;

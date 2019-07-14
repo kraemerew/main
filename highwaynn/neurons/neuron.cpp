@@ -8,6 +8,29 @@
 #include "gated.hpp"
 #include "pool.hpp"
 
+SSiHighwayNeuron::SSiHighwayNeuron(SScHighwayNetwork* net, Type type, SScActivation::Type acttype)
+    : m_net(net),
+      m_type(type),
+      m_conlock(false),
+      m_gainlock(false),
+      m_dedoset(false),
+      m_transformset(false),
+      m_outset(false),
+      m_dedo(0.0),
+      m_t(0.0),
+      m_o(0.0),
+      m_act(SScActivation::create(acttype))
+{
+   Q_CHECK_PTR(net);
+   reset();
+}
+
+SSiHighwayNeuron::~SSiHighwayNeuron()
+{
+    if (m_act) delete m_act;
+    m_act=NULL;
+}
+
 bool SSiHighwayNeuron::setActivation(SScActivation::Type type, double gain)
 {
     if (m_act) delete m_act;
@@ -72,7 +95,9 @@ QVariantMap SSiHighwayNeuron::toVM() const
     QVariantMap vm;
     vm["TYPE"] = type2Id(m_type);
     vm["NAME"] = m_name;
-    vm["ACT"] = m_act->toVM();
+    vm["ACT"]  = m_act->toVM();
+    if (m_conlock)  vm["TLOCK_CON"]  = m_conlock;
+    if (m_gainlock) vm["TLOCK_GAIN"] = m_gainlock;
     return vm;
 }
 
@@ -84,8 +109,11 @@ bool SSiHighwayNeuron::fromVM(const QVariantMap & vm)
     if (!avm.isEmpty())
     {
         if (m_act) delete m_act;
-        m_act = SScActivation::create(avm);
+        m_act = SScActivation::create(avm);        
     }
+    setConLock (sscvm.boolToken("TLOCK_CON", false));
+    setGainLock(sscvm.boolToken("TLOCK_GAIN",false));
+
     return true;
 }
 

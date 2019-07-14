@@ -91,16 +91,14 @@ double SScGatedNeuron::deltaw(SSiHighwayNeuron* n)
 
 void SScGatedNeuron::trainingStep()
 {
-    for(QMap<SSiHighwayNeuron*,QSharedPointer<SScTrainableParameter> >::iterator it = m_in.begin(); it != m_in.end(); ++it)
-    {
-        it.value()->update(deltaw(it.key()));
-    }
-    m_act->update(deltag());
+    if (!m_conlock) for(QMap<SSiHighwayNeuron*,QSharedPointer<SScTrainableParameter> >::iterator it = m_in.begin(); it != m_in.end(); ++it)
+        it.value()->update(deltaw(it.key()));    
+    if (!m_gainlock) m_act->update(deltag());
 }
 void SScGatedNeuron::endOfCycle()
 {
-    m_in.endOfCycle();
-    m_act->endOfCycle();
+    if (!m_conlock)  m_in.  endOfCycle();
+    if (!m_gainlock) m_act->endOfCycle();
 }
 QVariantMap SScGatedNeuron::toVM() const
 {
