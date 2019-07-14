@@ -82,10 +82,10 @@ double SSiHighwayNeuron::priv_dedo()
     foreach(SSiHighwayNeuron* l, m_out)
     {
         const double seldedo = l->forwardSelectedDedo(this);
-        if (seldedo>0) qWarning(">>>>>>FWDDEDO %lf %s->%s", seldedo, qPrintable(l->name()), qPrintable(name()));
+        //if (seldedo>0) qWarning(">>>>>>FWDDEDO %lf %s->%s", seldedo, qPrintable(l->name()), qPrintable(name()));
         ret += seldedo;    // only the pool neuron delivers something here, if this neuron achieved maximum in pool
         const double w_jl = l->icon(this);
-        ret += w_jl*l->dedo()*l->act()->dev()*l->act()->gain()*(1.0-l->carry());
+        ret +=  w_jl*l->dedo()*l->act()->dev()*l->act()->gain()*(1.0-l->carry());
     }
     return ret;
 }

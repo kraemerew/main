@@ -6,6 +6,8 @@
 SScPoolNeuron::SScPoolNeuron(SScHighwayNetwork* net, SSiHighwayNeuron::Type t)
     : SSiHighwayNeuron  (net, t),
       m_selected        (false),
+      m_fwdedoset       (false),
+      m_fwdedo          (0.0),
       m_sel             (NULL)
 {
     Q_ASSERT ((t==MinPool) || (t==MaxPool) || (t==MedPool));
@@ -55,22 +57,21 @@ double SScPoolNeuron::net()
 
 double SScPoolNeuron::forwardSelectedDedo(SSiHighwayNeuron* ref)
 {
-    if (!m_dedoset)
+    if (!m_sel || (m_sel!=ref)) return 0.0;
+    if (m_sel==NULL) transform();
+    // If ref is the neuron selected, it takes effectively the place of the pool and
+    // we behave as if it is directly connected to the neurons following the pool
+    if (!m_fwdedoset)
     {
-        m_dedo = 0;
-        m_dedoset = true;
+        m_fwdedo = 0;
+        m_fwdedoset = true;
         foreach(SSiHighwayNeuron* l, m_out)
         {
             const double w_jl = l->icon(this);
-            m_dedo += w_jl*l->dedo()*l->act()->dev()*l->act()->gain()*(1.0-l->carry());
+            m_fwdedo += w_jl*l->dedo()*l->act()->dev()*l->act()->gain()*(1.0-l->carry());
         }
     }
-    if (m_sel==NULL) transform();
-    //qWarning(">>>>>SELECT %s", qPrintable(m_sel->name()));
-    if (!m_sel || (m_sel!=ref)) return 0.0;
-    // If ref is the neuron selected, it takes effectively the place of the pool and
-    // we behave as if it is directly connected to the neurons following the pool
-    return m_dedo;
+    return m_fwdedo;
 }
 
 QVariantMap SScPoolNeuron::toVM() const
