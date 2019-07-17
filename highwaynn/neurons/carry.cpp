@@ -33,7 +33,6 @@ bool SScCarryNeuron::addInput(SSiHighwayNeuron *other, double v, SScTrainablePar
 bool    SScCarryNeuron::delInput        (SSiHighwayNeuron *other) { return m_in.delInput(other); }
 double  SScCarryNeuron::net             () { return m_in.net(); }
 void    SScCarryNeuron::reset           () { SSiHighwayNeuron::reset(); m_in.reset(); }
-double  SScCarryNeuron::deltag          () { return -dedo()*net()*m_act->dev(); }
 double  SScCarryNeuron::deltaw          (SSiHighwayNeuron* n) { return -dedo()*n->out()*m_act->dev()*m_act->gain(); }
 
 bool SScCarryNeuron::setActivation (SScActivation::Type type, double gain)
@@ -50,7 +49,7 @@ void SScCarryNeuron::trainingStep()
 {
     if (!m_conlock) for(QMap<SSiHighwayNeuron*,QSharedPointer<SScTrainableParameter> >::iterator it = m_in.begin(); it != m_in.end(); ++it)
         it.value()->update(deltaw(it.key()));    
-    if (!m_gainlock) m_act->update(deltag());
+    if (!m_gainlock) m_act->update(dedo(),0.0);
 }
 void SScCarryNeuron::endOfCycle()
 {

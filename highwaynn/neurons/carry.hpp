@@ -19,7 +19,6 @@ public:
     virtual bool   setInput(double) { Q_ASSERT(false); return false; }
     virtual bool   setTarget(double) { Q_ASSERT(false); return false; }
     virtual bool   connectHighway(SSiHighwayNeuron*, SSiHighwayNeuron*) { Q_ASSERT(false); return false; }
-    virtual double deltag();
     virtual double deltaw(SSiHighwayNeuron* n);
     virtual bool   setActivation(SScActivation::Type type, double gain);
     virtual void   trainingStep();

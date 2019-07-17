@@ -27,7 +27,6 @@ public:
     virtual bool    connectHighway  (SSiHighwayNeuron* hwn, SSiHighwayNeuron* cn);
     virtual double  transform       ();
     virtual double  out             ();
-    virtual double  deltag          ();
     virtual double  deltaw          (SSiHighwayNeuron* n);
 
     virtual void    trainingStep    ();

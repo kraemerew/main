@@ -38,7 +38,6 @@ public:
     inline double dev       () { return priv_dev(); }
     inline double gain      () const { return m_gain->value(); }
     inline bool   setGain   (double v) { m_gain->set(v); return true; }
-    inline void   update(double v) { m_gain->update(v); }
     inline void   endOfCycle() { m_gain->endOfCycle(); }
     inline QString type2Id() const { return type2Id(m_t); }
 
@@ -59,7 +58,14 @@ public:
     virtual QVariantMap toVM() const;
     virtual bool fromVM(const QVariantMap&);
 
+    virtual void update(double dedo, double carry)
+    {
+        update(-dedo*dev()*m_pot*(1.0-carry));
+    }
+
 protected:
+    inline void   update(double v) { m_gain->update(v); }
+
     virtual void priv_activate() = 0;
     virtual double priv_dev() = 0;
     Type m_t;

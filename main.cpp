@@ -237,36 +237,32 @@ void carryTest(int pow)
 void poolTest()
 {
     SScHighwayNetwork net;
-    net.setTrainingType(SScTrainableParameter::ADAM);
+    net.setTrainingType(SScTrainableParameter::AMSGRAD);
     net.setHiddenActivationType(SScActivation::MHAT);
-    net.setOutputActivationType(SScActivation::LOGISTIC);
+    net.setOutputActivationType(SScActivation::SWISH);
 
     net.setConnectionRange(0,2);
-    //net.setGainRange(1,0);
+    net.setGainRange(1,0);
     const int i1 = net.addInputNeuron   ("I1"),
               i2 = net.addInputNeuron   ("I2"),
               i3 = net.addInputNeuron   ("I3"),
               bi = net.addBiasNeuron    ("B"),
-              hx = net.addHiddenNeuron("HX"),
               o1 = net.addOutputNeuron  ("Out"),
               min= net.addMinPoolNeuron ("MinPool");
 
     //net.idx2n(o1)->setLock(true);
-    QList<int> hl0, hl1;
-    for (int i=0; i<5; ++i) hl0 << net.addHiddenNeuron(QString("H_0_%1").arg(i));
-    for (int i=0; i<5; ++i) hl1 << net.addHiddenNeuron(QString("H_1_%1").arg(i));
+    QList<int> hl0;
+    for (int i=0; i<30; ++i)
+        hl0 << net.addHiddenNeuron(QString("H_0_%1").arg(i));
 
     // Bias and input to hidden
-    foreach(int idx, QList<int>() << bi << i1 << i2 << i3) foreach(int toidx, hl0) net.connect(idx,toidx);
-    foreach(int toidx, hl1) net.connect(bi,toidx);
-    foreach(int idx, hl0) foreach(int toidx, hl1) net.connect(idx,toidx);
+    foreach(int idx, QList<int>() << bi << i1 << i2 << i3)
+        foreach(int toidx, hl0) net.connect(idx,toidx);
+    foreach(int toidx, hl0) net.connect(bi,toidx);
     // Hidden to pooling
-    foreach(int idx, hl1) net.connect(idx,min);
-
-    net.connect(min,hx);
-    net.connect(bi,hx);
+    foreach(int idx, hl0) net.connect(idx,min);
     // pool and bias to output
-    foreach(int idx, QList<int>() << min << bi << hx) net.connect(idx,o1);
+    foreach(int idx, QList<int>() << min << bi) net.connect(idx,o1);
 
     // training preparation
     net.connectForward();
@@ -276,7 +272,7 @@ void poolTest()
     int c=0;
     double err = 0, lasterr = 0;
     bool done = false, doLogging = false;
-    int failcount = 10000;
+    int failcount = 11000;
     do
     {
        // if (c==10) std::exit(0);
@@ -286,6 +282,7 @@ void poolTest()
                      inmin = qMin(qMin(in1,in2),in3),
                      inmax = qMax(qMax(in1,in2),in3),
                      trg   = inmin;
+
         ++c;
         const bool endOfCycle = (c%10000)==0;
         net.setInput(i1,in1);
@@ -302,7 +299,7 @@ void poolTest()
             qWarning("Cycle %d: %.2lf %.2lf %.2lf Trg %lf MinOut %lf Out %lf - err %lf", c, in1, in2, in3, trg, minout, pout, perr);
         //if (c==10) std::exit(0);
         err+=perr;
-        if (perr>.01) ++failcount;
+        if (perr>.05) ++failcount;
         if (endOfCycle)
         {
             err/=10000;
@@ -313,10 +310,9 @@ void poolTest()
                 et.restart();
                 qWarning("End of cycle %d / fail %d- error %lf %s %s",
                          c, failcount, err, err<lasterr ? "lower":"higher", isLocked ? "L":"");
-                if (failcount<4000)
+                if (failcount<100)
                 {
                     net.idx2n(o1)->setLock(true);
-                    net.idx2n(hx)->setLock(true);
                 }
                 if (failcount<200) doLogging=true;
             }
@@ -339,7 +335,7 @@ int main(int argc, char *argv[])
 {
     Q_UNUSED(argc);
     Q_UNUSED(argv);
-    poolTest();
+    parityTest(8);
     /*SScRBiasNeuron* bn = new (std::nothrow) SScRBiasNeuron();
     QList<SScRNeuron*> nl;
     for (int i=0; i<2; ++i) nl << new (std::nothrow) SScRNeuron();

@@ -13,7 +13,6 @@ public:
     virtual bool    delInput        (SSiHighwayNeuron*)                                     { return false; }
     virtual bool    setInput        (double)                                                { return false; }
     virtual bool    setTarget       (double)                                                { return false; }
-    virtual double  deltag          ()                                                      { return 0.0; }
     virtual double  deltaw          (SSiHighwayNeuron*)                                     { return 0.0; }
     virtual double  net             ()                                                      { return 1.0; }
     virtual double  out             ()                                                      { return 1.0; }

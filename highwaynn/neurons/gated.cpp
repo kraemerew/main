@@ -78,10 +78,7 @@ double SScGatedNeuron::out()
      }
     return m_o;
 }
-double  SScGatedNeuron::deltag()
-{
-    return -dedo()*net()*m_act->dev()*(1.0-carry());
-}
+
 double SScGatedNeuron::deltaw(SSiHighwayNeuron* n)
 {
     // dE/dw_ij=dE/doj*doj/dw_ij=dedo()*doj/dnetj*dnetj/dwij
@@ -93,7 +90,7 @@ void SScGatedNeuron::trainingStep()
 {
     if (!m_conlock) for(QMap<SSiHighwayNeuron*,QSharedPointer<SScTrainableParameter> >::iterator it = m_in.begin(); it != m_in.end(); ++it)
         it.value()->update(deltaw(it.key()));    
-    if (!m_gainlock) m_act->update(deltag());
+    if (!m_gainlock) m_act->update(dedo(),carry());
 }
 void SScGatedNeuron::endOfCycle()
 {

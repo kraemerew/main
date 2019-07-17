@@ -81,7 +81,7 @@ double SSiHighwayNeuron::priv_dedo()
 
     foreach(SSiHighwayNeuron* l, m_out)
     {       
-        ret += l->forwardSelectedDedo(this);;    // only the pool neuron delivers something here, if this neuron achieved maximum in pool
+        ret += l->forwardSelectedDedo(this);    // only the pool neuron delivers something here, if this neuron achieved maximum in pool
         ret += l->icon(this)*l->dedo()*l->act()->dev()*l->act()->gain()*(1.0-l->carry());
     }
     return ret;
