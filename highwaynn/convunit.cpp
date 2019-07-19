@@ -1,4 +1,5 @@
 #include "convunit.hpp"
+#include "sscvm.hpp"
 #include "../blas/blasvector.hpp"
 #include <QUuid>
 
@@ -86,22 +87,35 @@ SScConvUnit::SScConvUnit(int kx, int ky, int unitsx, int unitsy, int overlap, in
     m_unitsx    (unitsx),
     m_unitsy    (unitsy),
     m_ovl       (overlap),
-    m_pooling   (pooling),
+    m_pooling   (qMax(1,pooling)),
     m_color     (color)
+{    
+    ensureCleanConf(false);
+    for (int i=0; i<weights(); ++i)
+        m_w << SScTrainableParameter::create(SScTrainableParameter::ADAM,
+                   (double)qrand()/(double)RAND_MAX); //<< TODO - reset
+}
+SScConvUnit::~SScConvUnit()
 {
-    if (m_pooling<1) m_pooling=1;
+    ensureCleanConf(true);
+}
+void SScConvUnit::ensureCleanConf(bool clear)
+{
+    if (clear)
+    {
+        foreach(SScTrainableParameter* tp, m_w) delete tp;
+        m_w.clear();
+    }
 
-    m_kx=qMax(3,m_kx);
-    m_ky=qMax(3,m_ky);
+    // odd kernel size min 3
+    m_kx=qMax(3,m_kx); if (m_kx%2==0) ++m_kx;
+    m_ky=qMax(3,m_ky); if (m_ky%2==0) ++m_ky;
 
-    if (m_kx%2==0) ++m_kx;
-    if (m_ky%2==0) ++m_ky;
-    if (pooling>1)
+    if (m_pooling>1)  // number of units have to be multiples of pooling
     {
         while (m_unitsx%m_pooling!=0) ++m_unitsx;
         while (m_unitsy%m_pooling!=0) ++m_unitsy;
     }
-    for (int i=0; i<m_kx*m_ky; ++i) m_w << (double)qrand()/(double)RAND_MAX; //<< TODO - reset
 }
 
 QString SScConvUnit::addPattern(const QImage &im)
@@ -140,12 +154,15 @@ bool SScConvUnit::activatePattern(const QString& uuid)
 {
     if (m_patterns.contains(uuid) && (m_patterns[uuid].size()==units()))
     {
+        QVector<double> w;
+        w.reserve(m_w.size());
+        for (int i=0; i<m_w.size(); ++i) w << m_w[i]->value();
         m_n.clear();
         m_n.reserve(units());
 
         foreach(const QVector<double>& dv, m_patterns[uuid])
         {
-            m_n << SSnBlas::dot(m_w,dv);
+            m_n << SSnBlas::dot(w,dv);
             m_npooled = SSnConvHelpers::pooled(m_unitsx,m_unitsy,m_pooling,m_n);
         }
         return true;
@@ -153,4 +170,40 @@ bool SScConvUnit::activatePattern(const QString& uuid)
     return false;
 }
 
+QVariantMap SScConvUnit::toVM() const
+{
+    QVariantMap vm;
+    vm["KERNEL_X"] = m_kx;
+    vm["KERNEL_X"] = m_ky;
+    vm["KERNEL_OVERLAP"] = m_ovl;
+    vm["POOLING"] = m_pooling;
+    vm["UNITS_X"] = m_unitsx;
+    vm["UNITS_Y"] = m_unitsy;
+    int widx = -1;
+    foreach(SScTrainableParameter* tp, m_w)
+        vm[QString("WEIGHT_%1").arg(++widx)] = tp->toVM();
+    return vm;
+}
+bool SScConvUnit::fromVM(const QVariantMap & vm)
+{
+    bool ret = true;
+    SScVM sscvm(vm);
+    m_kx = sscvm.intToken("KERNEL_X",3);
+    m_ky = sscvm.intToken("KERNEL_Y",3);
+    m_pooling = sscvm.intToken("POOLING",1);
+    m_unitsx = sscvm.intToken("UNITS_X",10);
+    m_unitsy = sscvm.intToken("UNITS_Y",10);
 
+    ensureCleanConf(true);
+    for (int widx=0; widx<weights(); ++widx)
+    {
+        SScTrainableParameter* tp = SScTrainableParameter::create(sscvm.vmToken(QString("WEIGHT_%1").arg(widx)));
+        if (!tp)
+        {
+            tp = SScTrainableParameter::create(SScTrainableParameter::ADAM, (double)qrand()/(double)RAND_MAX); //<< TODO - reset
+            ret = false;
+        }
+        m_w << tp;
+    }
+    return ret;
+}
