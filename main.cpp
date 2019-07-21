@@ -7,6 +7,7 @@
 #include "cam/camwidget.hpp"
 #include "cam/frameintervaldescriptor.hpp"
 #include "image/moments.hpp"
+#include "convunit.hpp"
 #include <QTimer>
 
 #ifndef _DEPRECATION_DISABLE
@@ -331,11 +332,18 @@ void poolTest()
     std::exit(0);
 }
 
+void convTest()
+{
+    SScInputConvUnit cu(3,3,10,10,1,1);
+    cu.addPattern("~/1.png");
+    cu.addPattern("~/2.png");
+}
+
 int main(int argc, char *argv[])
 {
     Q_UNUSED(argc);
     Q_UNUSED(argv);
-    parityTest(8);
+    convTest();
     /*SScRBiasNeuron* bn = new (std::nothrow) SScRBiasNeuron();
     QList<SScRNeuron*> nl;
     for (int i=0; i<2; ++i) nl << new (std::nothrow) SScRNeuron();

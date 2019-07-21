@@ -13,13 +13,13 @@ public:
     explicit SSiConvUnit(int kx, int ky, int unitsx=8, int unitsy = 8, int overlap = 1, int pooling = 2);
     virtual ~SSiConvUnit();
 
-    inline int  xpixels() const { return m_kx+ ((m_unitsx-1)*(m_kx-m_ovl)); }
-    inline int  ypixels() const { return m_ky +((m_unitsy-1)*(m_ky-m_ovl)); }
-    inline int  units  () const { return m_unitsx*m_unitsy; }
-    virtual int weights() const { return m_kx*m_ky*depth(); }
-    inline bool pooling() const { return m_pooling>1; }
-    virtual int depth  () const { return 1; }
-    virtual bool isColor() const { return depth()==3; }
+    inline int      xpixels     () const { return m_kx+ ((m_unitsx-1)*(m_kx-m_ovl)); }
+    inline int      ypixels     () const { return m_ky +((m_unitsy-1)*(m_ky-m_ovl)); }
+    inline int      units       () const { return m_unitsx*m_unitsy; }
+    virtual int     weights     () const { return m_kx*m_ky*depth(); }
+    inline bool     hasPooling  () const { return m_pooling>1; }
+    virtual int     depth       () const { return 1; }
+    virtual bool    isColor     () const { return depth()==3; }
 
     virtual QVariantMap toVM() const;
     virtual bool fromVM(const QVariantMap&);
@@ -41,7 +41,8 @@ public:
     explicit SScInputConvUnit(int kx, int ky, int unitsx=8, int unitsy = 8, int overlap = 1, int pooling = 2);
     virtual ~SScInputConvUnit();
 
-    QString addPattern(const QImage& im);
+    QString addPattern(const QImage& im);    
+    QString addPattern(const QString& filename);
     bool activatePattern(const QString& uuid);
     QString nextPattern(bool& cycleDone);
     virtual int depth  () const { return 1; }

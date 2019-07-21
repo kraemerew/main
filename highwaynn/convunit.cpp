@@ -166,8 +166,12 @@ SScInputConvUnit::~SScInputConvUnit()
 {
     clearWeights();
 }
-
-
+QString SScInputConvUnit::addPattern(const QString& filename)
+{
+    QImage im;
+    im.load(filename);
+    return !im.isNull() ? addPattern(im) : QString();
+}
 QString SScInputConvUnit::addPattern(const QImage &im)
 {
     bool success = true;
