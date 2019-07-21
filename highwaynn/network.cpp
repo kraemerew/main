@@ -33,6 +33,9 @@ int SScHighwayNetwork::addNeuron   (SSiHighwayNeuron::Type type, const QString& 
         case SSiHighwayNeuron::Output:
             n->setActivation(oActType(),getRandomGainValue());
         break;
+        case SSiHighwayNeuron::Conv:
+            n->setActivation(hActType(),getRandomGainValue());
+        break;
         case SSiHighwayNeuron::MinPool: break;
         case SSiHighwayNeuron::MaxPool: break;
         case SSiHighwayNeuron::MedPool: break;

@@ -19,6 +19,7 @@ public:
         Output,
         Bias,
         Carry,
+        Conv,
         MaxPool,
         MinPool,
         MedPool,

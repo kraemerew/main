@@ -6,6 +6,7 @@
 #include "input.hpp"
 #include "carry.hpp"
 #include "gated.hpp"
+#include "conv.hpp"
 #include "pool.hpp"
 
 SSiHighwayNeuron::SSiHighwayNeuron(SScHighwayNetwork* net, Type type, SScActivation::Type acttype)
@@ -62,6 +63,7 @@ SSiHighwayNeuron* SSiHighwayNeuron::create(SScHighwayNetwork* net, Type type, co
         case Output: ret = new (std::nothrow) SScOutputNeuron (net); break;
         case Bias:   ret = new (std::nothrow) SScBiasNeuron   (net); break;
         case Carry:  ret = new (std::nothrow) SScCarryNeuron  (net); break;
+        case Conv:   ret = new (std::nothrow) SScConvNeuron   (net); break;
         case MinPool:ret = new (std::nothrow) SScMinPoolNeuron(net); break;
         case MaxPool:ret = new (std::nothrow) SScMaxPoolNeuron(net); break;
         case MedPool:ret = new (std::nothrow) SScMedPoolNeuron(net); break;

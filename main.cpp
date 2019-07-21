@@ -334,7 +334,8 @@ void poolTest()
 
 void convTest()
 {
-    SScInputConvUnit cu(3,3,2,2,0,2);
+    SScHighwayNetwork net;
+    SScInputConvUnit cu(&net,3,3,2,2,0);
     cu.addPattern("/home/developer/1.png");
     cu.addPattern("/home/developer/2.jpg");
     int c = 0;
@@ -342,7 +343,6 @@ void convTest()
     {
         bool cdone;
         const QString pid = cu.nextPattern(cdone);
-        qWarning(">>>>>>>ACTIVTE %s %s", qPrintable(pid), cdone ?"END OF CYCLE":"");
         if (++c>1000) std::exit(1);
     }
 }
@@ -351,7 +351,7 @@ int main(int argc, char *argv[])
 {
     Q_UNUSED(argc);
     Q_UNUSED(argv);
-    parityTest(10);
+    convTest();
     /*SScRBiasNeuron* bn = new (std::nothrow) SScRBiasNeuron();
     QList<SScRNeuron*> nl;
     for (int i=0; i<2; ++i) nl << new (std::nothrow) SScRNeuron();

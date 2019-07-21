@@ -22,6 +22,8 @@ SOURCES += main.cpp \
     highwaynn/neurons/gated.cpp \
     highwaynn/neurons/carry.cpp \
     highwaynn/neurons/pool.cpp \
+    highwaynn/neurons/neuron.cpp \
+    highwaynn/neurons/conv.cpp \
     image/matrix.cpp \
     image/image.cpp \
     cam/camcapability.cpp \
@@ -37,7 +39,6 @@ SOURCES += main.cpp \
     nnhelpers/ssnjsonhandler.cpp \
     highwaynn/gate.cpp \
     highwaynn/network.cpp \
-    highwaynn/neurons/neuron.cpp \
     highwaynn/convunit.cpp \
     highwaynn/sharedgate.cpp
 
@@ -66,6 +67,8 @@ HEADERS += \
     highwaynn/neurons/bias.hpp \
     highwaynn/neurons/carry.hpp \
     highwaynn/neurons/pool.hpp \
+    highwaynn/neurons/conv.hpp \
+    highwaynn/neurons/neuron.hpp \
     image/matrix.hpp \
     image/image.hpp \
     cam/camcapability.hpp \
@@ -82,7 +85,6 @@ HEADERS += \
     nnhelpers/ssnjsonhandler.hpp \
     highwaynn/gate.hpp \
     highwaynn/network.hpp \
-    highwaynn/neurons/neuron.hpp \
     highwaynn/convunit.hpp \
     highwaynn/sharedgate.hpp
 

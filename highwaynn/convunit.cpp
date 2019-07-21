@@ -1,6 +1,8 @@
 #include "convunit.hpp"
 #include "sscvm.hpp"
+#include "neurons/conv.hpp"
 #include "../blas/blasvector.hpp"
+#include "network.hpp"
 #include <QUuid>
 
 namespace SSnConvHelpers
@@ -81,21 +83,39 @@ public:
 
 
 
-SSiConvUnit::SSiConvUnit(int kx, int ky, int unitsx, int unitsy, int overlap, int pooling) :
+SSiConvUnit::SSiConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx, int unitsy, int overlap) :
+    m_network   (network),
     m_kx        (kx),
     m_ky        (ky),
     m_unitsx    (unitsx),
     m_unitsy    (unitsy),
-    m_ovl       (overlap),
-    m_pooling   (qMax(1,pooling))
+    m_ovl       (overlap)
 {
+   Q_CHECK_PTR(network);
     ensureCleanConf();
     createWeights();
+    createNeurons();
 }
 SSiConvUnit::~SSiConvUnit()
 {
     clearWeights();
+    clearNeurons();
 }
+void SSiConvUnit::clearNeurons()
+{
+    foreach(SScConvNeuron* n,m_neurons) delete n;
+    m_neurons.clear();
+}
+void SSiConvUnit::createNeurons()
+{
+    clearNeurons();
+    for (int i=0; i<m_unitsx*m_unitsy; ++i)
+    {
+        m_neurons << new (std::nothrow) SScConvNeuron(m_network);
+        m_neurons.last()->setConvUnit(this,i);
+    }
+}
+
 void SSiConvUnit::createWeights()
 {
     clearWeights();
@@ -111,14 +131,6 @@ void SSiConvUnit::ensureCleanConf()
     // odd kernel size min 3
     m_kx=qMax(3,m_kx); if (m_kx%2==0) ++m_kx;
     m_ky=qMax(3,m_ky); if (m_ky%2==0) ++m_ky;
-
-    if (m_pooling>1)  // number of units have to be multiples of pooling
-    {
-        while (m_unitsx%m_pooling!=0) ++m_unitsx;
-        while (m_unitsy%m_pooling!=0) ++m_unitsy;
-    }
-
-    qWarning(">>>>>>>KERNEL %dx%d POOLING %d UNITS %dx%d -> %dx%d", m_kx, m_ky, m_pooling, m_unitsx, m_unitsy, xpixels(),ypixels());
 }
 
 QVariantMap SSiConvUnit::toVM() const
@@ -127,9 +139,11 @@ QVariantMap SSiConvUnit::toVM() const
     vm["KERNEL_X"] = m_kx;
     vm["KERNEL_X"] = m_ky;
     vm["KERNEL_OVERLAP"] = m_ovl;
-    vm["POOLING"] = m_pooling;
     vm["UNITS_X"] = m_unitsx;
     vm["UNITS_Y"] = m_unitsy;
+    int nidx = -1;
+    foreach(SScConvNeuron* n, m_neurons)
+        vm[QString("ACT_%1").arg(++nidx)]=n->act()->toVM();
     int widx = -1;
     foreach(SScTrainableParameter* tp, m_w)
         vm[QString("WEIGHT_%1").arg(++widx)] = tp->toVM();
@@ -141,11 +155,20 @@ bool SSiConvUnit::fromVM(const QVariantMap & vm)
     SScVM sscvm(vm);
     m_kx = sscvm.intToken("KERNEL_X",3);
     m_ky = sscvm.intToken("KERNEL_Y",3);
-    m_pooling = sscvm.intToken("POOLING",1);
     m_unitsx = sscvm.intToken("UNITS_X",10);
     m_unitsy = sscvm.intToken("UNITS_Y",10);
     clearWeights();
     ensureCleanConf();
+    for (int nidx=0; nidx<m_unitsx*m_unitsy; ++nidx)
+    {
+        //TODO: neurons
+    }
+    for (int nidx=0; nidx<neurons(); ++nidx)
+    {
+        //TODO: Neurons activation load
+        QString("ACT_%1").arg(nidx);
+    }
+
     for (int widx=0; widx<weights(); ++widx)
     {
         SScTrainableParameter* tp = SScTrainableParameter::create(sscvm.vmToken(QString("WEIGHT_%1").arg(widx)));
@@ -159,8 +182,8 @@ bool SSiConvUnit::fromVM(const QVariantMap & vm)
     return ret;
 }
 
-SScInputConvUnit::SScInputConvUnit(int kx, int ky, int unitsx, int unitsy, int overlap, int pooling)
-    : SSiConvUnit(kx,ky,unitsx,unitsy,overlap,pooling)
+SScInputConvUnit::SScInputConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx, int unitsy, int overlap)
+    : SSiConvUnit(network,kx,ky,unitsx,unitsy,overlap)
 {}
 
 SScInputConvUnit::~SScInputConvUnit()
@@ -222,20 +245,17 @@ bool SScInputConvUnit::activatePattern(const QString& uuid)
         QVector<double> w;
         w.reserve(m_w.size());
         for (int i=0; i<m_w.size(); ++i) w << m_w[i]->value();
-        m_n.clear();
+        m_n.clear();       
         m_n.reserve(units());
-
         foreach(const QVector<double>& dv, m_patterns[uuid]) m_n << SSnBlas::dot(w,dv);
-        m_npooled = SSnConvHelpers::pooled(m_unitsx,m_unitsy,m_pooling,m_n);
-        qWarning("POTENTIAL %d POOLED %d", m_n.size(),m_npooled.size());
         return true;
     }
     return false;
 }
 
 
-SScColorInputConvUnit::SScColorInputConvUnit(int kx, int ky, int unitsx, int unitsy, int overlap, int pooling)
-    : SScInputConvUnit(kx,ky,unitsx,unitsy,overlap,pooling)
+SScColorInputConvUnit::SScColorInputConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx, int unitsy, int overlap)
+    : SScInputConvUnit(network,kx,ky,unitsx,unitsy,overlap)
 {}
 SScColorInputConvUnit::~SScColorInputConvUnit()
 {
@@ -243,8 +263,8 @@ SScColorInputConvUnit::~SScColorInputConvUnit()
 }
 
 
-SScHiddenConvUnit::SScHiddenConvUnit(int kx, int ky, int unitsx, int unitsy, int overlap, int pooling)
-    : SSiConvUnit(kx,ky,unitsx,unitsy,overlap,pooling)
+SScHiddenConvUnit::SScHiddenConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx, int unitsy, int overlap)
+    : SSiConvUnit(network,kx,ky,unitsx,unitsy,overlap)
 {}
 SScHiddenConvUnit::~SScHiddenConvUnit()
 {
@@ -273,14 +293,14 @@ QVariantMap SScHiddenConvUnit::toVM() const
     return vm;
 }
 
-SSiConvUnit* SSiConvUnit::create(const QVariantMap &vm)
+SSiConvUnit* SSiConvUnit::create(SScHighwayNetwork* net, const QVariantMap &vm)
 {
     SSiConvUnit* ret = NULL;
     SScVM sscvm(vm);
     const QString type = sscvm.stringToken("TYPE");
-    if (type=="INPUT")          ret = new (std::nothrow) SScInputConvUnit(3,3); else
-    if (type=="INPUT_COLOR")    ret = new (std::nothrow) SScColorInputConvUnit(3,3); else
-    if (type=="HIDDEN")         ret = new (std::nothrow) SScHiddenConvUnit(3,3);
+    if (type=="INPUT")          ret = new (std::nothrow) SScInputConvUnit       (net,3,3); else
+    if (type=="INPUT_COLOR")    ret = new (std::nothrow) SScColorInputConvUnit  (net,3,3); else
+    if (type=="HIDDEN")         ret = new (std::nothrow) SScHiddenConvUnit      (net,3,3);
     if (ret) ret->fromVM(vm);
     return ret;
 }
