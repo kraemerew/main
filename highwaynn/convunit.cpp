@@ -41,27 +41,25 @@ namespace SSnConvHelpers
 class SScConvPattern
 {
 public:
-    explicit SScConvPattern(const QImage& im) : m_im(im)
+    explicit SScConvPattern(const QImage& im, int w, int h, bool color) : m_im(im), m_w(w), m_h(h), m_color(color)
     {
-        (void) m_im.convertToFormat(QImage::Format_RGB888);
+        Q_ASSERT(m_w*m_h>0);
+        if (color) (void) m_im.convertToFormat(QImage::Format_RGB888);
+        else       (void) m_im.convertToFormat(QImage::Format_Grayscale8);
+        m_im = m_im.scaled(w,h,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
     }
 
-    inline bool convert(int w, int h)
-    {
-        if (!isValid()) return false;
-        m_im.scaled(w,h,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
-        return isValid();
-    }
     inline bool isValid() const { return !m_im.isNull(); }
-    QVector<double> vect(int topleftx, int toplefty, int w, int h, bool color = true) const
+    inline int vSize() const { return m_color ? m_w*m_h*3 : m_w*m_h; }
+    QVector<double> vect(int topleftx, int toplefty, int w, int h) const
     {
         QVector<double> v;
+        v.reserve(m_color ? w*h*3 : w*h);
         Q_ASSERT(topleftx+w-1<m_im.width ());
         Q_ASSERT(toplefty+h-1<m_im.height());
-        if (color)
+        if (m_color)
         {
-            v.reserve(w*h*3);
-            for (int y=toplefty; y<toplefty+h-1; ++y) for (int x=topleftx; x<topleftx+w-1; ++x)
+            for (int y=toplefty; y<toplefty+h; ++y) for (int x=topleftx; x<topleftx+w; ++x)
             {
                 const auto px = m_im.pixel(x,y);
                 v << qRed(px);
@@ -71,13 +69,14 @@ public:
         }
         else
         {
-            v.reserve(w*h);
-            for (int y=toplefty; y<toplefty+h-1; ++y) for (int x=topleftx; x<topleftx+w-1; ++x)
+            for (int y=toplefty; y<toplefty+h; ++y) for (int x=topleftx; x<topleftx+w; ++x)
                 v << qGray(m_im.pixel(x,y));
         }
         return v;
     }
     QImage m_im;
+    int m_w, m_h;
+    bool m_color;
 };
 
 
@@ -118,6 +117,8 @@ void SSiConvUnit::ensureCleanConf()
         while (m_unitsx%m_pooling!=0) ++m_unitsx;
         while (m_unitsy%m_pooling!=0) ++m_unitsy;
     }
+
+    qWarning(">>>>>>>KERNEL %dx%d POOLING %d UNITS %dx%d -> %dx%d", m_kx, m_ky, m_pooling, m_unitsx, m_unitsy, xpixels(),ypixels());
 }
 
 QVariantMap SSiConvUnit::toVM() const
@@ -175,22 +176,27 @@ QString SScInputConvUnit::addPattern(const QString& filename)
 QString SScInputConvUnit::addPattern(const QImage &im)
 {
     bool success = true;
-    SScConvPattern p(im);
-    p.convert(xpixels(),ypixels());
+    SScConvPattern p(im,xpixels(),ypixels(),isColor());
     auto key = QUuid::createUuid().toString();
     m_images[key]=p.m_im;
+    qWarning(">>ADDED %dx%d %dbpp", p.m_im.width(), p.m_im.height(), p.m_im.depth());
     for (int y=0; y<m_unitsy; ++y) for (int x = 0; x<m_unitsx; ++x)
     {
         const int topleftx = x*m_kx-x*m_ovl, toplefty = y*m_ky-y*m_ovl;
-        auto v = p.vect(topleftx, toplefty, m_kx, m_ky, isColor());
+        auto v = p.vect(topleftx, toplefty, m_kx, m_ky);
+        qWarning(">>>>>>>>>VECTOR %d,%d -> %d", topleftx,toplefty,v.size());
         if (v.isEmpty()) success = false; else m_patterns[key] << v;
     }
     if (!success)
     {
+        qWarning(">>>PATTERN NOT ADDED");
         m_images.remove(key);
         m_patterns.remove(key);
     }
-    else m_pkeys = m_patterns.keys();
+    else
+    {
+        m_pkeys = m_patterns.keys();
+    }
     return success ? key : QString();
 }
 
@@ -202,7 +208,8 @@ QString SScInputConvUnit::nextPattern(bool& cycleDone)
         const QString key = m_pkeys.takeFirst();
         m_pkeys << key;
         if (activatePattern(key))
-        {   if (key==m_patterns.lastKey()) cycleDone = true;
+        {
+            if (key==m_patterns.lastKey()) cycleDone = true;
             return key;
         }
     }
@@ -210,7 +217,7 @@ QString SScInputConvUnit::nextPattern(bool& cycleDone)
 }
 bool SScInputConvUnit::activatePattern(const QString& uuid)
 {
-    if (m_patterns.contains(uuid) && (m_patterns[uuid].size()==units()))
+    if (m_patterns.contains(uuid))
     {
         QVector<double> w;
         w.reserve(m_w.size());
@@ -218,11 +225,9 @@ bool SScInputConvUnit::activatePattern(const QString& uuid)
         m_n.clear();
         m_n.reserve(units());
 
-        foreach(const QVector<double>& dv, m_patterns[uuid])
-        {
-            m_n << SSnBlas::dot(w,dv);
-            m_npooled = SSnConvHelpers::pooled(m_unitsx,m_unitsy,m_pooling,m_n);
-        }
+        foreach(const QVector<double>& dv, m_patterns[uuid]) m_n << SSnBlas::dot(w,dv);
+        m_npooled = SSnConvHelpers::pooled(m_unitsx,m_unitsy,m_pooling,m_n);
+        qWarning("POTENTIAL %d POOLED %d", m_n.size(),m_npooled.size());
         return true;
     }
     return false;

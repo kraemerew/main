@@ -38,7 +38,7 @@ protected:
 class SScInputConvUnit : public SSiConvUnit
 {
 public:
-    explicit SScInputConvUnit(int kx, int ky, int unitsx=8, int unitsy = 8, int overlap = 1, int pooling = 2);
+    explicit SScInputConvUnit(int kx, int ky, int unitsx=8, int unitsy = 8, int overlap = 1, int pooling = 1);
     virtual ~SScInputConvUnit();
 
     QString addPattern(const QImage& im);    

@@ -334,9 +334,17 @@ void poolTest()
 
 void convTest()
 {
-    SScInputConvUnit cu(3,3,10,10,1,1);
-    cu.addPattern("~/1.png");
-    cu.addPattern("~/2.png");
+    SScInputConvUnit cu(3,3,2,2,0,2);
+    cu.addPattern("/home/developer/1.png");
+    cu.addPattern("/home/developer/2.jpg");
+    int c = 0;
+    while (true)
+    {
+        bool cdone;
+        const QString pid = cu.nextPattern(cdone);
+        qWarning(">>>>>>>ACTIVTE %s %s", qPrintable(pid), cdone ?"END OF CYCLE":"");
+        if (++c>1000) std::exit(1);
+    }
 }
 
 int main(int argc, char *argv[])
