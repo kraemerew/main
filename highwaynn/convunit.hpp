@@ -6,6 +6,7 @@
 #include <QVector>
 #include <QVariantMap>
 #include "ssctrainableparameter.hpp"
+#include "neuron.hpp"
 
 class SSiConvUnit
 {
@@ -24,6 +25,8 @@ public:
     virtual QVariantMap toVM() const;
     virtual bool fromVM(const QVariantMap&);
 
+    static SSiConvUnit* create(const QVariantMap& vm);
+
 protected:
     virtual void ensureCleanConf();
     virtual void clearWeights();
@@ -33,6 +36,15 @@ protected:
     QVector<SScTrainableParameter*> m_w;
     QVector<double>                 m_n,            // < net
                                     m_npooled;
+};
+
+class SScHiddenConvUnit : public SSiConvUnit
+{
+public:
+    explicit SScHiddenConvUnit(int kx, int ky, int unitsx=8, int unitsy = 8, int overlap = 1, int pooling = 1);
+    virtual ~SScHiddenConvUnit();
+
+    virtual QVariantMap toVM() const;
 };
 
 class SScInputConvUnit : public SSiConvUnit
@@ -47,6 +59,8 @@ public:
     QString nextPattern(bool& cycleDone);
     virtual int depth  () const { return 1; }
 
+    virtual QVariantMap toVM() const;
+
 protected:
     QMap<QString,QImage>                    m_images;
     QMap<QString,QList<QVector<double> > >  m_patterns;
@@ -59,6 +73,8 @@ public:
     explicit SScColorInputConvUnit(int kx, int ky, int unitsx=8, int unitsy = 8, int overlap = 1, int pooling = 2);
     virtual ~SScColorInputConvUnit();
     virtual int depth  () const { return 3; }
+
+    virtual QVariantMap toVM() const;
 };
 
 #endif // SSCCONVUNIT_HPP

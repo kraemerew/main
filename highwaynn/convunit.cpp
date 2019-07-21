@@ -238,4 +238,49 @@ SScColorInputConvUnit::SScColorInputConvUnit(int kx, int ky, int unitsx, int uni
     : SScInputConvUnit(kx,ky,unitsx,unitsy,overlap,pooling)
 {}
 SScColorInputConvUnit::~SScColorInputConvUnit()
+{
+    clearWeights();
+}
+
+
+SScHiddenConvUnit::SScHiddenConvUnit(int kx, int ky, int unitsx, int unitsy, int overlap, int pooling)
+    : SSiConvUnit(kx,ky,unitsx,unitsy,overlap,pooling)
 {}
+SScHiddenConvUnit::~SScHiddenConvUnit()
+{
+    clearWeights();
+}
+
+
+QVariantMap SScInputConvUnit::toVM() const
+{
+    QVariantMap vm = SSiConvUnit::toVM();
+    vm["TYPE"] = "INPUT";
+    return vm;
+}
+
+QVariantMap SScColorInputConvUnit::toVM() const
+{
+    QVariantMap vm = SSiConvUnit::toVM();
+    vm["TYPE"] = "INPUT_COLOR";
+    return vm;
+}
+
+QVariantMap SScHiddenConvUnit::toVM() const
+{
+    QVariantMap vm = SSiConvUnit::toVM();
+    vm["TYPE"] = "HIDDEN";
+    return vm;
+}
+
+SSiConvUnit* SSiConvUnit::create(const QVariantMap &vm)
+{
+    SSiConvUnit* ret = NULL;
+    SScVM sscvm(vm);
+    const QString type = sscvm.stringToken("TYPE");
+    if (type=="INPUT")          ret = new (std::nothrow) SScInputConvUnit(3,3); else
+    if (type=="INPUT_COLOR")    ret = new (std::nothrow) SScColorInputConvUnit(3,3); else
+    if (type=="HIDDEN")         ret = new (std::nothrow) SScHiddenConvUnit(3,3);
+    if (ret) ret->fromVM(vm);
+    return ret;
+}
