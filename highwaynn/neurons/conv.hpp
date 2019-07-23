@@ -2,9 +2,8 @@
 #define HWN_GCONV_HPP
 
 #include "neuron.hpp"
-#include "convunit.hpp"
 #include "ssctrainableparameter.hpp"
-class SSiConvUnit;
+class SScKernel;
 
 class SScConvNeuron : public SSiHighwayNeuron
 {
@@ -14,12 +13,12 @@ public:
     virtual bool    setInput    (double) { return false; }
     virtual bool    setTarget   (double) { return false; }
 
-    bool setConvUnit(SSiConvUnit* cu, int idx) { Q_CHECK_PTR(cu); if (m_cu && (cu!=m_cu)) return false; m_cu=cu; m_cuidx=idx; return true; }
+    bool setKernel(SScKernel* krn, int idx);
     virtual bool addInput(SSiHighwayNeuron*, SScTrainableParameter*) { return false; }
     virtual bool addInput(SSiHighwayNeuron*, double, SScTrainableParameter::Type) { return false; }
     virtual bool delInput(SSiHighwayNeuron*) { return false; }
 
-    virtual double  net             () { Q_CHECK_PTR(m_cu); return m_cu->net(m_cuidx); }
+    virtual double  net             ();
     //virtual double  icon            (SSiHighwayNeuron*) { return 0.0; }
     //virtual void    reset           ();
     virtual double  carry           () { return 0.0; }
@@ -36,8 +35,8 @@ public:
     //virtual bool        fromVM  (const QVariantMap &vm);
 
 protected:
-    SSiConvUnit*    m_cu;
-    int             m_cuidx;
+    SScKernel*   m_krn;
+    int          m_kidx;
 };
 
 #endif // CONV_HPP

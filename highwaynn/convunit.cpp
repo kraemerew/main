@@ -3,8 +3,8 @@
 #include "neurons/conv.hpp"
 #include "../blas/blasvector.hpp"
 #include "network.hpp"
+#include "kernel.hpp"
 #include <QUuid>
-
 namespace SSnConvHelpers
 {
     double max(const QVector<double>& v)
@@ -83,7 +83,7 @@ public:
 
 
 
-SSiConvUnit::SSiConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx, int unitsy, int overlap) :
+SSiConvUnit::SSiConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx, int unitsy, int overlap, int knr) :
     m_network   (network),
     m_kx        (kx),
     m_ky        (ky),
@@ -91,40 +91,22 @@ SSiConvUnit::SSiConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx,
     m_unitsy    (unitsy),
     m_ovl       (overlap)
 {
-   Q_CHECK_PTR(network);
+    Q_CHECK_PTR(network);
     ensureCleanConf();
-    createWeights();
-    createNeurons();
+    createKernels(qMax(1,knr));
 }
 SSiConvUnit::~SSiConvUnit()
 {
-    clearWeights();
-    clearNeurons();
-}
-void SSiConvUnit::clearNeurons()
-{
-    foreach(SScConvNeuron* n,m_neurons) delete n;
-    m_neurons.clear();
-}
-void SSiConvUnit::createNeurons()
-{
-    clearNeurons();
-    for (int i=0; i<m_unitsx*m_unitsy; ++i)
-    {
-        m_neurons << new (std::nothrow) SScConvNeuron(m_network);
-        m_neurons.last()->setConvUnit(this,i);
-    }
+    clearKernels();
 }
 
-void SSiConvUnit::createWeights()
+void SSiConvUnit::clearKernels  () { foreach(SScKernel* k, m_kernels) delete k; m_kernels.clear(); }
+void SSiConvUnit::createKernels (int nr)
 {
-    clearWeights();
-    for (int i=0; i<weights(); ++i) m_w << SScTrainableParameter::create(SScTrainableParameter::ADAM, (double)qrand()/(double)RAND_MAX); //<< TODO - reset
-}
-void SSiConvUnit::clearWeights()
-{
-    foreach(SScTrainableParameter* tp, m_w) delete tp;
-    m_w.clear();
+    while (m_kernels.size()<nr)
+    {
+        m_kernels << new (std::nothrow) SScKernel(m_network, m_kx*m_ky, m_unitsx*m_unitsy);
+    }
 }
 void SSiConvUnit::ensureCleanConf()
 {
@@ -141,12 +123,8 @@ QVariantMap SSiConvUnit::toVM() const
     vm["KERNEL_OVERLAP"] = m_ovl;
     vm["UNITS_X"] = m_unitsx;
     vm["UNITS_Y"] = m_unitsy;
-    int nidx = -1;
-    foreach(SScConvNeuron* n, m_neurons)
-        vm[QString("ACT_%1").arg(++nidx)]=n->act()->toVM();
-    int widx = -1;
-    foreach(SScTrainableParameter* tp, m_w)
-        vm[QString("WEIGHT_%1").arg(++widx)] = tp->toVM();
+    vm["KERNELS"] = m_kernels.size();
+    for (int i=0; i<m_kernels.size(); ++i) vm[QString("KERNEL_%1").arg(i)] = m_kernels[i]->toVM();
     return vm;
 }
 bool SSiConvUnit::fromVM(const QVariantMap & vm)
@@ -157,38 +135,22 @@ bool SSiConvUnit::fromVM(const QVariantMap & vm)
     m_ky = sscvm.intToken("KERNEL_Y",3);
     m_unitsx = sscvm.intToken("UNITS_X",10);
     m_unitsy = sscvm.intToken("UNITS_Y",10);
-    clearWeights();
+    int knr = sscvm.intToken("KERNELS",1);
+    knr = qMax(1,knr);
+    clearKernels();
     ensureCleanConf();
-    for (int nidx=0; nidx<m_unitsx*m_unitsy; ++nidx)
-    {
-        //TODO: neurons
-    }
-    for (int nidx=0; nidx<neurons(); ++nidx)
-    {
-        //TODO: Neurons activation load
-        QString("ACT_%1").arg(nidx);
-    }
-
-    for (int widx=0; widx<weights(); ++widx)
-    {
-        SScTrainableParameter* tp = SScTrainableParameter::create(sscvm.vmToken(QString("WEIGHT_%1").arg(widx)));
-        if (!tp)
-        {
-            tp = SScTrainableParameter::create(SScTrainableParameter::ADAM, (double)qrand()/(double)RAND_MAX); //<< TODO - reset
-            ret = false;
-        }
-        m_w << tp;
-    }
+    createKernels(knr);
+    for (int i=0; i<knr; ++i) if (!m_kernels[i]->fromVM(sscvm.vmToken(QString("KERNEL_%1").arg(i)))) ret = false;
     return ret;
 }
 
-SScInputConvUnit::SScInputConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx, int unitsy, int overlap)
-    : SSiConvUnit(network,kx,ky,unitsx,unitsy,overlap)
+SScInputConvUnit::SScInputConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx, int unitsy, int overlap, int knr)
+    : SSiConvUnit(network,kx,ky,unitsx,unitsy,overlap,knr)
 {}
 
 SScInputConvUnit::~SScInputConvUnit()
 {
-    clearWeights();
+    clearKernels();
 }
 QString SScInputConvUnit::addPattern(const QString& filename)
 {
@@ -238,37 +200,34 @@ QString SScInputConvUnit::nextPattern(bool& cycleDone)
     }
     return QString();
 }
+
 bool SScInputConvUnit::activatePattern(const QString& uuid)
 {
+    bool ret = false;
     if (m_patterns.contains(uuid))
     {
-        QVector<double> w;
-        w.reserve(m_w.size());
-        for (int i=0; i<m_w.size(); ++i) w << m_w[i]->value();
-        m_n.clear();       
-        m_n.reserve(units());
-        foreach(const QVector<double>& dv, m_patterns[uuid]) m_n << SSnBlas::dot(w,dv);
-        return true;
+        ret = true;
+        foreach(SScKernel* k, m_kernels) if (!k->activatePattern(m_patterns[uuid])) ret = false;
     }
-    return false;
+    return ret;
 }
 
 
-SScColorInputConvUnit::SScColorInputConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx, int unitsy, int overlap)
-    : SScInputConvUnit(network,kx,ky,unitsx,unitsy,overlap)
+SScColorInputConvUnit::SScColorInputConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx, int unitsy, int overlap,int knr)
+    : SScInputConvUnit(network,kx,ky,unitsx,unitsy,overlap,knr)
 {}
 SScColorInputConvUnit::~SScColorInputConvUnit()
 {
-    clearWeights();
+    clearKernels();
 }
 
 
-SScHiddenConvUnit::SScHiddenConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx, int unitsy, int overlap)
-    : SSiConvUnit(network,kx,ky,unitsx,unitsy,overlap)
+SScHiddenConvUnit::SScHiddenConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx, int unitsy, int overlap, int knr)
+    : SSiConvUnit(network,kx,ky,unitsx,unitsy,overlap,knr)
 {}
 SScHiddenConvUnit::~SScHiddenConvUnit()
 {
-    clearWeights();
+    clearKernels();
 }
 
 

@@ -40,7 +40,8 @@ SOURCES += main.cpp \
     highwaynn/gate.cpp \
     highwaynn/network.cpp \
     highwaynn/convunit.cpp \
-    highwaynn/sharedgate.cpp
+    highwaynn/sharedgate.cpp \
+    highwaynn/kernel.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -86,5 +87,6 @@ HEADERS += \
     highwaynn/gate.hpp \
     highwaynn/network.hpp \
     highwaynn/convunit.hpp \
-    highwaynn/sharedgate.hpp
+    highwaynn/sharedgate.hpp \
+    highwaynn/kernel.hpp
 
