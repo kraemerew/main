@@ -343,7 +343,7 @@ void convTest()
     {
         bool cdone;
         const QString pid = cu.nextPattern(cdone);
-        qWarning(">>>>PATTEN %s %s", qPrintable(pid), cdone ? "END":"");
+        qWarning(">>>>PATTERN %s %s", qPrintable(pid), cdone ? "END":"");
         if (++c>1000) std::exit(1);
     }
 }

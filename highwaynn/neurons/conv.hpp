@@ -35,6 +35,8 @@ public:
     //virtual bool        fromVM  (const QVariantMap &vm);
 
 protected:
+    virtual double priv_dedo();
+
     SScKernel*   m_krn;
     int          m_kidx;
 };

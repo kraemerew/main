@@ -77,6 +77,41 @@ void SScHighwayNetwork::connectForward()
     foreach(SSiHighwayNeuron* n, m_neurons) if (m.contains(n)) n->connectForward(m[n].toList());
 }
 
+bool SScHighwayNetwork::connect(const QList<int>& from, int to, double v)
+{
+    bool ret = true;
+    foreach(auto fr, from) if (!connect(fr,to,v)) { ret = false; break; }
+    if (!isFeedForward()) ret = false;
+    if (!ret) foreach(auto fr, from) disconnect(fr,to);
+    return ret;
+}
+bool SScHighwayNetwork::connect(const QList<int>& from, int to)
+{
+    bool ret = true;
+    foreach(auto fr, from) if (!connect(fr,to,getRandomConnectionValue())) { ret = false; break; }
+    if (!isFeedForward()) ret = false;
+    if (!ret) foreach(auto fr, from) disconnect(fr,to);
+    return ret;
+}
+
+bool SScHighwayNetwork::connect(const QList<SSiHighwayNeuron*>& from, SSiHighwayNeuron* to, double v)
+{
+    bool ret = true;
+    foreach(auto fr, from) if (!connect(fr,to,v)) { ret = false; break; }
+    if (!isFeedForward()) ret = false;
+    if (!ret) foreach(auto fr, from) disconnect(fr,to);
+    return ret;
+}
+
+bool SScHighwayNetwork::connect(const QList<SSiHighwayNeuron*>& from, SSiHighwayNeuron* to)
+{
+    bool ret = true;
+    foreach(auto fr, from) if (!connect(fr,to,getRandomConnectionValue())) { ret = false; break; }
+    if (!isFeedForward()) ret = false;
+    if (!ret) foreach(auto fr, from) disconnect(fr,to);
+    return ret;
+}
+
 bool SScHighwayNetwork::connect(SSiHighwayNeuron* from, SSiHighwayNeuron* to, double v)
 {   
     if (!contains(from) || !contains(to)) return false;

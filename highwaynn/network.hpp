@@ -38,11 +38,18 @@ public:
     void reset();
     void connectForward();
     bool contains(SSiHighwayNeuron* n) const;
-    bool connect(SSiHighwayNeuron* from, SSiHighwayNeuron* to, double v);    
     bool disconnect(SSiHighwayNeuron* from, SSiHighwayNeuron* to);
+
+
+    bool connect(const QList<SSiHighwayNeuron*>& from, SSiHighwayNeuron* to, double v);
+    bool connect(const QList<SSiHighwayNeuron*>& from, SSiHighwayNeuron* to);
+
+    bool connect(SSiHighwayNeuron* from, SSiHighwayNeuron* to, double v);
     bool connect(int from, int to, const QVariantMap&);
     bool connect(int from, int to, double v);
     bool connect(int from, int to);
+    bool connect(const QList<int>& from, int to, double v);
+    bool connect(const QList<int>& from, int to);
 
     /*!
      * \brief Make a highway connection
