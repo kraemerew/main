@@ -16,7 +16,7 @@ public:
     inline double net(int idx) const { Q_ASSERT(idx<m_n.size()); return m_n[idx]; }
 
     bool activatePattern(const QList<QVector<double> >& pattern);
-
+    SScConvNeuron* output(quint32 idx) const { return (idx<(quint32)m_neurons.size()) ? m_neurons[idx] : NULL; }
     QVariantMap toVM() const { return QVariantMap(); }
     bool fromVM(const QVariantMap&) { return false; }
 
