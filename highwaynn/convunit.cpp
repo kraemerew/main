@@ -14,7 +14,7 @@ namespace SSnConvHelpers
         for (int i=0; i<v.size(); ++i) if (v[i]>ret) ret = v[i];
         return ret;
     }
-    QVector<double> pooled(int xunits, int yunits, int pool, const QVector<double>& v)
+    /*QVector<double> pooled(int xunits, int yunits, int pool, const QVector<double>& v)
     {
         if (pool<2) return v;
         Q_ASSERT(v.size()==xunits*yunits);
@@ -37,7 +37,7 @@ namespace SSnConvHelpers
         ret.reserve(poolcache.size());
         foreach(int idx, poolcache.keys()) ret << SSnConvHelpers::max(poolcache[idx]);
         return ret;
-    }
+    }*/
 }
 
 SSiConvUnit::SSiConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx, int unitsy, int overlap, int knr) :
