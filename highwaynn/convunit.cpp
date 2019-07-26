@@ -141,14 +141,34 @@ SScColorInputConvUnit::~SScColorInputConvUnit()
 }
 
 
-SScHiddenConvUnit::SScHiddenConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx, int unitsy, int overlap, int knr)
-    : SSiConvUnit(network,kx,ky,unitsx,unitsy,overlap,knr)
+SScHiddenConvUnit::SScHiddenConvUnit(SScHighwayNetwork* network, int kx, int ky, int overlap, int knr)
+    : SSiConvUnit(network,kx,ky,2,2,overlap,knr)
 {}
 SScHiddenConvUnit::~SScHiddenConvUnit()
 {
     clearKernels();
 }
 
+bool SScHiddenConvUnit::connectFrom(SSiConvUnit* from)
+{
+    Q_CHECK_PTR(from);
+
+    const int xu = from->xunits(), yu = from->yunits();
+
+    //m_kx+(n-1)*(m_kx-m_ovl)= xu and m_ky+(n-1)*(m_ky-m_ovl)= yu
+    const int calcxunits = 1 + ((xu-m_kx) / (m_kx-m_ovl)),
+              calcyunits = 1 + ((yu-m_ky) / (m_ky-m_ovl));
+    const bool fitsx = (xu == m_kx+(calcxunits-1)*(m_kx-m_ovl)),
+               fitsy = (yu == m_ky+(calcyunits-1)*(m_ky-m_ovl));
+    if (fitsx && fitsy)
+    {
+        m_from=from;
+        m_unitsx = calcxunits;
+        m_unitsy = calcyunits;
+    }
+    return false;
+
+}
 
 QVariantMap SScInputConvUnit::toVM() const
 {

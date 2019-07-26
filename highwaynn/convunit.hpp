@@ -19,6 +19,9 @@ public:
     explicit SSiConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx=8, int unitsy = 8, int overlap = 1, int knr = 1);
     virtual ~SSiConvUnit();
 
+    inline int      xunits      () const { m_unitsx; }
+    inline int      yunits      () const { m_unitsy; }
+
     inline int      xpixels     () const { return m_kx+ ((m_unitsx-1)*(m_kx-m_ovl)); }
     inline int      ypixels     () const { return m_ky +((m_unitsy-1)*(m_ky-m_ovl)); }
     inline int      units       () const { return m_unitsx*m_unitsy; }
@@ -44,10 +47,12 @@ protected:
 class SScHiddenConvUnit : public SSiConvUnit
 {
 public:
-    explicit SScHiddenConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx=8, int unitsy = 8, int overlap = 1, int knr = 1);
+    explicit SScHiddenConvUnit(SScHighwayNetwork* network, int kx, int ky, int overlap = 1, int knr = 1);
     virtual ~SScHiddenConvUnit();
-
+    bool connectFrom(SSiConvUnit*);
     virtual QVariantMap toVM() const;
+protected:
+    SSiConvUnit* m_from;
 };
 
 class SScInputConvUnit : public SSiConvUnit
