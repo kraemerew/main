@@ -40,7 +40,6 @@ SOURCES += main.cpp \
     highwaynn/gate.cpp \
     highwaynn/network.cpp \
     highwaynn/convunit.cpp \
-    highwaynn/sharedgate.cpp \
     highwaynn/kernel.cpp \
     highwaynn/convpatternprovider.cpp
 
@@ -88,7 +87,6 @@ HEADERS += \
     highwaynn/gate.hpp \
     highwaynn/network.hpp \
     highwaynn/convunit.hpp \
-    highwaynn/sharedgate.hpp \
     highwaynn/kernel.hpp \
     highwaynn/convpatternprovider.hpp
 
