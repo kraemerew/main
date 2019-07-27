@@ -335,7 +335,7 @@ void poolTest()
 void convTest()
 {
     SScHighwayNetwork net;
-    SScColorInputConvUnit cu(&net,3,3,10,10,0);
+    SScInputConvUnit cu(&net,3,3,10,10,0);
     cu.addPattern("/home/developer/1.png");
     cu.addPattern("/home/developer/2.jpg");
     int c = 0;
@@ -344,7 +344,7 @@ void convTest()
         bool cdone;
         const QString pid = cu.nextPattern(cdone);
         qWarning(">>>>PATTERN %s %s", qPrintable(pid), cdone ? "END":"");
-        if (++c>1000) std::exit(1);
+        if (++c>2) std::exit(1);
     }
 }
 

@@ -29,7 +29,8 @@ void SSiConvUnit::createKernels (int nr)
 {
     while (m_kernels.size()<nr)
     {
-        m_kernels << new (std::nothrow) SScKernel(m_network, m_kx*m_ky, m_unitsx*m_unitsy);
+        qWarning(">>>>>KERNEL SIZE %d", weights());
+        m_kernels << new (std::nothrow) SScKernel(m_network, weights(), units());
     }
 }
 void SSiConvUnit::ensureCleanConf()
@@ -101,7 +102,11 @@ bool SScInputConvUnit::activatePattern(const QString& uuid)
 SScColorInputConvUnit::SScColorInputConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx, int unitsy, int overlap,int knr)
     : SScInputConvUnit(network,kx,ky,unitsx,unitsy,overlap,knr)
 {
+    Q_CHECK_PTR(network);
+    ensureCleanConf();
     m_pp.reconfigure(xpixels(),ypixels(),isColor(),m_kx,m_ky,m_ovl);
+    clearKernels();
+    createKernels(qMax(1,knr));
 }
 SScColorInputConvUnit::~SScColorInputConvUnit()
 {

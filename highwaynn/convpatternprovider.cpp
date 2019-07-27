@@ -66,7 +66,6 @@ void SScConvPatternProvider::reconfigure(int x, int y, bool c, int kx, int ky, i
     Q_ASSERT(kx>0);
     Q_ASSERT(kx>0);
     Q_ASSERT(ovl>=0);
-    clear();
     m_xres=x;
     m_yres=y;
     m_kx= kx;
@@ -83,7 +82,8 @@ QString SScConvPatternProvider::addPattern(const QString& filename)
 }
 QString SScConvPatternProvider::addPattern(const QImage &im)
 {
-    QString key;
+    auto key = QUuid::createUuid().toString();
+
     bool success = true;
 
     const QSize kidxsize = SSnConvHelpers::convMaskFits(m_kx,m_ky,m_ovl,m_xres,m_yres);
@@ -91,17 +91,13 @@ QString SScConvPatternProvider::addPattern(const QImage &im)
     {
         qWarning(">>>>> IMAGE %dx%d - KONV %dx%d AT KX %d KY %d OVL %d", m_xres,m_yres,kidxsize.width(),kidxsize.height(),m_kx, m_ky, m_ovl);
         SScConvPattern p(im,m_xres, m_yres, m_isColor);
-        key = QUuid::createUuid().toString();
         m_images[key]=p.m_im;
 
-        qWarning(">>ADDED %dx%d %dbpp", p.m_im.width(), p.m_im.height(), p.m_im.depth());
         for (int y=0; y<kidxsize.height(); ++y) for (int x = 0; x<kidxsize.width(); ++x) if (success)
         {
             const auto px = p.pixels(m_kx,m_ky,m_ovl,x,y);
-qWarning(">>>>POS %d %d: %d pixels", x,y,px.size());
             if (px.isEmpty()) success = false; else m_patterns[key] << px;
         }
-        std::exit(0);
     }
     else success = false;
 
