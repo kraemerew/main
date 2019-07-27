@@ -3,6 +3,7 @@
 
 #include <QSize>
 #include <QList>
+#include <QPoint>
 
 namespace SSnConvHelpers
 {
@@ -17,7 +18,19 @@ namespace SSnConvHelpers
      */
     QSize inputSize(int kx, int ky, int ovl, int xunits, int yunits);
     /*!
-     * \brief Return convolution mask as index, given kernel parameters and input image wxh as well as mask index
+     * \brief Convenience call, returning positions converted to linear array index (don't use on image classes like QImage because they may have padding)
+     * \param kx
+     * \param ky
+     * \param ovl
+     * \param xidx
+     * \param yidx
+     * \param w
+     * \param h
+     * \return
+     */
+    QList<int> convMaskIndexes(int kx, int ky, int ovl, int xidx, int yidx, int w, int h);
+    /*!
+     * \brief Return convolution input as list of points, given kernel parameters and input image wxh as well as mask index
      * \param kx    Kernel size x
      * \param ky    Kernel size y
      * \param ovl   Overlap
@@ -27,7 +40,7 @@ namespace SSnConvHelpers
      * \param h     Source image height
      * \return
      */
-    QList<int> convMaskIdx(int kx, int ky, int ovl, int xidx, int yidx, int w, int h);
+    QList<QPoint> convMaskPositions(int kx, int ky, int ovl, int xidx, int yidx, int w, int h);
     /*!
      * \brief Checks whether a convolution mask of kx,ky with overlap ovl fits into an image/array of wxh
      * \param kx    Applied kernel width

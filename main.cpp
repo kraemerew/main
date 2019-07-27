@@ -348,10 +348,19 @@ void convTest()
     }
 }
 
+#include "convhelpers.hpp"
+
 int main(int argc, char *argv[])
 {
     Q_UNUSED(argc);
     Q_UNUSED(argv);
+
+    auto aaa = SSnConvHelpers::inputSize(3,4,2,2,1);
+    auto bbb = SSnConvHelpers::convMaskFits(3,3,1,9,9);
+    qWarning(">>>>%dx%d",bbb.width(),bbb.height());
+    auto ccc = SSnConvHelpers::convMaskIndexes(3,3,1,1,0,5,3);
+    foreach(auto i, ccc) qWarning("#%d",i);
+    std::exit(0);
     convTest();
     parityTest(16);
     /*SScRBiasNeuron* bn = new (std::nothrow) SScRBiasNeuron();

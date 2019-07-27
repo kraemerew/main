@@ -127,7 +127,7 @@ bool SScHiddenConvUnit::connectFrom(SSiConvUnit* from)
     m_unitsy = out_xy.height();
     for (int i=0; i<m_unitsx; ++i) for (int j=0; j<m_unitsy; ++j)
     {
-        auto idxlist = SSnConvHelpers::convMaskIdx(m_kx,m_ky,m_ovl,i,j,xu,yu);
+        auto idxlist = SSnConvHelpers::convMaskIndexes(m_kx,m_ky,m_ovl,i,j,xu,yu);
         if (idxlist.isEmpty()) return false;
         //TODO
 
