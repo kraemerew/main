@@ -4,6 +4,7 @@
 
 SScKernel::SScKernel(SScHighwayNetwork* network, int weights, int neurons)
     : m_network (network),
+      m_netset  (false),
       m_nrw     (weights),
       m_nrn     (neurons)
 {
@@ -20,7 +21,7 @@ SScKernel::~SScKernel()
     clearWeights();
 }
 
-bool SScKernel::activatePattern(const QList<QVector<double> > &pattern)
+bool SScKernel::activatePattern(const QVector<QVector<double> > &pattern)
 {
     QVector<double> w;
     w.reserve(m_w.size());
@@ -32,6 +33,19 @@ bool SScKernel::activatePattern(const QList<QVector<double> > &pattern)
         if (dv.size()==w.size()) m_n << SSnBlas::dot(w,dv);
         else                  {  m_n << 0.0; ret = false; }
     return ret;
+}
+
+bool SScKernel::transform()
+{
+    QVector<QVector<double> > pattern;
+    pattern.reserve(m_inputs.size());
+    foreach(const auto& field, m_inputs)
+    {
+        QVector<double> v; v.reserve(field.size());
+        foreach(auto& n, field) v << n->out();
+        pattern << v;
+    }
+    return activatePattern(pattern);
 }
 
 void SScKernel::clearNeurons()

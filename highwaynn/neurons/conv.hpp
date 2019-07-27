@@ -13,14 +13,14 @@ public:
     virtual bool    setInput    (double) { return false; }
     virtual bool    setTarget   (double) { return false; }
 
-    bool setKernel(SScKernel* krn, int idx);
+    bool setKernel(SScKernel* krn, quint32 idx);
     virtual bool addInput(SSiHighwayNeuron*, SScTrainableParameter*) { return false; }
     virtual bool addInput(SSiHighwayNeuron*, double, SScTrainableParameter::Type) { return false; }
     virtual bool delInput(SSiHighwayNeuron*) { return false; }
 
     virtual double  net             ();
     //virtual double  icon            (SSiHighwayNeuron*) { return 0.0; }
-    //virtual void    reset           ();
+    virtual void    reset           ();
     virtual double  carry           () { return 0.0; }
     virtual double  highway         () { return 0.0; }
     virtual bool    connectHighway  (SSiHighwayNeuron*, SSiHighwayNeuron*) { return false; }
@@ -38,7 +38,7 @@ protected:
     virtual double priv_dedo();
 
     SScKernel*   m_krn;
-    int          m_kidx;
+    quint32      m_kidx;
 };
 
 #endif // CONV_HPP

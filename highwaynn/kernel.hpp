@@ -13,10 +13,22 @@ class SScKernel
 public:
     explicit SScKernel(SScHighwayNetwork* network, int weights, int neurons);
     virtual ~SScKernel();
-    inline double net(int idx) const { Q_ASSERT(idx<m_n.size()); return m_n[idx]; }
+    virtual void reset() { m_netset = false; }
+    inline double net(quint32 idx)
+    {
+        if (!m_netset && !m_inputs.isEmpty())
+        {
+            transform();
+            m_netset = true;
+        }
+        Q_ASSERT(idx<m_n.size());
+        return m_n[idx];
+    }
 
-    bool activatePattern(const QList<QVector<double> >& pattern);
+    bool activatePattern(const QVector<QVector<double> >& pattern);
+    bool transform();
     SScConvNeuron* output(quint32 idx) const { return (idx<(quint32)m_neurons.size()) ? m_neurons[idx] : NULL; }
+    void addInputField(const QVector<SScConvNeuron*>& v) { m_inputs << v; }
     QVariantMap toVM() const { return QVariantMap(); }
     bool fromVM(const QVariantMap&) { return false; }
 
@@ -27,10 +39,12 @@ protected:
     void clearWeights();
 
     SScHighwayNetwork*              m_network;
+    bool                            m_netset;
     int                             m_nrw, m_nrn;
     QVector<SScTrainableParameter*> m_w;
     QVector<double>                 m_n;
-    QVector<SScConvNeuron*>         m_neurons;
+    QVector<SScConvNeuron*>             m_neurons;
+    QVector<QVector<SScConvNeuron*> >   m_inputs;
 };
 
 #endif // KERNEL_HPP

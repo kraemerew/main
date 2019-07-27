@@ -1,6 +1,5 @@
 #include "convhelpers.hpp"
 
-
 QSize SSnConvHelpers::inputSize(int kx, int ky, int ovl, int xunits, int yunits)
 {
     if ((kx>0) && (ky>0) && (xunits>0) && (yunits>0) && (ovl>=0))
@@ -31,7 +30,6 @@ QList<QPoint> SSnConvHelpers::convMaskPositions(int kx, int ky, int ovl, int xid
     if (!ok) ret.clear();
     return ret;
 }
-
 
 QSize SSnConvHelpers::convMaskFits(int kx, int ky, int ovl, int w, int h)
 {

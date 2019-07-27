@@ -11,11 +11,10 @@ SScConvNeuron::SScConvNeuron(SScHighwayNetwork *net)
 SScConvNeuron::~SScConvNeuron()
 {}
 
-bool SScConvNeuron::setKernel(SScKernel* krn, int idx)
+bool SScConvNeuron::setKernel(SScKernel* krn, quint32 idx)
 {
     Q_CHECK_PTR(krn);
     if (m_krn && (krn!=m_krn)) return false;
-    Q_ASSERT(idx>=0);
     m_krn   = krn;
     m_kidx  = idx;
     return true;
@@ -25,6 +24,11 @@ double SScConvNeuron::net()
 {
     Q_CHECK_PTR(m_krn);
     return m_krn->net(m_kidx);
+}
+
+void SScConvNeuron::reset()
+{
+    if (m_krn) m_krn->reset();
 }
 
 double SScConvNeuron::priv_dedo()

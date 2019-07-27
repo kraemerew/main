@@ -24,12 +24,13 @@ SSiConvUnit::~SSiConvUnit()
     clearKernels();
 }
 
+SScConvNeuron* SSiConvUnit::output(quint32 k, quint32 nidx) const { return (k<(quint32)m_kernels.size()) ? m_kernels[k]->output(nidx) : NULL; }
+
 void SSiConvUnit::clearKernels  () { foreach(SScKernel* k, m_kernels) delete k; m_kernels.clear(); }
 void SSiConvUnit::createKernels (int nr)
 {
     while (m_kernels.size()<nr)
     {
-        qWarning(">>>>>KERNEL SIZE %d", weights());
         m_kernels << new (std::nothrow) SScKernel(m_network, weights(), units());
     }
 }
@@ -55,11 +56,11 @@ bool SSiConvUnit::fromVM(const QVariantMap & vm)
 {
     bool ret = true;
     SScVM sscvm(vm);
-    m_kx = sscvm.intToken("KERNEL_X",3);
-    m_ky = sscvm.intToken("KERNEL_Y",3);
+    m_kx     = sscvm.intToken("KERNEL_X",3);
+    m_ky     = sscvm.intToken("KERNEL_Y",3);
     m_unitsx = sscvm.intToken("UNITS_X",10);
     m_unitsy = sscvm.intToken("UNITS_Y",10);
-    int knr = sscvm.intToken("KERNELS",1);
+    int knr  = sscvm.intToken("KERNELS", 1);
     knr = qMax(1,knr);
     clearKernels();
     ensureCleanConf();
@@ -126,20 +127,24 @@ bool SScHiddenConvUnit::connectFrom(SSiConvUnit* from)
 {
     Q_CHECK_PTR(from);
 
-    const int xu = from->xunits(), yu = from->yunits();
+    const int krn = from->kernels(), xu = from->xunits(), yu = from->yunits();
+
     const QSize out_xy = SSnConvHelpers::convMaskFits(m_kx,m_ky,m_ovl,xu,yu);
     if (!out_xy.isValid()) return false;
     m_from=from;
     m_unitsx = out_xy.width();
     m_unitsy = out_xy.height();
-    for (int i=0; i<m_unitsx; ++i) for (int j=0; j<m_unitsy; ++j)
+    clearKernels();
+    createKernels(krn);       // as many kernels as the underlying connection
+    for (int k=0; k<krn; ++k) for (int j=0; j<m_unitsy; ++j) for (int i=0; i<m_unitsx; ++i)
     {
         auto idxlist = SSnConvHelpers::convMaskIndexes(m_kx,m_ky,m_ovl,i,j,xu,yu);
         if (idxlist.isEmpty()) return false;
-        //TODO
-
+        QVector<SScConvNeuron*> field;
+        foreach(int idx, idxlist) field << from->output(k,idx);
+        m_kernels[krn]->addInputField(field);
     }
-    return false;
+    return true;
 }
 
 QVariantMap SScInputConvUnit::toVM() const

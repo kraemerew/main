@@ -19,6 +19,7 @@ public:
     explicit SSiConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx=8, int unitsy = 8, int overlap = 1, int knr = 1);
     virtual ~SSiConvUnit();
 
+    virtual int     kernels     () const { return m_kernels.size(); }
     virtual int     xunits      () const { return m_unitsx; }
     virtual int     yunits      () const { return m_unitsy; }
 
@@ -40,6 +41,8 @@ public:
     virtual QVariantMap toVM() const;
     virtual bool fromVM(const QVariantMap&);
     static SSiConvUnit* create(SScHighwayNetwork* net, const QVariantMap& vm);
+
+    SScConvNeuron* output(quint32 k, quint32 nidx) const;
 
 protected:
     virtual void ensureCleanConf    ();

@@ -36,17 +36,17 @@ public:
     }
     QString addPattern(const QImage& im);
     QString addPattern(const QString& filename);
-    QList<QVector<double> > getPattern(const QString& key) const
+    QVector<QVector<double> > getPattern(const QString& key) const
     {
         if (m_patterns.contains(key)) return m_patterns[key];
-        return QList<QVector<double> >();
+        return QVector<QVector<double> >();
     }
 
 private:
     int                                     m_xres, m_yres, m_kx, m_ky, m_ovl;  // Kernel settings
     bool                                    m_isColor;
     QMap<QString,QImage>                    m_images;   // Source images for each pattern
-    QMap<QString,QList<QVector<double> > >  m_patterns; // Per pattern: the pattern vectors for each of the output neurons
+    QMap<QString,QVector<QVector<double> > >m_patterns; // Per pattern: the pattern vectors for each of the output neurons
     QList<QString>                          m_pkeys;    // Keeps track of training sequence - current pattern at beginning
 };
 
