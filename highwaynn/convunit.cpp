@@ -7,6 +7,58 @@
 #include <QUuid>
 namespace SSnConvHelpers
 {
+/*!
+     * \brief Return convolution mask as index
+     * \param kx    Kernel size x
+     * \param ky    Kernel size y
+     * \param ovl   Overlap
+     * \param xidx  Mask index x (at overlap 0, xidx*kx)
+     * \param yidx  Mask index y
+     * \param w     Source image width
+     * \param h     Source image height
+     * \return
+     */
+    QList<int> convMaskIdx(int kx, int ky, int ovl, int xidx, int yidx, int w, int h)
+    {
+        QList<int> ret;
+        bool ok = (ky>0) && (ky>0) && (xidx>=0) && (yidx>=0) && (w>0) && (h>0);
+        if (!ok) return ret;
+        const int topleftx = kx + ((xidx-1)*(kx-ovl)),
+                  toplefty = ky + ((yidx-1)*(ky-ovl));
+        for (int y = toplefty; y<toplefty+ky; ++y) for (int x = topleftx; x<topleftx+kx; ++x)
+        {
+            if ((qBound(0,x,w)==x) && (qBound(0,y,h)==y))
+                ret << x + (y*h);
+            else ok = false;
+        }
+        if (!ok) ret.clear();
+        return ret;
+    }
+    /*!
+     * \brief Checks whether a convolution mask of kx,ky with overlap ovl fits into an image/array of wxh
+     * \param kx    Applied kernel width
+     * \param ky    Applied kernel height
+     * \param ovl   Overlap in kernel
+     * \param w     Source array width
+     * \param h     Source array height
+     * \return  Number of kernel units or invalid size on failure
+     */
+    QSize convMaskFits(int kx, int ky, int ovl, int w, int h)
+    {
+        // kx + (n-1)(kx-ovl)==w
+        // ky + (m-1)(ky-ovl)==h
+        const int n = 1 + ((w-kx)/(kx-ovl)),
+                  m = 1 + ((h-ky)/(ky-ovl));
+
+        // Check whether it fits
+        const int wnew = kx + (n-1)*(kx-ovl),
+                  hnew = ky + (m-1)*(ky-ovl);
+
+        // Has to be same size
+        if ((w==wnew) && (h==hnew)) return QSize(n,m);
+        return QSize(-1,-1);
+    }
+
     double max(const QVector<double>& v)
     {
         Q_ASSERT(!v.isEmpty());
@@ -154,20 +206,19 @@ bool SScHiddenConvUnit::connectFrom(SSiConvUnit* from)
     Q_CHECK_PTR(from);
 
     const int xu = from->xunits(), yu = from->yunits();
-
-    //m_kx+(n-1)*(m_kx-m_ovl)= xu and m_ky+(n-1)*(m_ky-m_ovl)= yu
-    const int calcxunits = 1 + ((xu-m_kx) / (m_kx-m_ovl)),
-              calcyunits = 1 + ((yu-m_ky) / (m_ky-m_ovl));
-    const bool fitsx = (xu == m_kx+(calcxunits-1)*(m_kx-m_ovl)),
-               fitsy = (yu == m_ky+(calcyunits-1)*(m_ky-m_ovl));
-    if (fitsx && fitsy)
+    const QSize out_xy = SSnConvHelpers::convMaskFits(m_kx,m_ky,m_ovl,xu,yu);
+    if (!out_xy.isValid()) return false;
+    m_from=from;
+    m_unitsx = out_xy.width();
+    m_unitsy = out_xy.height();
+    for (int i=0; i<m_unitsx; ++i) for (int j=0; j<m_unitsy; ++j)
     {
-        m_from=from;
-        m_unitsx = calcxunits;
-        m_unitsy = calcyunits;
+        auto idxlist = SSnConvHelpers::convMaskIdx(m_kx,m_ky,m_ovl,i,j,xu,yu);
+        if (idxlist.isEmpty()) return false;
+        //TODO
+
     }
     return false;
-
 }
 
 QVariantMap SScInputConvUnit::toVM() const
