@@ -1,4 +1,5 @@
 #include "convpatternprovider.hpp"
+#include "convhelpers.hpp"
 #include <QUuid>
 
 class SScConvPattern
@@ -13,30 +14,45 @@ public:
     }
 
     inline bool isValid() const { return !m_im.isNull(); }
-    inline int vSize() const { return m_color ? m_w*m_h*3 : m_w*m_h; }
-    QVector<double> vect(int topleftx, int toplefty, int w, int h) const
+    /*!
+     * \brief Returns the image pixels at a given kernel position
+     * \param kx
+     * \param ky
+     * \param ovl
+     * \param xidx  Kernel position index x (this is the output neuron position)
+     * \param yidx  Kernel position index y (this is the output neuron position)
+     * \return
+     */
+    QVector<double> pixels(int kx, int ky, int ovl, int xidx, int yidx) const
+    {
+        return pixels(SSnConvHelpers::convMaskPositions(kx,ky,ovl,xidx,yidx,m_im.width(),m_im.height()));
+    }
+
+    /*!
+     * \brief Return pixel values
+     * \param positions
+     * \return
+     */
+    QVector<double> pixels(const QList<QPoint>& positions) const
     {
         QVector<double> v;
-        v.reserve(m_color ? w*h*3 : w*h);
-        Q_ASSERT(topleftx+w-1<m_im.width ());
-        Q_ASSERT(toplefty+h-1<m_im.height());
-        if (m_color)
+        foreach(const auto& pos, positions)
         {
-            for (int y=toplefty; y<toplefty+h; ++y) for (int x=topleftx; x<topleftx+w; ++x)
+            const auto px = m_im.pixel(pos);
+            if (m_color)
             {
-                const auto px = m_im.pixel(x,y);
-                v << qRed(px);
-                v << qGreen(px);
-                v << qBlue(px);
+                v << qRed   (px);
+                v << qGreen (px);
+                v << qBlue  (px);
             }
-        }
-        else
-        {
-            for (int y=toplefty; y<toplefty+h; ++y) for (int x=topleftx; x<topleftx+w; ++x)
-                v << qGray(m_im.pixel(x,y));
+            else
+            {
+                v << qGray(m_im.pixel(pos));
+            }
         }
         return v;
     }
+
     QImage m_im;
     int m_w, m_h;
     bool m_color;
@@ -50,6 +66,7 @@ void SScConvPatternProvider::reconfigure(int x, int y, bool c, int kx, int ky, i
     Q_ASSERT(kx>0);
     Q_ASSERT(kx>0);
     Q_ASSERT(ovl>=0);
+    clear();
     m_xres=x;
     m_yres=y;
     m_kx= kx;
@@ -66,23 +83,32 @@ QString SScConvPatternProvider::addPattern(const QString& filename)
 }
 QString SScConvPatternProvider::addPattern(const QImage &im)
 {
+    QString key;
     bool success = true;
-    SScConvPattern p(im,m_xres, m_yres, m_isColor);
-    auto key = QUuid::createUuid().toString();
-    m_images[key]=p.m_im;
-    qWarning(">>ADDED %dx%d %dbpp", p.m_im.width(), p.m_im.height(), p.m_im.depth());
-    for (int y=0; y<m_yres; ++y) for (int x = 0; x<m_xres; ++x)
+
+    const QSize kidxsize = SSnConvHelpers::convMaskFits(m_kx,m_ky,m_ovl,m_xres,m_yres);
+    if (kidxsize.isValid())
     {
-        const int topleftx = x*m_kx-x*m_ovl, toplefty = y*m_ky-y*m_ovl;
-        auto v = p.vect(topleftx, toplefty, m_kx, m_ky);
-        qWarning(">>>>>>>>>VECTOR %d,%d -> %d", topleftx,toplefty,v.size());
-        if (v.isEmpty()) success = false; else m_patterns[key] << v;
+        qWarning(">>>>> IMAGE %dx%d - KONV %dx%d AT KX %d KY %d OVL %d", m_xres,m_yres,kidxsize.width(),kidxsize.height(),m_kx, m_ky, m_ovl);
+        SScConvPattern p(im,m_xres, m_yres, m_isColor);
+        key = QUuid::createUuid().toString();
+        m_images[key]=p.m_im;
+
+        qWarning(">>ADDED %dx%d %dbpp", p.m_im.width(), p.m_im.height(), p.m_im.depth());
+        for (int y=0; y<kidxsize.height(); ++y) for (int x = 0; x<kidxsize.width(); ++x) if (success)
+        {
+            const auto px = p.pixels(m_kx,m_ky,m_ovl,x,y);
+qWarning(">>>>POS %d %d: %d pixels", x,y,px.size());
+            if (px.isEmpty()) success = false; else m_patterns[key] << px;
+        }
+        std::exit(0);
     }
+    else success = false;
+
     if (!success)
     {
-        qWarning(">>>PATTERN NOT ADDED");
-        m_images.remove(key);
-        m_patterns.remove(key);
+        m_images.   remove(key);
+        m_patterns. remove(key);
     }
     else
     {

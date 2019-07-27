@@ -100,7 +100,9 @@ bool SScInputConvUnit::activatePattern(const QString& uuid)
 
 SScColorInputConvUnit::SScColorInputConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx, int unitsy, int overlap,int knr)
     : SScInputConvUnit(network,kx,ky,unitsx,unitsy,overlap,knr)
-{}
+{
+    m_pp.reconfigure(xpixels(),ypixels(),isColor(),m_kx,m_ky,m_ovl);
+}
 SScColorInputConvUnit::~SScColorInputConvUnit()
 {
     clearKernels();
