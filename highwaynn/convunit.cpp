@@ -4,94 +4,9 @@
 #include "../blas/blasvector.hpp"
 #include "network.hpp"
 #include "kernel.hpp"
+#include "convhelpers.hpp"
+
 #include <QUuid>
-namespace SSnConvHelpers
-{
-/*!
-     * \brief Return convolution mask as index
-     * \param kx    Kernel size x
-     * \param ky    Kernel size y
-     * \param ovl   Overlap
-     * \param xidx  Mask index x (at overlap 0, xidx*kx)
-     * \param yidx  Mask index y
-     * \param w     Source image width
-     * \param h     Source image height
-     * \return
-     */
-    QList<int> convMaskIdx(int kx, int ky, int ovl, int xidx, int yidx, int w, int h)
-    {
-        QList<int> ret;
-        bool ok = (ky>0) && (ky>0) && (xidx>=0) && (yidx>=0) && (w>0) && (h>0);
-        if (!ok) return ret;
-        const int topleftx = kx + ((xidx-1)*(kx-ovl)),
-                  toplefty = ky + ((yidx-1)*(ky-ovl));
-        for (int y = toplefty; y<toplefty+ky; ++y) for (int x = topleftx; x<topleftx+kx; ++x)
-        {
-            if ((qBound(0,x,w)==x) && (qBound(0,y,h)==y))
-                ret << x + (y*h);
-            else ok = false;
-        }
-        if (!ok) ret.clear();
-        return ret;
-    }
-    /*!
-     * \brief Checks whether a convolution mask of kx,ky with overlap ovl fits into an image/array of wxh
-     * \param kx    Applied kernel width
-     * \param ky    Applied kernel height
-     * \param ovl   Overlap in kernel
-     * \param w     Source array width
-     * \param h     Source array height
-     * \return  Number of kernel units or invalid size on failure
-     */
-    QSize convMaskFits(int kx, int ky, int ovl, int w, int h)
-    {
-        // kx + (n-1)(kx-ovl)==w
-        // ky + (m-1)(ky-ovl)==h
-        const int n = 1 + ((w-kx)/(kx-ovl)),
-                  m = 1 + ((h-ky)/(ky-ovl));
-
-        // Check whether it fits
-        const int wnew = kx + (n-1)*(kx-ovl),
-                  hnew = ky + (m-1)*(ky-ovl);
-
-        // Has to be same size
-        if ((w==wnew) && (h==hnew)) return QSize(n,m);
-        return QSize(-1,-1);
-    }
-
-    double max(const QVector<double>& v)
-    {
-        Q_ASSERT(!v.isEmpty());
-        double ret = v[0];
-        for (int i=0; i<v.size(); ++i) if (v[i]>ret) ret = v[i];
-        return ret;
-    }
-    /*QVector<double> pooled(int xunits, int yunits, int pool, const QVector<double>& v)
-    {
-        if (pool<2) return v;
-        Q_ASSERT(v.size()==xunits*yunits);
-        Q_ASSERT(xunits%pool==0);
-        Q_ASSERT(yunits%pool==0);
-        QMap<int,QVector<double> > poolcache;
-        const int newwidth = xunits/pool;
-        int nr=-1;
-
-        for (int y=0; y<yunits; ++y)
-        {
-            const int pooloffs = newwidth*(y/pool);
-            for (int x=0; x<xunits; ++x)
-            {
-                const int poolx = x/pool;
-                poolcache[pooloffs+poolx] << v[++nr];
-            }
-        }
-        QVector<double> ret;
-        ret.reserve(poolcache.size());
-        foreach(int idx, poolcache.keys()) ret << SSnConvHelpers::max(poolcache[idx]);
-        return ret;
-    }*/
-}
-
 SSiConvUnit::SSiConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx, int unitsy, int overlap, int knr) :
     m_network   (network),
     m_kx        (kx),
@@ -119,9 +34,8 @@ void SSiConvUnit::createKernels (int nr)
 }
 void SSiConvUnit::ensureCleanConf()
 {
-    // odd kernel size min 3
-    m_kx=qMax(3,m_kx); if (m_kx%2==0) ++m_kx;
-    m_ky=qMax(3,m_ky); if (m_ky%2==0) ++m_ky;
+    m_kx=qMax(1,m_kx);
+    m_ky=qMax(1,m_ky);
 }
 
 QVariantMap SSiConvUnit::toVM() const
