@@ -19,15 +19,15 @@ public:
     virtual bool delInput(SSiHighwayNeuron*) { return false; }
 
     virtual double  net             ();
-    //virtual double  icon            (SSiHighwayNeuron*) { return 0.0; }
+    virtual double  icon            (SSiHighwayNeuron*);
     virtual void    reset           ();
     virtual double  carry           () { return 0.0; }
     virtual double  highway         () { return 0.0; }
     virtual bool    connectHighway  (SSiHighwayNeuron*, SSiHighwayNeuron*) { return false; }
     virtual double  transform       () { if (m_transformset) return m_t; m_t=m_act->activate(net()); m_transformset=true; return m_t; }
     virtual double  out             () { return transform(); }
-    virtual double  deltaw          (SSiHighwayNeuron*) { return 0.0; }
-
+    virtual double  deltaw          (SSiHighwayNeuron*);
+    virtual double  deltaw(double out);
     //virtual void    trainingStep    ();
     //virtual void    endOfCycle      ();
 

@@ -1,6 +1,7 @@
 #include "kernel.hpp"
 #include "network.hpp"
 #include "conv.hpp"
+#include "ssctrainableparameter.hpp"
 
 SScKernel::SScKernel(SScHighwayNetwork* network, int weights, int neurons)
     : m_network (network),
@@ -75,3 +76,50 @@ void SScKernel::createWeights()
     }
 }
 
+QVector<SScConvNeuron*> SScKernel::fwdConnections(SScConvNeuron* inneuron)
+{
+    auto it = m_fwdcache.find(inneuron);
+    if (it!=m_fwdcache.end()) return it.value();
+
+    QSet<SScConvNeuron*> ret;
+    for (int i=0; i<m_inputs.size(); ++i) if (m_inputs[i].contains(inneuron) && (i<m_neurons.size())) ret << m_neurons[i];
+    m_fwdcache[inneuron]=ret.toList().toVector();
+    return m_fwdcache[inneuron];
+}
+
+SScTrainableParameter* SScKernel::icon(SScConvNeuron* inneuron, SScConvNeuron* outneuron)
+{
+    QPair<SScConvNeuron*,SScConvNeuron*> p(inneuron,outneuron);
+    auto it = m_iconcache.find(p);
+    if (it!=m_iconcache.end()) return it.value();
+    for (int i = 0; i<m_neurons.size(); ++i) if (m_neurons[i]==outneuron)
+    {
+        for (int j=0; j<m_inputs[i].size(); ++j) if (m_inputs[i][j]==inneuron)
+        {
+            m_iconcache[p]=m_w[j];
+            return m_w[j];
+        }
+    }
+    return m_iconcache[p]=NULL;
+}
+double SScKernel::iconValue(SScConvNeuron* inneuron, SScConvNeuron* outneuron)
+{
+    auto tp = icon(inneuron,outneuron);
+    return tp ? tp->value() : 0.0;
+}
+
+QVector<QPair<SScConvNeuron*,SScConvNeuron*> > SScKernel::sharedConnectionPairs(int idx)
+{
+    QVector<QPair<SScConvNeuron*,SScConvNeuron*> > ret;
+    auto it = m_wpcache.find(idx);
+    if (it!=m_wpcache.end()) return it.value();
+
+    for (int i=0; i<m_neurons.size(); ++i) if (idx<m_inputs[i].size())
+    {
+        auto on = m_neurons[i];
+        auto in = m_inputs[i][idx];
+        ret << QPair<SScConvNeuron*, SScConvNeuron*>(in,on);
+    }
+    m_wpcache[idx]=ret;
+    return ret;
+}
