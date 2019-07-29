@@ -64,7 +64,8 @@ public:
 
     virtual bool    setTarget(double v) { if (m_target==v) return false; m_target = v; return true; }
     virtual double  err() { return out()-m_target; }
-    virtual void    connectForward(const QList<SSiHighwayNeuron*>&) {}
+    virtual bool addFwdConnection(SSiHighwayNeuron *) { return false; }
+    virtual bool delFwdConnection(SSiHighwayNeuron *) { return false; }
 
 private:
 

@@ -62,8 +62,10 @@ bool SScGatedNeuron::connectHighway  (SSiHighwayNeuron* hwn, SSiHighwayNeuron* c
     SScCarryNeuron* dccn = dynamic_cast<SScCarryNeuron*>(cn);
     if ( (!hwn && !cn) || (hwn && cn && dccn && (hwn!=cn) && (hwn!=this) && (cn!=this)) )
     {
+        if (m_cn) m_cn->delFwdConnection(this);
         m_hwn=hwn;
         m_cn=cn;
+        if (cn) cn->addFwdConnection(this);
         return true;
     }
     return false;
