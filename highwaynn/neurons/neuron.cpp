@@ -81,7 +81,7 @@ double SSiHighwayNeuron::priv_dedo()
     //         = sum(l) w_jl dedo(l) act(l)'gain_l
     double ret = 0;
 
-    foreach(SSiHighwayNeuron* l, m_out)
+    foreach(SSiHighwayNeuron* l, m_fwd)
     {       
         ret += l->forwardSelectedDedo(this);    // only the pool neuron delivers something here, if this neuron achieved maximum in pool
         ret += l->icon(this)*l->dedo()*l->act()->dev()*l->act()->gain()*(1.0-l->carry());
@@ -145,4 +145,7 @@ void SSiHighwayNeuron::dump()
 {
     if (m_name.isEmpty())   qWarning("> Type %s", qPrintable(type2Id(m_type)));
     else                    qWarning("> Type %s / Name %s", qPrintable(type2Id(m_type)), qPrintable(m_name));
+    QStringList sl;
+    foreach(SSiHighwayNeuron* n, m_fwd) sl << n->name();
+    qWarning("Neuron %s forward connected to %s", qPrintable(name()), qPrintable(sl.join(",")));
 }

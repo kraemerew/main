@@ -23,7 +23,7 @@ double SScPoolNeuron::transform()
     }
     return m_t;
 }
-bool SScPoolNeuron::addInput(SSiHighwayNeuron* other, SScTrainableParameter*)
+bool SScPoolNeuron::addConnection(SSiHighwayNeuron* other, SScTrainableParameter*)
 {
     if (m_in.contains(other)) return true;
     SScCarryNeuron* cn = dynamic_cast<SScCarryNeuron*>(other);
@@ -32,18 +32,24 @@ bool SScPoolNeuron::addInput(SSiHighwayNeuron* other, SScTrainableParameter*)
     m_in << other;
     return true;
 }
-bool SScPoolNeuron::addInput(SSiHighwayNeuron *other, double, SScTrainableParameter::Type)
+bool SScPoolNeuron::addConnection(SSiHighwayNeuron *other, double, SScTrainableParameter::Type)
 {
     if (m_in.contains(other)) return true;
     SScCarryNeuron* cn = dynamic_cast<SScCarryNeuron*>(other);
     SScPoolNeuron* pn = dynamic_cast<SScPoolNeuron*>(other);
     if (cn || pn) return false;
     m_in << other;
+    other->addFwdConnection(this);
     return true;
 }
-bool SScPoolNeuron::delInput(SSiHighwayNeuron *other)
+bool SScPoolNeuron::delConnection(SSiHighwayNeuron *other)
 {
-    return m_in.removeAll(other);
+    if (m_in.removeAll(other))
+    {
+        (void) other->delFwdConnection(this);
+        return true;
+    }
+    return false;
 }
 double SScPoolNeuron::net()
 {
@@ -65,10 +71,9 @@ double SScPoolNeuron::forwardSelectedDedo(SSiHighwayNeuron* ref)
     {
         m_fwdedo = 0;
         m_fwdedoset = true;
-        foreach(SSiHighwayNeuron* l, m_out)
+        foreach(SSiHighwayNeuron* l, m_fwd)
         {
-            const double w_jl = l->icon(this);
-            m_fwdedo += w_jl*l->dedo()*l->act()->dev()*l->act()->gain()*(1.0-l->carry());
+            m_fwdedo += l->icon(this)*l->dedo()*l->act()->dev()*l->act()->gain()*(1.0-l->carry());
         }
     }
     return m_fwdedo;

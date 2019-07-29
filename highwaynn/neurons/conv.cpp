@@ -61,7 +61,7 @@ double SScConvNeuron::priv_dedo()
     {
        ret+=m_krn->iconValue(this,l)*l->dedo()*l->act()->dev()*l->act()->gain()*(1.0-l->carry());
     }
-    foreach(SSiHighwayNeuron* l, m_out)
+    foreach(SSiHighwayNeuron* l, m_fwd)
     {
         ret += l->forwardSelectedDedo(this);    // only the pool neuron delivers something here, if this neuron achieved maximum in pool
         ret += l->icon(this)*l->dedo()*l->act()->dev()*l->act()->gain()*(1.0-l->carry());

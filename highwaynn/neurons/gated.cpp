@@ -9,22 +9,32 @@ SScGatedNeuron::SScGatedNeuron(SScHighwayNetwork* net, Type type, SScActivation:
       m_hwn             (NULL),
       m_cn              (NULL)
 {}
-bool SScGatedNeuron::addInput(SSiHighwayNeuron* other, SScTrainableParameter* tp)
+bool SScGatedNeuron::addConnection(SSiHighwayNeuron* other, SScTrainableParameter* tp)
 {
     SScCarryNeuron* cn = dynamic_cast<SScCarryNeuron*>(other);
-    return cn ? false : m_in.addInput(other,tp);
+    if (cn) return false;
+    const bool ret = m_in.addInput(other,tp);
+    if (ret) other->addFwdConnection(this);
+    return ret;
 }
-bool SScGatedNeuron::addInput(SSiHighwayNeuron *other, double v, SScTrainableParameter::Type t)
+bool SScGatedNeuron::addConnection(SSiHighwayNeuron *other, double v, SScTrainableParameter::Type t)
 {
     SScCarryNeuron* cn = dynamic_cast<SScCarryNeuron*>(other);
-    return cn ? false : m_in.addInput(other,v,t);
+    if (cn) return false;
+    const bool ret = m_in.addInput(other,v,t);
+    if (ret) other->addFwdConnection(this);
+    return ret;
 }
-bool SScGatedNeuron::delInput(SSiHighwayNeuron *other)
+bool SScGatedNeuron::delConnection(SSiHighwayNeuron *other)
 {
     bool ret = false;
     if (other==m_cn)    { m_cn  = NULL; ret = true; }
     if (other==m_hwn)   { m_hwn = NULL; ret = true; }
-    if (m_in.delInput(other)) ret = true;
+    if (m_in.delInput(other))
+    {
+        other->delFwdConnection(this);
+        ret = true;
+    }
     return ret;
 }
 

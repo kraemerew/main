@@ -64,17 +64,7 @@ bool SScHighwayNetwork::delNeuron   (int idx)
 bool SScHighwayNetwork::disconnect  (SSiHighwayNeuron* from, SSiHighwayNeuron* to)
 {
     if (!contains(from) || !contains(to)) return false;
-    return to->delInput(from);
-}
-
-void SScHighwayNetwork::connectForward()
-{
-    QMap<SSiHighwayNeuron*,QSet<SSiHighwayNeuron*> > m; //< outputs for each neuron
-    foreach(SSiHighwayNeuron* n, m_neurons) foreach(SSiHighwayNeuron* inp, n->allInputs())
-    {
-        m[inp] << n;    //< neuron inp feeds neuron n
-    }
-    foreach(SSiHighwayNeuron* n, m_neurons) if (m.contains(n)) n->connectForward(m[n].toList());
+    return to->delConnection(from);
 }
 
 bool SScHighwayNetwork::connect(const QList<int>& from, int to, double v)
@@ -115,7 +105,7 @@ bool SScHighwayNetwork::connect(const QList<SSiHighwayNeuron*>& from, SSiHighway
 bool SScHighwayNetwork::connect(SSiHighwayNeuron* from, SSiHighwayNeuron* to, double v)
 {   
     if (!contains(from) || !contains(to)) return false;
-    to->addInput(from,v,trainingType());
+    to->addConnection(from,v,trainingType());
 
     if (!isFeedForward())
     {
@@ -194,7 +184,7 @@ bool SScHighwayNetwork::connect(int from, int to, const QVariantMap& vm)
     SScTrainableParameter* tp = SScTrainableParameter::create(vm);
     if (tp)
     {
-        n2->addInput(n1,tp);
+        n2->addConnection(n1,tp);
 
         if (!isFeedForward())
         {

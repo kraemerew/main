@@ -10,9 +10,9 @@ public:
           m_input(0.0)
     {}
 
-    virtual bool    addInput        (SSiHighwayNeuron*, double,SScTrainableParameter::Type) { return false; }
-    virtual bool    addInput        (SSiHighwayNeuron*, SScTrainableParameter*)             { return false; }
-    virtual bool    delInput        (SSiHighwayNeuron*)                                     { return false; }
+    virtual bool    addConnection        (SSiHighwayNeuron*, double,SScTrainableParameter::Type) { return false; }
+    virtual bool    addConnection        (SSiHighwayNeuron*, SScTrainableParameter*)             { return false; }
+    virtual bool    delConnection        (SSiHighwayNeuron*)                                     { return false; }
     virtual bool    setInput        (double v)                                              { if (v==m_input) return false; m_input = v; return true; }
     virtual bool    setTarget       (double)                                                { return false; }
     virtual double  deltaw          (SSiHighwayNeuron*)                                     { return 0; }

@@ -4,9 +4,11 @@
 #include "gate.hpp"
 #include "../nnhelpers/sscactivation.hpp"
 
+#include <QSet>
 #include <QMap>
 #include <QSharedPointer>
 #include <QtMath>
+
 class SScHighwayNetwork;
 
 class SSiHighwayNeuron
@@ -44,16 +46,21 @@ public:
     inline double   perr    () { return qPow(err(),2.0); }
 
     inline  SScActivation* act  () const { return m_act; }
-    virtual double icon (SSiHighwayNeuron* other) { Q_UNUSED(other); return 0.00; } //< incoming connection from other neuron
-    inline  double ocon (SSiHighwayNeuron* other) { return other->icon(this); }     //< outgoing connection to the other neuron
+    virtual double icon (SSiHighwayNeuron*) { return 0.00; } //< incoming connection from other neuron
+    virtual double ocon (SSiHighwayNeuron* other) { return other->icon(this); }     //< outgoing connection to the other neuron
 
     virtual bool  setInput(double) = 0;
     virtual bool  setTarget(double) = 0;
     virtual bool setActivation(SScActivation::Type type, double gain = 1.0);
     virtual double deltaw(SSiHighwayNeuron* n) = 0;
-    virtual bool addInput(SSiHighwayNeuron* other, SScTrainableParameter* tp) = 0;
-    virtual bool addInput(SSiHighwayNeuron* other, double v, SScTrainableParameter::Type t) = 0;
-    virtual bool delInput(SSiHighwayNeuron* other) = 0;
+    virtual bool addConnection(SSiHighwayNeuron* other, SScTrainableParameter* tp) = 0;
+    virtual bool addConnection(SSiHighwayNeuron* other, double v, SScTrainableParameter::Type t) = 0;
+    virtual bool delConnection(SSiHighwayNeuron* other) = 0;
+
+    virtual bool addFwdConnection(SSiHighwayNeuron* fwd) { if (!fwd || m_fwd.contains(fwd)) return false; m_fwd << fwd; return true; }
+    virtual bool delFwdConnection(SSiHighwayNeuron* fwd) { return m_fwd.remove(fwd); }
+
+
     virtual double net() { return 0.0; }
     virtual double out() { return 0.0; }
     virtual double transform() { return 0.0; }
@@ -66,7 +73,7 @@ public:
     virtual QList<SSiHighwayNeuron*> allInputs() const { return inputs(); }
     static SSiHighwayNeuron* create(SScHighwayNetwork* net, const QVariantMap&);
     static SSiHighwayNeuron* create(SScHighwayNetwork* net, Type type, const QString& name = QString());
-    virtual void connectForward (const QList<SSiHighwayNeuron*>& fwd) { qWarning("N %s FORWARD %d", qPrintable(name()), fwd.size()); m_out = fwd; }
+
     virtual void trainingStep   () {}
     virtual void endOfCycle     () {}
     inline void setName(const QString& name) { m_name=name; }
@@ -105,7 +112,7 @@ protected:
     double                      m_dedo, m_t, m_o;
     SScActivation*              m_act;
     QString                     m_name;
-    QList<SSiHighwayNeuron*>    m_out;
+    QSet<SSiHighwayNeuron*>     m_fwd;
 };
 
 #endif // HWNEURON_HPP

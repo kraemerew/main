@@ -36,7 +36,6 @@ public:
     int n2idx(const SSiHighwayNeuron* n) const;
     SSiHighwayNeuron* idx2n(int idx) const;
     void reset();
-    void connectForward();
     bool contains(SSiHighwayNeuron* n) const;
     bool disconnect(SSiHighwayNeuron* from, SSiHighwayNeuron* to);
 

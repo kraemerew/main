@@ -14,9 +14,9 @@ public:
     virtual bool    setTarget   (double) { return false; }
 
     bool setKernel(SScKernel* krn, quint32 idx);
-    virtual bool addInput(SSiHighwayNeuron*, SScTrainableParameter*) { return false; }
-    virtual bool addInput(SSiHighwayNeuron*, double, SScTrainableParameter::Type) { return false; }
-    virtual bool delInput(SSiHighwayNeuron*) { return false; }
+    virtual bool addConnection(SSiHighwayNeuron*, SScTrainableParameter*) { return false; }
+    virtual bool addConnection(SSiHighwayNeuron*, double, SScTrainableParameter::Type) { return false; }
+    virtual bool delConnection(SSiHighwayNeuron*) { return false; }
 
     virtual double  net             ();
     virtual double  icon            (SSiHighwayNeuron*);

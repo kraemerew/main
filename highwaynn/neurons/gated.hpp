@@ -9,9 +9,9 @@ class SScGatedNeuron : public SSiHighwayNeuron
 public:
     SScGatedNeuron(SScHighwayNetwork* net, Type type, SScActivation::Type acttype);
 
-    virtual bool addInput(SSiHighwayNeuron* other, SScTrainableParameter* tp);
-    virtual bool addInput(SSiHighwayNeuron *other, double v, SScTrainableParameter::Type t);
-    virtual bool delInput(SSiHighwayNeuron *other);
+    virtual bool addConnection(SSiHighwayNeuron* other, SScTrainableParameter* tp);
+    virtual bool addConnection(SSiHighwayNeuron *other, double v, SScTrainableParameter::Type t);
+    virtual bool delConnection(SSiHighwayNeuron *other);
 
     virtual QList<SSiHighwayNeuron*> inputs() const;
     virtual QList<SSiHighwayNeuron*> allInputs() const;

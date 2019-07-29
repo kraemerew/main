@@ -11,9 +11,9 @@ public:
     virtual double transform();
 
     virtual double out() { return transform(); }
-    virtual bool   addInput(SSiHighwayNeuron* other, SScTrainableParameter* tp);
-    virtual bool   addInput(SSiHighwayNeuron *other, double v, SScTrainableParameter::Type t);
-    virtual bool   delInput(SSiHighwayNeuron *other);
+    virtual bool   addConnection(SSiHighwayNeuron* other, SScTrainableParameter* tp);
+    virtual bool   addConnection(SSiHighwayNeuron *other, double v, SScTrainableParameter::Type t);
+    virtual bool   delConnection(SSiHighwayNeuron *other);
     virtual double net();
     virtual void   reset();
     virtual bool   setInput(double) { Q_ASSERT(false); return false; }

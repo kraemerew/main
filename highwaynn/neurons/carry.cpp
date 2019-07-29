@@ -18,19 +18,23 @@ double SScCarryNeuron::transform()
     return m_t;
 }
 
-bool SScCarryNeuron::addInput(SSiHighwayNeuron* other, SScTrainableParameter* tp)
+bool SScCarryNeuron::addConnection(SSiHighwayNeuron* other, SScTrainableParameter* tp)
 {
     SScCarryNeuron* cn = dynamic_cast<SScCarryNeuron*>(other);
     if (cn) return false;
-    return m_in.addInput(other,tp);
+    const bool ret = m_in.addInput(other,tp);
+    if (ret) other->addFwdConnection(this);
+    return ret;
 }
-bool SScCarryNeuron::addInput(SSiHighwayNeuron *other, double v, SScTrainableParameter::Type t)
+bool SScCarryNeuron::addConnection(SSiHighwayNeuron *other, double v, SScTrainableParameter::Type t)
 {
     SScCarryNeuron* cn = dynamic_cast<SScCarryNeuron*>(other);
     if (cn) return false;
-    return m_in.addInput(other,v,t);
+    const bool ret = m_in.addInput(other,v,t);
+    if (ret) other->addFwdConnection(this);
+    return ret;
 }
-bool    SScCarryNeuron::delInput        (SSiHighwayNeuron *other) { return m_in.delInput(other); }
+bool    SScCarryNeuron::delConnection (SSiHighwayNeuron *other) { (void) other->delFwdConnection(this);  return m_in.delInput(other); }
 double  SScCarryNeuron::net             () { return m_in.net(); }
 void    SScCarryNeuron::reset           () { SSiHighwayNeuron::reset(); m_in.reset(); }
 double  SScCarryNeuron::deltaw          (SSiHighwayNeuron* n) { return -dedo()*n->out()*m_act->dev()*m_act->gain(); }
@@ -80,6 +84,6 @@ void SScCarryNeuron::dump()
 double SScCarryNeuron::priv_dedo()
 {
     double ret = 0;
-    foreach(SSiHighwayNeuron* l, m_out) ret += l->dedo()*l->highwayMinusTransform();
+    foreach(SSiHighwayNeuron* l, m_fwd) ret += l->dedo()*l->highwayMinusTransform();
     return ret;
 }

@@ -7,9 +7,9 @@ class SScPoolNeuron : public SSiHighwayNeuron
 {
 public:
     SScPoolNeuron(SScHighwayNetwork* net, SSiHighwayNeuron::Type t);
-    virtual bool    addInput            (SSiHighwayNeuron* other, SScTrainableParameter*);
-    virtual bool    addInput            (SSiHighwayNeuron* other, double, SScTrainableParameter::Type);
-    virtual bool    delInput            (SSiHighwayNeuron* other);
+    virtual bool    addConnection       (SSiHighwayNeuron* other, SScTrainableParameter*);
+    virtual bool    addConnection       (SSiHighwayNeuron* other, double, SScTrainableParameter::Type);
+    virtual bool    delConnection       (SSiHighwayNeuron* other);
     virtual bool    connectHighway      (SSiHighwayNeuron*, SSiHighwayNeuron*) { return false; }
     virtual bool    setActivation       (SScActivation::Type, double) { return false; }
     virtual double  icon                (SSiHighwayNeuron*) { return 0; }
