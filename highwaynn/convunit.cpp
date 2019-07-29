@@ -16,8 +16,7 @@ SSiConvUnit::SSiConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx,
     m_ovl       (overlap)
 {
     Q_CHECK_PTR(network);
-    ensureCleanConf();
-    createKernels(qMax(1,knr));
+    ensureCleanConf();    
 }
 SSiConvUnit::~SSiConvUnit()
 {
@@ -31,7 +30,7 @@ void SSiConvUnit::createKernels (int nr)
 {
     while (m_kernels.size()<nr)
     {
-        m_kernels << new (std::nothrow) SScKernel(m_network, weights(), units());
+        m_kernels << new (std::nothrow) SScKernel(m_network, patternProvider(), weights(), units());
     }
 }
 void SSiConvUnit::ensureCleanConf()
@@ -72,7 +71,9 @@ bool SSiConvUnit::fromVM(const QVariantMap & vm)
 SScInputConvUnit::SScInputConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx, int unitsy, int overlap, int knr)
     : SSiConvUnit(network,kx,ky,unitsx,unitsy,overlap,knr)
 {
+    ensureCleanConf();
     m_pp.reconfigure(xpixels(),ypixels(),isColor(),m_kx,m_ky,m_ovl);
+    createKernels(qMax(1,knr));
 }
 
 SScInputConvUnit::~SScInputConvUnit()
@@ -80,33 +81,17 @@ SScInputConvUnit::~SScInputConvUnit()
     clearKernels();
 }
 
-
 QString SScInputConvUnit::nextPattern(bool& cycleDone)
 {
-    const QString key = m_pp.nextKey(cycleDone);
-    if (activatePattern(key)) return key;
-    return QString();
+    return m_pp.nextKey(cycleDone);
 }
-
-bool SScInputConvUnit::activatePattern(const QString& uuid)
-{
-    bool ret = false;
-    if (m_pp.hasPattern(uuid))
-    {
-        ret = true;
-        foreach(SScKernel* k, m_kernels) if (!k->activatePattern(m_pp.getPattern(uuid))) ret = false;
-    }
-    return ret;
-}
-
 
 SScColorInputConvUnit::SScColorInputConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx, int unitsy, int overlap,int knr)
     : SScInputConvUnit(network,kx,ky,unitsx,unitsy,overlap,knr)
 {
     Q_CHECK_PTR(network);
     ensureCleanConf();
-    m_pp.reconfigure(xpixels(),ypixels(),isColor(),m_kx,m_ky,m_ovl);
-    clearKernels();
+    m_pp.reconfigure(xpixels(),ypixels(),isColor(),m_kx,m_ky,m_ovl);   
     createKernels(qMax(1,knr));
 }
 SScColorInputConvUnit::~SScColorInputConvUnit()

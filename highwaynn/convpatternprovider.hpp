@@ -36,11 +36,17 @@ public:
     }
     QString addPattern(const QImage& im);
     QString addPattern(const QString& filename);
+
     QVector<QVector<double> > getPattern(const QString& key) const
     {
         if (m_patterns.contains(key)) return m_patterns[key];
         return QVector<QVector<double> >();
     }
+    QVector<QVector<double> > currentPattern() const
+    {
+        return getPattern(currentPatternId());
+    }
+    QString currentPatternId() const { return !m_pkeys.isEmpty() ? m_pkeys.last() : QString(); }
 
 private:
     int                                     m_xres, m_yres, m_kx, m_ky, m_ovl;  // Kernel settings

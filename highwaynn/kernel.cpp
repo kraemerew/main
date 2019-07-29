@@ -2,9 +2,11 @@
 #include "network.hpp"
 #include "conv.hpp"
 #include "ssctrainableparameter.hpp"
+#include "convpatternprovider.hpp"
 
-SScKernel::SScKernel(SScHighwayNetwork* network, int weights, int neurons)
+SScKernel::SScKernel(SScHighwayNetwork* network, SScConvPatternProvider* pp, int weights, int neurons)
     : m_network (network),
+      m_pp      (pp),
       m_netset  (false),
       m_nrw     (weights),
       m_nrn     (neurons)
@@ -39,12 +41,19 @@ bool SScKernel::activatePattern(const QVector<QVector<double> > &pattern)
 bool SScKernel::transform()
 {
     QVector<QVector<double> > pattern;
-    pattern.reserve(m_inputs.size());
-    foreach(const auto& field, m_inputs)
+    if (m_pp)
     {
-        QVector<double> v; v.reserve(field.size());
-        foreach(auto& n, field) v << n->out();
-        pattern << v;
+        pattern = m_pp->currentPattern();
+    }
+    else
+    {
+        pattern.reserve(m_inputs.size());
+        foreach(const auto& field, m_inputs)
+        {
+            QVector<double> v; v.reserve(field.size());
+            foreach(auto& n, field) v << n->out();
+            pattern << v;
+        }
     }
     return activatePattern(pattern);
 }
@@ -64,7 +73,7 @@ void SScKernel::createNeurons()
     while (m_neurons.size()<m_nrn)
     {
         SScConvNeuron* cn = new (std::nothrow) SScConvNeuron(m_network);
-        cn->setKernel(this,m_neurons.size());
+        cn->setKernel(this,m_neurons.size());// tell neuron the kernel and its own index in the neuron sequence
         m_neurons << cn;
     }
 }

@@ -150,7 +150,7 @@ void carryTest(int pow)
     SScHighwayNetwork net;
     net.setTrainingType(SScTrainableParameter::ADAM);
     net.setHiddenActivationType(SScActivation::MHAT);
-    net.setOutputActivationType(SScActivation::MHAT);
+    net.setOutputActivationType(SScActivation::LOGISTIC);
     // net.setConnectionRange(1,0);
     // net.setGainRange(0,1);
     const int o1 = net.addOutputNeuron  ("Out");
@@ -160,9 +160,10 @@ void carryTest(int pow)
     QList<int> il, hl;
     for (int i=0;i<pow; ++i) il << net.addInputNeuron (QString("I%1").arg(i));
     for (int i=0;i<pow; ++i) hl << net.addHiddenNeuron(QString("H%1").arg(i));
-    for (int i=0;i<pow; ++i) net.setHighway(hl[i],il[i],cn);
 
-    // Bias to hidden and out
+    net.setHighway(o1,il.first(),cn);
+
+    // Bias to carry and out
     net.connect(bi,o1);
     net.connect(bi,cn);
 
@@ -179,32 +180,43 @@ void carryTest(int pow)
     QElapsedTimer t, et; t.start(); et.start();
     int c=0, failcount=0;
     double err = 0, lasterr = 0;
-    bool done = false;
+    bool done = false, tlocked = false;
     do
     {
         const int p = (++c)%pmax;
         if (p==0) err = 0;
+        if (c==1000)
+        {
+            foreach(int n, hl) net.lockTraining(n,true);
+            net.lockTraining(o1,true);
+            tlocked = true;
+        }
         const int bits = bitsSet(p);
+
 
         for (int i=0; i<pow; ++i) if (bitSet(p,i)) net.setInput(il[i],1); else net.setInput(il[i],0);
 
-        const bool even = (bits%2)==0;
-        const double trg = even ? 0.0 : 1.0;
+        const bool even = (bits%2)==0; bool fake = false;
+        double trg = even ? 0.0 : 1.0;
+        if (bitSet(p,2)) { trg = bitSet(p,0); fake = true; }
         net.setTarget(o1,trg);
 
         net.reset();
 
 
-        const double pout = net.idx2n(o1)->out(), pdlt = qAbs(pout-trg), perr = net.idx2n(o1)->perr();
+        const double i0 = net.idx2n(il.first())->out(), pout = net.idx2n(o1)->out(), pdlt = qAbs(pout-trg), perr = net.idx2n(o1)->perr(), carryo = net.idx2n(cn)->out();
         const bool success = pdlt<0.5;
-       // qWarning("%s %5d #bits: %2d %s Output %lf Target %lf", success ? "OK ":"NOK", p, bits, even ?"EVEN":"ODD", pout, trg);
-       // std::exit(1);
+       // Carry output should become pretty high at all lines marked with +
+        if (fake) qWarning("%s + %s %5d #bits: %2d %s Output %lf Target %lf I0 %lf Carry %lf", tlocked ? "L":" ", success ? "OK ":"NOK", p, bits, even ?"EVEN":"ODD", pout, trg, i0, carryo);
+        else      qWarning("%s  %s %5d #bits: %2d %s Output %lf Target %lf I0 %lf Carry %lf", tlocked ? "L":" ", success ? "OK ":"NOK", p, bits, even ?"EVEN":"ODD", pout, trg, i0, carryo);
+
+        // std::ex it(1);
         err+=perr;
         if (!success) ++failcount;
 //if (c==100) std::exit(1);
         if (p==plast)
         {
-            if (failcount==0) done = true;
+           if (failcount==0) done = true;
             if (done || (et.elapsed()>200))
             {
                 et.restart();
@@ -324,7 +336,7 @@ void poolTest()
     net.save("poolTest.net");
     std::exit(0);
 }
-
+#include "conv.hpp"
 void convTest()
 {
     SScHighwayNetwork net;
@@ -337,7 +349,8 @@ void convTest()
         bool cdone;
         const QString pid = cu.nextPattern(cdone);
         qWarning(">>>>PATTERN %s %s", qPrintable(pid), cdone ? "END":"");
-        if (++c>2) std::exit(1);
+        for (int i=0; i<cu.units(); ++i) qWarning("Unit %d: %lf", i, cu.output(0,i)->out());
+        if (++c>5) std::exit(1);
     }
 }
 
@@ -355,8 +368,7 @@ int main(int argc, char *argv[])
     foreach(auto i, ccc) qWarning("#%d",i);
     std::exit(0);*/
 
-    carryTest(8);
-
+    convTest();
     /*SScRBiasNeuron* bn = new (std::nothrow) SScRBiasNeuron();
     QList<SScRNeuron*> nl;
     for (int i=0; i<2; ++i) nl << new (std::nothrow) SScRNeuron();

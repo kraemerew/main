@@ -19,6 +19,8 @@ public:
     explicit SSiConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx=8, int unitsy = 8, int overlap = 1, int knr = 1);
     virtual ~SSiConvUnit();
 
+    virtual SScConvPatternProvider* patternProvider() { return NULL; }
+
     virtual int     kernels     () const { return m_kernels.size(); }
     virtual int     xunits      () const { return m_unitsx; }
     virtual int     yunits      () const { return m_unitsy; }
@@ -74,6 +76,7 @@ public:
     bool activatePattern(const QString& uuid);
     QString addPattern(const QImage& im) { return m_pp.addPattern(im); }
     QString addPattern(const QString& filename){ return m_pp.addPattern(filename); }
+    virtual SScConvPatternProvider* patternProvider() { return &m_pp; }
 
     virtual int depth  () const { return 1; }
 
