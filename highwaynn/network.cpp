@@ -57,6 +57,7 @@ bool SScHighwayNetwork::delNeuron   (int idx)
     if (!n) return false;
     foreach(SSiHighwayNeuron* other, m_neurons) (void) disconnect(n,other);
     m_neurons.remove(idx);
+    m_locked.remove(idx);
     delete n;
     return true;
 }
@@ -172,8 +173,9 @@ bool                SScHighwayNetwork::disconnect       (int from, int to)      
 void                SScHighwayNetwork::reset            ()                              { foreach(SSiHighwayNeuron* n, m_neurons) n->reset(); }
 void                SScHighwayNetwork::trainingStep     (bool endOfCycle)
 {
-    foreach(SSiHighwayNeuron* n, m_neurons.values()) n->trainingStep();
-    if (endOfCycle) foreach(SSiHighwayNeuron* n, m_neurons.values()) n->endOfCycle();
+    for (auto it= m_neurons.begin(); it!=m_neurons.end(); ++it) if (!m_locked.contains(it.key())) it.value()->trainingStep();
+    if (endOfCycle)
+        for (auto it= m_neurons.begin(); it!=m_neurons.end(); ++it) if (!m_locked.contains(it.key())) it.value()->endOfCycle();
 }
 
 bool SScHighwayNetwork::connect(int from, int to, const QVariantMap& vm)

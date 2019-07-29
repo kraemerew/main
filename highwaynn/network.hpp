@@ -70,6 +70,21 @@ public:
     bool setTarget(int idx, double d);    
 
     void dump();
+    bool lockTraining(int nr, bool l)
+    {
+       if (!m_neurons.contains(nr)) return false;
+       if (l)
+       {
+           if (m_locked.contains(nr)) return false;
+           m_locked << nr;
+           return true;
+       }
+       else
+       {
+           return m_locked.remove(nr);
+       }
+    }
+
 
 private:
     bool isFeedForward() const;
@@ -78,6 +93,7 @@ private:
 
     QString                     m_name;
     QMap<int,SSiHighwayNeuron*> m_neurons;
+    QSet<int>                   m_locked;
 };
 
 #endif // HIGHWAYNETWORK_HPP
