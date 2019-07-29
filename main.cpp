@@ -83,8 +83,6 @@ void parityTest(int pow)
     // Hidden to output
     foreach(int from, hl) net.connect(from,o1);
 
-    // training preparation
-    net.connectForward();
     // training
     QElapsedTimer t, et; t.start(); et.start();
     int c=0, failcount=0;
@@ -177,8 +175,6 @@ void carryTest(int pow)
     // Hidden to output
     foreach(int from, hl) net.connect(from,o1);
 
-    // training preparation
-    net.connectForward();
     // training
     QElapsedTimer t, et; t.start(); et.start();
     int c=0, failcount=0;
@@ -264,9 +260,6 @@ void poolTest()
     foreach(int idx, hl0) net.connect(idx,min);
     // pool and bias to output
     foreach(int idx, QList<int>() << min << bi) net.connect(idx,o1);
-
-    // training preparation
-    net.connectForward();
 
     // training
     QElapsedTimer t, et; t.start(); et.start();
@@ -361,8 +354,9 @@ int main(int argc, char *argv[])
     auto ccc = SSnConvHelpers::convMaskIndexes(3,3,1,1,0,5,3);
     foreach(auto i, ccc) qWarning("#%d",i);
     std::exit(0);*/
-    convTest();
-    parityTest(16);
+
+    carryTest(8);
+
     /*SScRBiasNeuron* bn = new (std::nothrow) SScRBiasNeuron();
     QList<SScRNeuron*> nl;
     for (int i=0; i<2; ++i) nl << new (std::nothrow) SScRNeuron();
@@ -472,9 +466,6 @@ int main(int argc, char *argv[])
 
     net.idx2n(o1)->setActivation(SScActivation::Act_SoftPlus);
     net.idx2n(h1)->setActivation(SScActivation::Act_SoftPlus);
-
-    // training preparation
-    net.connectForward();
 
     // training
     QElapsedTimer t; t.start();
