@@ -20,25 +20,26 @@ public:
     virtual ~SSiConvUnit();
 
     virtual SScConvPatternProvider* patternProvider() { return NULL; }
+    virtual void    reset           ();
+    virtual void    resetTraining   ();
+    virtual int     kernels         () const { return m_kernels.size(); }
+    virtual int     xunits          () const { return m_unitsx; }
+    virtual int     yunits          () const { return m_unitsy; }
 
-    virtual int     kernels     () const { return m_kernels.size(); }
-    virtual int     xunits      () const { return m_unitsx; }
-    virtual int     yunits      () const { return m_unitsy; }
-
-    virtual int     xpixels     () const { return m_kx+ ((m_unitsx-1)*(m_kx-m_ovl)); }
-    virtual int     ypixels     () const { return m_ky +((m_unitsy-1)*(m_ky-m_ovl)); }
+    virtual int     xpixels         () const { return m_kx+ ((m_unitsx-1)*(m_kx-m_ovl)); }
+    virtual int     ypixels         () const { return m_ky +((m_unitsy-1)*(m_ky-m_ovl)); }
     /*!
      * \brief Number of output units
      * \return
      */
-    virtual int     units       () const { return m_unitsx*m_unitsy; }
+    virtual int     units           () const { return m_unitsx*m_unitsy; }
     /*!
      * \brief Kernel size
      * \return
      */
-    virtual int     weights     () const { return m_kx*m_ky*depth(); }
-    virtual int     depth       () const { return 1; }
-    virtual bool    isColor     () const { return depth()==3; }
+    virtual int     weights         () const { return m_kx*m_ky*depth(); }
+    virtual int     depth           () const { return 1; }
+    virtual bool    isColor         () const { return depth()==3; }
 
     virtual QVariantMap toVM() const;
     virtual bool fromVM(const QVariantMap&);

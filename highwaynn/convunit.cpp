@@ -23,21 +23,13 @@ SSiConvUnit::~SSiConvUnit()
     clearKernels();
 }
 
-SScConvNeuron* SSiConvUnit::output(quint32 k, quint32 nidx) const { return (k<(quint32)m_kernels.size()) ? m_kernels[k]->output(nidx) : NULL; }
+void SSiConvUnit::reset             ()      { foreach(SScKernel* k, m_kernels) k->reset(); }
+void SSiConvUnit::resetTraining     ()      { foreach(SScKernel* k, m_kernels) k->resetTraining(); }
+void SSiConvUnit::clearKernels      ()      { foreach(SScKernel* k, m_kernels) delete k; m_kernels.clear(); }
+void SSiConvUnit::createKernels     (int nr){ while (m_kernels.size()<nr) m_kernels << new (std::nothrow) SScKernel(m_network, patternProvider(), weights(), units()); }
+void SSiConvUnit::ensureCleanConf   ()      { m_kx=qMax(1,m_kx); m_ky=qMax(1,m_ky); }
 
-void SSiConvUnit::clearKernels  () { foreach(SScKernel* k, m_kernels) delete k; m_kernels.clear(); }
-void SSiConvUnit::createKernels (int nr)
-{
-    while (m_kernels.size()<nr)
-    {
-        m_kernels << new (std::nothrow) SScKernel(m_network, patternProvider(), weights(), units());
-    }
-}
-void SSiConvUnit::ensureCleanConf()
-{
-    m_kx=qMax(1,m_kx);
-    m_ky=qMax(1,m_ky);
-}
+SScConvNeuron* SSiConvUnit::output(quint32 k, quint32 nidx) const { return (k<(quint32)m_kernels.size()) ? m_kernels[k]->output(nidx) : NULL; }
 
 QVariantMap SSiConvUnit::toVM() const
 {
@@ -83,7 +75,9 @@ SScInputConvUnit::~SScInputConvUnit()
 
 QString SScInputConvUnit::nextPattern(bool& cycleDone)
 {
-    return m_pp.nextKey(cycleDone);
+    const QString ret = m_pp.nextKey(cycleDone);
+    reset();
+    return ret;
 }
 
 SScColorInputConvUnit::SScColorInputConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx, int unitsy, int overlap,int knr)

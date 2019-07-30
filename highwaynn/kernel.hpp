@@ -15,7 +15,13 @@ class SScKernel
 public:
     explicit SScKernel(SScHighwayNetwork* network, SScConvPatternProvider* pp, int weights, int neurons);
     virtual ~SScKernel();
-    virtual void reset() { m_netset = false; m_iconcache.clear(); m_fwdcache.clear(); m_wpcache.clear(); }
+    virtual void resetTraining()
+    {
+        m_iconcache.clear();
+        m_fwdcache. clear();
+        m_wpcache.  clear();
+    }
+    virtual void reset();
     /*!
      * \brief Delivers all neurons pairs connected by weight #idx
      * \param idx
@@ -36,13 +42,14 @@ public:
      */
     SScTrainableParameter* icon(SScConvNeuron* inneuron, SScConvNeuron* outneuron);
     double iconValue(SScConvNeuron* inneuron, SScConvNeuron* outneuron);
-    inline double net(quint32 idx)
+    virtual double net(quint32 idx)
     {
-        if (!m_netset && !m_inputs.isEmpty())
+        if (!m_netset)
         {
             transform();
             m_netset = true;
         }
+
         Q_ASSERT(idx<m_n.size());
         return m_n[idx];
     }
@@ -60,13 +67,14 @@ protected:
     void clearNeurons();
     void clearWeights();
 
-    SScHighwayNetwork*                  m_network;
-    SScConvPatternProvider*             m_pp;
-    bool                                m_netset;
-    int                                 m_nrw, m_nrn;
-    QVector<SScTrainableParameter*>     m_w;
-    QVector<double>                     m_n;
-    QVector<SScConvNeuron*>             m_neurons;
+    SScHighwayNetwork*      m_network;
+    SScConvPatternProvider* m_pp;
+    bool                    m_netset;
+    int                     m_nrw, m_nrn;
+
+    QVector<SScTrainableParameter*>                                     m_w;
+    QVector<double>                                                     m_n;
+    QVector<SScConvNeuron*>                                             m_neurons;
     QVector<QVector<SScConvNeuron*> >                                   m_inputs;
     QHash<QPair<SScConvNeuron*,SScConvNeuron*>, SScTrainableParameter*> m_iconcache;
     QHash<SScConvNeuron*, QVector<SScConvNeuron*> >                     m_fwdcache;

@@ -24,6 +24,8 @@ SScKernel::~SScKernel()
     clearWeights();
 }
 
+void SScKernel::reset() { m_netset = false; foreach(auto n, m_neurons) n->reset(); }
+
 bool SScKernel::activatePattern(const QVector<QVector<double> > &pattern)
 {
     QVector<double> w;
@@ -50,11 +52,13 @@ bool SScKernel::transform()
         pattern.reserve(m_inputs.size());
         foreach(const auto& field, m_inputs)
         {
-            QVector<double> v; v.reserve(field.size());
+            QVector<double> v;
+            v.reserve(field.size());
             foreach(auto& n, field) v << n->out();
             pattern << v;
         }
     }
+
     return activatePattern(pattern);
 }
 

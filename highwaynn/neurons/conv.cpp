@@ -28,8 +28,7 @@ double SScConvNeuron::net()
 
 void SScConvNeuron::reset()
 {
-    Q_CHECK_PTR(m_krn);
-    if (m_krn) m_krn->reset();
+    m_transformset=false;
 }
 
 double  SScConvNeuron::icon(SSiHighwayNeuron* other)

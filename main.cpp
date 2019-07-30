@@ -340,15 +340,18 @@ void poolTest()
 void convTest()
 {
     SScHighwayNetwork net;
-    SScInputConvUnit cu(&net,3,3,10,10,0);
+    SScInputConvUnit cu(&net,3,3,5,5,1);
     cu.addPattern("/home/developer/1.png");
     cu.addPattern("/home/developer/2.jpg");
     int c = 0;
+    cu.resetTraining();
     while (true)
     {
         bool cdone;
         const QString pid = cu.nextPattern(cdone);
+
         qWarning(">>>>PATTERN %s %s", qPrintable(pid), cdone ? "END":"");
+
         for (int i=0; i<cu.units(); ++i) qWarning("Unit %d: %lf", i, cu.output(0,i)->out());
         if (++c>5) std::exit(1);
     }
