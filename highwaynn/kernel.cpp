@@ -28,6 +28,7 @@ void SScKernel::reset() { m_netset = false; foreach(auto n, m_neurons) n->reset(
 
 bool SScKernel::activatePattern(const QVector<QVector<double> > &pattern)
 {
+    m_currentpattern = pattern;
     QVector<double> w;
     w.reserve(m_w.size());
     for (int i=0; i<m_w.size(); ++i) w << m_w[i]->value();
@@ -136,3 +137,33 @@ QVector<QPair<SScConvNeuron*,SScConvNeuron*> > SScKernel::sharedConnectionPairs(
     m_wpcache[idx]=ret;
     return ret;
 }
+
+QVector<double> SScKernel::deltaw()
+{
+    Q_ASSERT(!m_neurons.isEmpty());
+    QVector<double> ret; ret.fill(0.0,m_w.size());
+    for (int n=0; n<m_neurons.size(); ++n)
+    {
+        SScConvNeuron* neuron = m_neurons[n];
+        const QVector<double>& pat = m_currentpattern[n];
+        for (int i=0; i<m_w.size(); ++i)
+            ret[i] += -neuron->dedo()*pat[i]*neuron->act()->dev()*neuron->act()->gain();
+    }
+    const double scale = 1.0/(double)m_neurons.size();
+    for (int i=0; i<ret.size(); ++i) ret[i]*=scale;
+    return ret;
+}
+
+void SScKernel::endOfCycle()
+{
+    foreach(auto tp, m_w)       tp->endOfCycle();
+    foreach(auto n,  m_neurons) n ->endOfCycle();
+}
+
+void SScKernel::trainingStep()
+{
+    const auto v = deltaw();
+    for (int i=0; i<m_w.size(); ++i) m_w[i]->update(v[i]);
+    foreach(auto n, m_neurons) n->act()->update(n->dedo(),0.0);
+}
+

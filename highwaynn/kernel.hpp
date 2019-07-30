@@ -42,6 +42,10 @@ public:
      */
     SScTrainableParameter* icon(SScConvNeuron* inneuron, SScConvNeuron* outneuron);
     double iconValue(SScConvNeuron* inneuron, SScConvNeuron* outneuron);
+
+    QVector<double> deltaw();
+    void trainingStep();
+    void endOfCycle();
     virtual double net(quint32 idx)
     {
         if (!m_netset)
@@ -79,6 +83,7 @@ protected:
     QHash<QPair<SScConvNeuron*,SScConvNeuron*>, SScTrainableParameter*> m_iconcache;
     QHash<SScConvNeuron*, QVector<SScConvNeuron*> >                     m_fwdcache;
     QHash<int,QVector<QPair<SScConvNeuron*,SScConvNeuron*> > >          m_wpcache;
+    QVector<QVector<double> > m_currentpattern;
 };
 
 #endif // KERNEL_HPP
