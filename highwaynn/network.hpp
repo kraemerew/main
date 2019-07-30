@@ -72,17 +72,9 @@ public:
     void dump();
     bool lockTraining(int nr, bool l)
     {
-       if (!m_neurons.contains(nr)) return false;
-       if (l)
-       {
-           if (m_locked.contains(nr)) return false;
-           m_locked << nr;
-           return true;
-       }
-       else
-       {
-           return m_locked.remove(nr);
-       }
+        if (!m_neurons.contains(nr)) return false;
+        m_neurons[nr]->setLock(l);
+        return true;
     }
 
 
@@ -93,7 +85,6 @@ private:
 
     QString                     m_name;
     QMap<int,SSiHighwayNeuron*> m_neurons;
-    QSet<int>                   m_locked;
 };
 
 #endif // HIGHWAYNETWORK_HPP
