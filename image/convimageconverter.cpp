@@ -60,6 +60,14 @@ QVector<double> SScConvImageConverter::pattern(int x, int y) const
     return ret;
 }
 
+QVector<double> SScConvImageConverter::matrix() const
+{
+    QVector<double> ret;
+    ret.reserve(dim()*m_outw*m_outh);
+    for (int j=0; j<m_outh; ++j) for (int i=0; i<m_outw; ++i) ret << pattern(i,j);
+    return ret;
+}
+
 QImage SScConvImageConverter::cut(int x, int y) const
 {
     QImage ret;

@@ -46,6 +46,12 @@ public:
      */
     QVector<double> pattern     (int x, int y) const;
     /*!
+     * \brief Return all patterns for all output elements concatenated by line
+     * \return
+     */
+    QVector<double> matrix     () const;
+
+    /*!
      * \brief Cut image input for output element x,y
      * \param x
      * \param y

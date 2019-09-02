@@ -360,7 +360,7 @@ void convTest()
 
 void convImageTest()
 {
-    SScConvImageConverter imcv(5,5,1,2,2,false,"/home/developer/2.jpg");
+    SScConvImageConverter imcv(100,100,50,2,2,false,"/home/developer/2.jpg");
 
     imcv.cut(0,0).save("/home/developer/00.jpg");
     imcv.cut(1,0).save("/home/developer/10.jpg");
