@@ -23,7 +23,7 @@ QList<QPoint> SSnConvHelpers::convMaskPositions(int kx, int ky, int ovl, int xid
     const int topleftx = (kx*xidx)-(xidx*ovl),
               toplefty = (ky*yidx)-(yidx*ovl);
     for (int y = toplefty; y<toplefty+ky; ++y) for (int x = topleftx; x<topleftx+kx; ++x)
-        if ((qBound(0,x,w)==x) && (qBound(0,y,h)==y))
+        if ((qBound(0,x,w)==x) && (qBound(0,y,h)==y))   //< should always be the case
             ret << QPoint(x,y);
         else ok = false;
 

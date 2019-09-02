@@ -42,7 +42,8 @@ SOURCES += main.cpp \
     highwaynn/convunit.cpp \
     highwaynn/kernel.cpp \
     highwaynn/convpatternprovider.cpp \
-    highwaynn/convhelpers.cpp
+    highwaynn/convhelpers.cpp \
+    image/convimageconverter.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -90,5 +91,6 @@ HEADERS += \
     highwaynn/convunit.hpp \
     highwaynn/kernel.hpp \
     highwaynn/convpatternprovider.hpp \
-    highwaynn/convhelpers.hpp
+    highwaynn/convhelpers.hpp \
+    image/convimageconverter.hpp
 

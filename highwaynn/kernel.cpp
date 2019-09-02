@@ -96,7 +96,7 @@ QVector<SScConvNeuron*> SScKernel::fwdConnections(SScConvNeuron* inneuron)
     if (it!=m_fwdcache.end()) return it.value();
 
     QSet<SScConvNeuron*> ret;
-    for (int i=0; i<m_inputs.size(); ++i) if (m_inputs[i].contains(inneuron) && (i<m_neurons.size())) ret << m_neurons[i];
+    for (int i=0; i<m_neurons.size(); ++i) if (m_inputs[i].contains(inneuron)) ret << m_neurons[i];
     m_fwdcache[inneuron]=ret.toList().toVector();
     return m_fwdcache[inneuron];
 }

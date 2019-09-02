@@ -9,6 +9,7 @@
 #include "image/moments.hpp"
 #include "convunit.hpp"
 #include <QTimer>
+#include "image/convimageconverter.hpp"
 
 #ifndef _DEPRECATION_DISABLE
 #define _DEPRECATION_DISABLE
@@ -357,12 +358,20 @@ void convTest()
     }
 }
 
+void convImageTest()
+{
+    SScConvImageConverter imcv(3,3,1,2,2,false,"/home/developer/2.jpg");
+    imcv.pattern(1,0);
+}
+
 #include "convhelpers.hpp"
 
 int main(int argc, char *argv[])
 {
     Q_UNUSED(argc);
     Q_UNUSED(argv);
+    convImageTest();
+    std::exit(0);
 /*
     auto aaa = SSnConvHelpers::inputSize(3,4,2,2,1);
     auto bbb = SSnConvHelpers::convMaskFits(3,3,1,9,9);
