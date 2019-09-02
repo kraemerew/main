@@ -36,7 +36,7 @@ bool SScKernel::activatePattern(const QVector<QVector<double> > &pattern)
     m_n.reserve(m_neurons.size());
     bool ret = true;
     foreach(const QVector<double>& dv, pattern)
-        if (dv.size()==w.size()) m_n << SSnBlas::dot(w,dv);
+        if (dv.size()==w.size()) m_n << SSnBlas::vxv(w,dv);
         else                  {  m_n << 0.0; ret = false; }
     return ret;
 }

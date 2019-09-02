@@ -10,6 +10,7 @@
 #include "convunit.hpp"
 #include <QTimer>
 #include "image/convimageconverter.hpp"
+#include "blasvector.hpp"
 
 #ifndef _DEPRECATION_DISABLE
 #define _DEPRECATION_DISABLE
@@ -374,8 +375,19 @@ int main(int argc, char *argv[])
 {
     Q_UNUSED(argc);
     Q_UNUSED(argv);
-    convImageTest();
+
+    QVector<double> a, b;
+    a << 1 << 2 << 3 <<
+         4 << 5 << 6 <<
+         7 <<8 << 9 <<
+         10 << 11 << 12;
+    b << 1 << 1 << 1;
+    auto c = SSnBlas::mxv(a,b);
+    for (int i=0; i<c.size(); ++i) qWarning(">>>>#%d: %lf", i, c[i]);
     std::exit(0);
+
+    convImageTest();
+
 /*
     auto aaa = SSnConvHelpers::inputSize(3,4,2,2,1);
     auto bbb = SSnConvHelpers::convMaskFits(3,3,1,9,9);

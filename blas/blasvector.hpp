@@ -5,7 +5,8 @@
 
 namespace SSnBlas
 {
-    double dot(const QVector<double>& a, const QVector<double>& b);
+    double vxv(const QVector<double>& a, const QVector<double>& b);
+    QVector<double> mxv(const QVector<double>& a, const QVector<double>& b);
 }
 
 #endif // BLASVECTOR_HPP

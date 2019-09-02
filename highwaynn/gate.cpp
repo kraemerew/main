@@ -48,7 +48,7 @@ double SScGate::net()
         }
 
         m_dirty = false;
-        m_net = SSnBlas::dot(a,b);
+        m_net = SSnBlas::vxv(a,b);
     }
     return m_net;
 }
