@@ -58,6 +58,11 @@ public:
      * \return
      */
     QImage cut(int x, int y) const;
+    /*!
+     * \brief Return image
+     * \return
+     */
+    inline QImage image() const { return m_im; }
 
 private:
     inline int      inputWidth  () const                { return (m_outw*m_kx) - ((m_outw-1)*m_ovl); }

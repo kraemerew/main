@@ -5,8 +5,9 @@
 #include "network.hpp"
 #include "kernel.hpp"
 #include "convhelpers.hpp"
-
+#include "imageprovider.hpp"
 #include <QUuid>
+
 SSiConvUnit::SSiConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx, int unitsy, int overlap, int knr) :
     m_network   (network),
     m_kx        (kx),
@@ -64,33 +65,40 @@ SScInputConvUnit::SScInputConvUnit(SScHighwayNetwork* network, int kx, int ky, i
     : SSiConvUnit(network,kx,ky,unitsx,unitsy,overlap,knr)
 {
     ensureCleanConf();
-    m_pp.reconfigure(xpixels(),ypixels(),isColor(),m_kx,m_ky,m_ovl);
+    m_ip = new (std::nothrow) SScImageProvider(kx,ky,overlap,unitsx,unitsy,isColor());
+    Q_CHECK_PTR(m_ip);
     createKernels(qMax(1,knr));
 }
 
 SScInputConvUnit::~SScInputConvUnit()
 {
     clearKernels();
+    delete m_ip;
 }
 
 QString SScInputConvUnit::nextPattern(bool& cycleDone)
 {
-    const QString ret = m_pp.nextKey(cycleDone);
+    const QString ret = m_ip->nextKey(cycleDone);
     reset();
     return ret;
 }
+
+QString SScInputConvUnit::addPattern(const QImage& im) { return m_ip->addPattern(im); }
+QString SScInputConvUnit::addPattern(const QString& filename) { return m_ip->addPattern(filename); }
 
 SScColorInputConvUnit::SScColorInputConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx, int unitsy, int overlap,int knr)
     : SScInputConvUnit(network,kx,ky,unitsx,unitsy,overlap,knr)
 {
     Q_CHECK_PTR(network);
     ensureCleanConf();
-    m_pp.reconfigure(xpixels(),ypixels(),isColor(),m_kx,m_ky,m_ovl);   
+    m_ip = new (std::nothrow) SScImageProvider(kx,ky,overlap,unitsx,unitsy,isColor());
+    Q_CHECK_PTR(m_ip);
     createKernels(qMax(1,knr));
 }
 SScColorInputConvUnit::~SScColorInputConvUnit()
 {
     clearKernels();
+    delete m_ip;
 }
 
 

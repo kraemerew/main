@@ -9,6 +9,7 @@
 #include "ssctrainableparameter.hpp"
 #include "neuron.hpp"
 
+class SScImageProvider;
 class SScHighwayNetwork;
 class SScConvNeuron;
 class SScKernel;
@@ -74,16 +75,16 @@ public:
     explicit SScInputConvUnit(SScHighwayNetwork* network, int kx, int ky, int unitsx=8, int unitsy = 8, int overlap = 1, int knr = 1);
     virtual ~SScInputConvUnit();
     QString nextPattern(bool& cycleDone);
-    bool activatePattern(const QString& uuid);
-    QString addPattern(const QImage& im) { return m_pp.addPattern(im); }
-    QString addPattern(const QString& filename){ return m_pp.addPattern(filename); }
-    virtual SScConvPatternProvider* patternProvider() { return &m_pp; }
+    QString addPattern(const QImage& im);
+    QString addPattern(const QString& filename);
+    virtual SScImageProvider* imageProvider() { return m_ip; }
 
     virtual int depth  () const { return 1; }
 
     virtual QVariantMap toVM() const;
+
 protected:
-    SScConvPatternProvider m_pp;
+    SScImageProvider* m_ip;
 };
 
 class SScColorInputConvUnit : public SScInputConvUnit
