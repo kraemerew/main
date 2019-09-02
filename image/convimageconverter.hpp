@@ -45,16 +45,25 @@ public:
      * \return kx*ky*depth elements
      */
     QVector<double> pattern     (int x, int y) const;
+    /*!
+     * \brief Cut image input for output element x,y
+     * \param x
+     * \param y
+     * \return
+     */
+    QImage cut(int x, int y) const;
 
 private:
     inline int      inputWidth  () const                { return (m_outw*m_kx) - ((m_outw-1)*m_ovl); }
     inline int      inputHeight () const                { return (m_outh*m_ky) - ((m_outh-1)*m_ovl); }
     inline QSize    inputSize   () const                { return QSize(inputWidth(), inputHeight()); }
+    inline QSize    kernelSize  () const                { return QSize(m_kx, m_ky); }
     inline int      topLeftX    (int x) const           { return x*m_kx - m_ovl*x; }
     inline int      topLeftY    (int y) const           { return y*m_ky - m_ovl*y; }
     inline QPoint   topLeft     (int x, int y) const    { return QPoint(topLeftX(x), topLeftY(y)); }
     inline int      depth       () const                { return m_color ? 3 : 1; }
     inline int      dim         () const                { return m_kx*m_ky*depth(); }
+    void            init        ();
 
     QImage m_im;
     int m_kx, m_ky, m_ovl, m_outw, m_outh;

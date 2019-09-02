@@ -360,8 +360,12 @@ void convTest()
 
 void convImageTest()
 {
-    SScConvImageConverter imcv(3,3,1,2,2,false,"/home/developer/2.jpg");
-    imcv.pattern(1,0);
+    SScConvImageConverter imcv(5,5,1,2,2,false,"/home/developer/2.jpg");
+
+    imcv.cut(0,0).save("/home/developer/00.jpg");
+    imcv.cut(1,0).save("/home/developer/10.jpg");
+    imcv.cut(0,1).save("/home/developer/01.jpg");
+    imcv.cut(1,1).save("/home/developer/11.jpg");
 }
 
 #include "convhelpers.hpp"
