@@ -54,7 +54,7 @@ public:
             m_netset = true;
         }
 
-        Q_ASSERT(idx<m_n.size());
+        Q_ASSERT(idx<(quint32)m_n.size());
         return m_n[idx];
     }
 
