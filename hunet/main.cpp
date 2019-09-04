@@ -9,7 +9,10 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
-
+#include <QLabel>
+#include <QMimeData>
+#include <QUrl>
+#include <QFileInfo>
 
 #ifndef _DEPRECATION_DISABLE
 #define _DEPRECATION_DISABLE
@@ -21,11 +24,29 @@
 class SScContour
 {
 public:
-    SScContour(const std::vector<cv::Point>& v) : m_data(v)
+    SScContour(const std::vector<cv::Point>& v) : m_data(v), m_done(false)
     {
+        huMoments();
+    }
+
+    double* huMoments()
+    {
+        if (!m_done)
+        {
+            cv::Moments m = cv::moments(m_data);
+            cv::HuMoments(m,m_hu);
+            for (int i=0; i<7; ++i) if (m_hu[i]<0) m_hu[i]=-log(qAbs(m_hu[i]));
+            else                                   m_hu[i]= log(m_hu[i]);
+            qWarning(">>>>HU0: %lf", m_hu[0]);
+
+            m_done = true;
+        }
+        return m_hu;
     }
 private:
-    std::vector<cv::Point> m_data;
+    std::vector<cv::Point>  m_data;
+    bool                    m_done;
+    double                  m_hu[7];
 };
 
     class SScCannyContainer
@@ -34,7 +55,10 @@ private:
 
         SScCannyContainer(const QString& filename, int median = 5, bool eq = true)
         {
+            QFileInfo fi(filename);
+            qWarning("FILE %s %s", qPrintable(fi.absoluteFilePath()), fi.exists() ? "EXISTS":"DOES NOT EXIST");
             m_mat = cv::imread(filename.toUtf8().constData(),cv::IMREAD_GRAYSCALE);
+            qWarning(">>>>>%s %dx%d", filename.toUtf8().constData(), m_mat.cols, m_mat.rows);
             if ((median>1) && (median%2!=0)) cv::medianBlur(m_mat,m_mat,median);
             if (eq) cv::equalizeHist(m_mat,m_mat);
         }
@@ -68,17 +92,52 @@ private:
         cv::Mat m_cmat;
     };
 
+    class HuNetMainWindow : public QLabel
+    {
+    public:
+        explicit HuNetMainWindow() : QLabel(0)
+        {
+            setAcceptDrops(true);
+            setScaledContents(true);
+         setMinimumSize(256,256);
+            qWarning("CREATED");
+        }
+    private:
+        void dragEnterEvent(QDragEnterEvent *event)
+        {
+            event->accept();
+        }
+        void dragMoveEvent(QDragMoveEvent *event)
+        {
+            event->accept();
+        }
+        void dragLeaveEvent(QDragLeaveEvent *event)
+        {
+            event->accept();
+        }
+        void dropEvent(QDropEvent* ev)
+        {
+            const QUrl url(ev->mimeData()->text());
+            if (url.isLocalFile())
+            {
+                const QString filename = url.toLocalFile().trimmed();
+                SScCannyContainer cc(filename,21,false);
+
+                auto cont = cc.contours(200,255);
+
+                setPixmap(QPixmap::fromImage(cc.canny()));
+            }
+        }
+    };
+
+
 int main(int argc, char *argv[])
 {
-    Q_UNUSED(argc);
-    Q_UNUSED(argv);
 
-    SScCannyContainer cc("/home/developer/00.jpg",21,false);
-    auto cont = cc.contours(200,255);
-    qWarning(">>>GOT %d contours", cont.size());
-    cc.orig().save("/home/developer/mat.png");
-    cc.canny().save("/home/developer/cmat.png");
+    QApplication app(argc,argv);
+    HuNetMainWindow mw;
+    mw.show();
+    return app.exec();
 
-    return 0;
 
 }
