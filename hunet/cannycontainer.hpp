@@ -4,6 +4,7 @@
 #include <QImage>
 #include <opencv2/core.hpp>
 #include "contour.hpp"
+#include "imageconverter.h"
 
 class SScCannySetting
 {
@@ -27,8 +28,8 @@ public:
     QList<SScContour> contours(double min, double max);
 
     inline bool   isValid   () const { return m_valid; }
-    inline QImage orig      () const { return image(m_mat); }
-    inline QImage canny     () const { return image(m_cmat); }
+    inline QImage orig      () const { return SSnImageConverter::image(m_mat); }
+    inline QImage canny     () const { return SSnImageConverter::image(m_cmat); }
 
 private:
     QImage image(const cv::Mat& mat) const;

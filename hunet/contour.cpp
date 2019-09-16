@@ -6,6 +6,19 @@ SScContour::SScContour() : m_done(false)
 {}
 SScContour::SScContour(const std::vector<cv::Point>& v) : m_data(v), m_done(false)
 {}
+
+QString SScContour::label()
+{
+    QStringList sl;
+    double* h = huMoments();
+    for (int i=0; i<7; ++i)
+    {
+        QString s;
+        s.sprintf("%.2lf",h[i]);
+        sl << s;
+    }
+    return sl.join(" ");
+}
 QImage SScContour::draw(int w) const
 {
     QImage im(w,w,QImage::Format_RGB32);
@@ -60,8 +73,8 @@ std::vector<cv::Point>  SScContour::norm(double w) const
     for(size_t i=0; i<m_data.size(); ++i)
     {
         cv::Point p;
-       p.x = qRound(scx*(double)(m_data[i].x-xmin)),
-               p.y = qRound(scy*(double)(m_data[i].y-ymin));
+        p.x = qRound(scx*(double)(m_data[i].x-xmin)),
+        p.y = qRound(scy*(double)(m_data[i].y-ymin));
         ret.insert(ret.end(),p);
     }
     return ret;

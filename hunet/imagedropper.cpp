@@ -6,12 +6,14 @@
 #include <QMimeData>
 #include <QUrl>
 
-HuNetImageDropper::HuNetImageDropper(QWidget* parent) : QLabel(parent)
+#include "opencv2/core.hpp"
+#include "opencv2/imgcodecs.hpp"
+#include "imageconverter.h"
+
+HuNetImageDropper::HuNetImageDropper(QWidget* parent) : HuNetImageDisplay(parent)
 {
     setAcceptDrops(true);
     setScaledContents(true);
-    setMinimumSize(256,256);
-    setAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
     setText("Drop image here");
 }
 void HuNetImageDropper::dragEnterEvent(QDragEnterEvent *event)
@@ -32,19 +34,16 @@ void HuNetImageDropper::dropEvent(QDropEvent* ev)
     if (url.isLocalFile())
     {
         const QString filename = url.toLocalFile().trimmed();
-        m_cc = SScCannyContainer(filename);
-        if (m_cc.isValid())
+        if (filename!=m_filename)
         {
-            qWarning(">>>>>>>>>>>>VALID");
-            setText(QString());
-            setPixmap(QPixmap::fromImage(m_cc.orig()));
+            cv::Mat im = cv::imread(filename.toUtf8().constData(),cv::IMREAD_GRAYSCALE);
+            if ((im.cols>0) && (im.rows>0))
+            {
+                m_filename = filename;
+                setText(QString());
+                set(SSnImageConverter::image(im));
+                emit loaded(filename);
+            }
         }
-        /*auto cont = cc.contours(200,255);
-        foreach (auto c, cont) if (c.size()>100)
-        {
-            qWarning("Contour size %d", (int)c.size());
-            setPixmap(QPixmap::fromImage(c.draw(255)));
-            break;
-        }*/
     }
 }

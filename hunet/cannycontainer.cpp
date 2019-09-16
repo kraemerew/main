@@ -15,7 +15,6 @@ SScCannyContainer::SScCannyContainer(const QString& filename, const SScCannySett
         if (median>1)
         {
             if (median%2==0) ++median;
-            qWarning("PROCESSING...");
             cv::medianBlur(m_mat,m_mat,median);
         }
         if (setting.m_eq)
@@ -35,15 +34,5 @@ QList<SScContour> SScCannyContainer::contours(double min, double max)
         cv::findContours(m_cmat,contours,hierarchy,CV_RETR_LIST,CV_CHAIN_APPROX_SIMPLE);
         for (unsigned int i=0; i<contours.size(); ++i) ret << SScContour(contours[i]);
     }
-    return ret;
-}
-
-QImage SScCannyContainer::image(const cv::Mat& mat) const
-{
-    QImage ret = QImage(QSize(mat.cols,mat.rows), QImage::Format_Grayscale8);
-
-    for (int i=0; i<mat.rows; ++i)
-        std::memcpy(ret.scanLine(i),mat.row(i).data,mat.cols);
-
     return ret;
 }

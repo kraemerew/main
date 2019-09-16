@@ -13,6 +13,7 @@ public:
     inline size_t size() const { return m_data.size(); }
     QImage draw(int w = 255) const;
     double* huMoments();
+    QString label();
 
 private:
     std::vector<cv::Point>  norm(double w = 255.0) const;
