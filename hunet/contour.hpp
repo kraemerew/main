@@ -14,6 +14,9 @@ public:
     QImage draw(int w = 255) const;
     double* huMoments();
     QString label();
+    int diag() const;
+    QPair<int,int> xRange() const;
+    QPair<int,int> yRange() const;
 
 private:
     std::vector<cv::Point>  norm(double w = 255.0) const;

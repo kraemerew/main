@@ -27,6 +27,7 @@ public:
     SScCannyContainer(const QString& filename, const SScCannySetting& setting = SScCannySetting());
     QList<SScContour> contours(double min, double max);
 
+           int    diag      () const;
     inline bool   isValid   () const { return m_valid; }
     inline QImage orig      () const { return SSnImageConverter::image(m_mat); }
     inline QImage canny     () const { return SSnImageConverter::image(m_cmat); }
