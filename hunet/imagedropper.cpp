@@ -32,7 +32,7 @@ void HuNetImageDropper::dropEvent(QDropEvent* ev)
     if (url.isLocalFile())
     {
         const QString filename = url.toLocalFile().trimmed();
-        m_cc = SScCannyContainer(filename,21,false);
+        m_cc = SScCannyContainer(filename);
         if (m_cc.isValid())
         {
             qWarning(">>>>>>>>>>>>VALID");

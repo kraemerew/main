@@ -1,21 +1,24 @@
 #include "cannycontainer.hpp"
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
+#include <QtMath>
 
 SScCannyContainer::SScCannyContainer() : m_valid(false) {}
-SScCannyContainer::SScCannyContainer(const QString& filename, int median, bool eq) : m_valid(false)
+SScCannyContainer::SScCannyContainer(const QString& filename, const SScCannySetting& setting) : m_valid(false)
 {
     m_mat = cv::imread(filename.toUtf8().constData(),cv::IMREAD_GRAYSCALE);
     m_valid = (m_mat.cols>0) && (m_mat.rows>0);
     if (m_valid)
     {
-        qWarning("PROCESSING...");
-        if ((median>1) && (median%2!=0))
+        const double diag = qSqrt(qPow(m_mat.rows,2)+qPow(m_mat.cols,2.0));
+        int median = qRound((setting.m_median*diag)/100.0);
+        if (median>1)
         {
-            qWarning("MEDIAN...");
+            if (median%2==0) ++median;
+            qWarning("PROCESSING...");
             cv::medianBlur(m_mat,m_mat,median);
         }
-        if (eq)
+        if (setting.m_eq)
         {
             cv::equalizeHist(m_mat,m_mat);
         }

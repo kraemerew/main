@@ -1,5 +1,5 @@
 #include <QApplication>
-#include "imagedropper.hpp"
+#include "hunetmainwindow.hpp"
 
 #ifndef _DEPRECATION_DISABLE
 #define _DEPRECATION_DISABLE
@@ -8,13 +8,10 @@
 #endif
 #endif
 
-
-
 int main(int argc, char *argv[])
 {
-
     QApplication app(argc,argv);
-    HuNetImageDropper mw;
+    HuNetMainWindow mw;
     mw.show();
     return app.exec();
 }
