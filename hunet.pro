@@ -31,7 +31,13 @@ SOURCES += hunet/main.cpp \
     highwaynn/kernel.cpp \
     highwaynn/convhelpers.cpp \
     image/convimageconverter.cpp \
-    highwaynn/imageprovider.cpp
+    highwaynn/imageprovider.cpp \
+    hunet/imagedropper.cpp \
+    hunet/cannycontainer.cpp \
+    hunet/contour.cpp \
+    hunet/hunetmainwindow.cpp \
+    hunet/hunetcannydisplay.cpp \
+    hunet/hunetcontourlist.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -63,5 +69,11 @@ HEADERS += \
     highwaynn/convpatternprovider.hpp \
     highwaynn/convhelpers.hpp \
     image/convimageconverter.hpp \
-    highwaynn/imageprovider.hpp
+    highwaynn/imageprovider.hpp \
+    hunet/imagedropper.hpp \
+    hunet/cannycontainer.hpp \
+    hunet/contour.hpp \
+    hunet/hunetmainwindow.hpp \
+    hunet/hunetcannydisplay.hpp \
+    hunet/hunetcontourlist.hpp
 

@@ -1,0 +1,46 @@
+#include "cannycontainer.hpp"
+#include <opencv2/imgproc.hpp>
+#include <opencv2/imgcodecs.hpp>
+
+SScCannyContainer::SScCannyContainer() : m_valid(false) {}
+SScCannyContainer::SScCannyContainer(const QString& filename, int median, bool eq) : m_valid(false)
+{
+    m_mat = cv::imread(filename.toUtf8().constData(),cv::IMREAD_GRAYSCALE);
+    m_valid = (m_mat.cols>0) && (m_mat.rows>0);
+    if (m_valid)
+    {
+        qWarning("PROCESSING...");
+        if ((median>1) && (median%2!=0))
+        {
+            qWarning("MEDIAN...");
+            cv::medianBlur(m_mat,m_mat,median);
+        }
+        if (eq)
+        {
+            cv::equalizeHist(m_mat,m_mat);
+        }
+    }
+}
+QList<SScContour> SScCannyContainer::contours(double min, double max)
+{
+    QList<SScContour> ret;
+    if ((min<max) && (min>=0) && (max<=255))
+    {
+        cv::Canny(m_mat,m_cmat,min,max);
+        std::vector<std::vector<cv::Point> > contours;
+        std::vector<cv::Vec4i> hierarchy;
+        cv::findContours(m_cmat,contours,hierarchy,CV_RETR_LIST,CV_CHAIN_APPROX_SIMPLE);
+        for (unsigned int i=0; i<contours.size(); ++i) ret << SScContour(contours[i]);
+    }
+    return ret;
+}
+
+QImage SScCannyContainer::image(const cv::Mat& mat) const
+{
+    QImage ret = QImage(QSize(mat.cols,mat.rows), QImage::Format_Grayscale8);
+
+    for (int i=0; i<mat.rows; ++i)
+        std::memcpy(ret.scanLine(i),mat.row(i).data,mat.cols);
+
+    return ret;
+}
