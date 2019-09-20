@@ -1,10 +1,10 @@
 #ifndef HUNETMAINWINDOW_HPP
 #define HUNETMAINWINDOW_HPP
 
+#include <QTabWidget>
 #include <QWidget>
 #include <QTimer>
 #include "cannycontainer.hpp"
-
 class QCheckBox;
 class QSpinBox;
 class QDoubleSpinBox;
@@ -12,7 +12,7 @@ class HuNetImageDropper;
 class HuNetImageDisplay;
 class HuNetContourList;
 
-class HuNetMainWindow : public QWidget
+class HuNetMainWindow : public QTabWidget
 {
     Q_OBJECT
 
@@ -39,8 +39,6 @@ private:
     HuNetContourList*   m_contourlist;
     HuNetImageDisplay*  m_contourdisplay;
 
-    QWidget*            m_w1;
-    QWidget*            m_w2;
     QDoubleSpinBox*     m_mediansb;
     QCheckBox*          m_eqcb;
     QSpinBox*           m_cannymin;
@@ -48,6 +46,7 @@ private:
 
     QTimer              m_recalctimer, m_cannytimer;
     SScCannyContainer   m_cc;
+    QImage              m_orig;
 };
 
 #endif // HUNETMAINWINDOW_HPP
