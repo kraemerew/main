@@ -8,16 +8,22 @@ SScContour::SScContour() : m_done(false)
 SScContour::SScContour(const std::vector<cv::Point>& v) : m_data(v), m_done(false)
 {}
 
+QStringList SScContour::labels()
+{
+    return QStringList() << "Hu1" << "Hu2" << "Hu3" << "Hu4" << "Hu5" << "Hu6" << "Hu7" << "ECRad";
+}
+QStringList SScContour::values()
+{
+    QString s;
+    QStringList ret;
+    double *dl = huMoments();
+    for (int i=0; i<7; ++i) { s.sprintf("%.4lf",dl[i]); ret << s; }
+    s.sprintf("%.4lf",minEnclosingCircleRadius()); ret << s;
+    return ret;
+}
+/*
 QString SScContour::label()
 {
-    QStringList sl;
-    /*double* h = huMoments();
-    for (int i=0; i<7; ++i)
-    {
-        QString s;
-        s.sprintf("%.2lf",h[i]);
-        sl << s;
-    }*/
 
     const double  r = minEnclosingCircleRadius(), a = area(), ha = hullArea(), cva = convexHullArea();
     if (a>0)
@@ -47,7 +53,8 @@ QString SScContour::label()
     }
 
     return sl.join(" ");
-}
+}*/
+
 bool SScContour::draw(QImage& im, double th) const
 {
     if (isValid() && !im.isNull())

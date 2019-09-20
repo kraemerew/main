@@ -16,10 +16,12 @@ public:
     QImage draw(int w = 255, double th = 2.0) const;
     bool draw(QImage&, double th = 1.5) const;
     double* huMoments();
-    QString label();
     int diag() const;
     QPair<int,int> xRange() const;
     QPair<int,int> yRange() const;
+
+    static QStringList labels();
+    QStringList values();
 
 private:
     std::vector<cv::Point>  norm(double w = 255.0) const;
@@ -27,6 +29,7 @@ private:
     double convexHullArea           () const;
     double area                     () const;
     double hullArea                 (double epsilon = 2.0) const;
+
     std::vector<cv::Point>  m_data;
     bool                    m_done;
     double                  m_hu[7];

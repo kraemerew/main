@@ -1,38 +1,64 @@
 #include "hunetcontourlist.hpp"
+#include <QHeaderView>
+#include <QTableWidgetItem>
 
-HuNetContourList::HuNetContourList(QWidget* parent) : QListWidget(parent)
+HuNetContourList::HuNetContourList(QWidget* parent) : QTableWidget(parent)
 {
     qRegisterMetaType<SScContour>("SScContour");
     setIconSize(QSize(32,32));
-    const bool ok = connect(this, SIGNAL(currentRowChanged(int)), this, SLOT(selectedSlot(int)));
+    setSortingEnabled(true);
+    const bool ok = connect(this, SIGNAL(currentItemChanged(QTableWidgetItem*,QTableWidgetItem*)),
+                            this, SLOT(selectedSlot(QTableWidgetItem*,QTableWidgetItem*)));
     Q_ASSERT(ok);
     Q_UNUSED(ok);
 }
 
+void HuNetContourList::clear()
+{
+    QTableWidget::clear();
+    m_contours.   clear();
+    m_it2idx.     clear();
+}
 
 void HuNetContourList::set(const QList<SScContour>& cl)
 {
     blockSignals(true);
     clear();
-    m_cl = cl;
+
+    verticalHeader()->hide();
+
+    setColumnCount(SScContour::labels().size()+1);
+    setHorizontalHeaderLabels(QStringList() << "" << SScContour::labels());
+    setRowCount(cl.size());
+
+    m_contours = cl;
+    int row = -1;
     foreach(auto c, cl)
     {
+        int col = -1;
         const QPixmap pm = QPixmap::fromImage(c.draw(32));
-        QListWidgetItem * it = new(std::nothrow) QListWidgetItem(this);
+        QTableWidgetItem* it = new (std::nothrow) QTableWidgetItem;
         Q_CHECK_PTR(it);
+        m_it2idx[it]=++row;
         it->setIcon(QIcon(pm));
-        it->setText(c.label());
-        addItem(it);
+        setItem(row,++col,it);
+        foreach(const QString& s, c.values())
+        {
+            it = new (std::nothrow) QTableWidgetItem;
+            Q_CHECK_PTR(it);
+            m_it2idx[it]=row;
+            it->setText(s);
+            setItem(row,++col,it);
+        }
     }
     if (cl.isEmpty()) hide(); else show();
     blockSignals(false);
-    setCurrentRow(0);
+    if (!m_contours.isEmpty()) setCurrentCell(0,0);
 }
 
-void HuNetContourList::selectedSlot(int row)
+void HuNetContourList::selectedSlot(QTableWidgetItem *newit, QTableWidgetItem *)
 {
     SScContour c;
-    if ((row>=0) && (row<m_cl.size()))
-        c = m_cl[row];
+    if (newit && m_it2idx.contains(newit)) c = m_contours[m_it2idx[newit]];
     emit selected (c);
 }
