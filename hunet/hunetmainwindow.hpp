@@ -5,12 +5,13 @@
 #include <QWidget>
 #include <QTimer>
 #include "cannycontainer.hpp"
+#include "contourcontainer.hpp"
+
 class QCheckBox;
 class QSpinBox;
 class QDoubleSpinBox;
 class HuNetImageDropper;
 class HuNetImageDisplay;
-class HuNetContourList;
 
 class HuNetMainWindow : public QTabWidget
 {
@@ -33,11 +34,10 @@ private:
     inline void recalc      () { if (!m_recalctimer.isActive()) m_recalctimer.start(100); }
     inline void recalcCanny () { if (!m_cannytimer. isActive()) m_cannytimer. start(100); }
 
-    HuNetImageDropper*  m_dropper;
-    HuNetImageDisplay*  m_procdisplay;
-    HuNetImageDisplay*  m_cannydisplay;
-    HuNetContourList*   m_contourlist;
-    HuNetImageDisplay*  m_contourdisplay;
+    HuNetImageDropper*      m_dropper;
+    HuNetImageDisplay*      m_procdisplay;
+    HuNetImageDisplay*      m_cannydisplay;
+    SScContourContainer*  m_contourdisplay;
 
     QDoubleSpinBox*     m_mediansb;
     QCheckBox*          m_eqcb;

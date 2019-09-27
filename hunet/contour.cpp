@@ -10,7 +10,7 @@ SScContour::SScContour(const std::vector<cv::Point>& v) : m_data(v), m_done(fals
 
 QStringList SScContour::labels()
 {
-    return QStringList() << "Hu1" << "Hu2" << "Hu3" << "Hu4" << "Hu5" << "Hu6" << "Hu7" << "ECRad";
+    return QStringList() << "Hu1" << "Hu2" << "Hu3" << "Hu4" << "Hu5" << "Hu6" << "Hu7" << "ECRad" << "Convexity";
 }
 QStringList SScContour::values()
 {
@@ -19,6 +19,8 @@ QStringList SScContour::values()
     double *dl = huMoments();
     for (int i=0; i<7; ++i) { s.sprintf("%.4lf",dl[i]); ret << s; }
     s.sprintf("%.4lf",minEnclosingCircleRadius()); ret << s;
+    s.sprintf("%.4lf",convexity()); ret << s;
+
     return ret;
 }
 /*
@@ -55,7 +57,9 @@ QString SScContour::label()
     return sl.join(" ");
 }*/
 
-bool SScContour::draw(QImage& im, double th) const
+double SScContour::perimeter() const { return cv::arcLength(m_data,true); }
+
+bool SScContour::mark(QImage& im, double th) const
 {
     if (isValid() && !im.isNull())
     {
@@ -63,41 +67,36 @@ bool SScContour::draw(QImage& im, double th) const
         QPen pen(Qt::red);
         pen.setWidthF(th);
         p.setPen(pen);
-        QPoint p1, p2;
-        p1 = QPoint(m_data[0].x, m_data[0].y);
-        for(size_t i=1; i<size(); ++i)
-        {
-            p2 = QPoint(m_data[i].x, m_data[i].y);
-            p.drawLine(p1,p2);
-            p1=p2;
-        }
+        foreach(auto l, lines(false)) p.drawLine(l);
         return true;
     }
     return false;
 }
-QImage SScContour::draw(int w, double th) const
+
+bool SScContour::draw(QImage& im, double th, const QColor& c, bool closed) const
+{
+    if (isEmpty() || im.isNull()) return false;
+
+    auto ll = norm(qMin(im.width(),im.height())).lines(closed);
+    if (!ll.isEmpty())
+    {
+        QPainter p(&im);
+        QPen pen(c);
+        pen.setWidthF(th);
+        p.setPen(pen);
+        foreach(auto l, ll) p.drawLine(l);
+    }
+    return true;
+}
+
+QImage SScContour::draw(int w, double th, const QColor& c, bool closed) const
 {
     QImage im(w,w,QImage::Format_RGB32);
     im.fill(Qt::black);
-
-    const auto a = norm(w);
-    if (a.size()>1)
-    {
-        QPainter p(&im);
-        QPen pen(Qt::white);
-        pen.setWidthF(th);
-        p.setPen(pen);
-        QPoint p1, p2;
-        p1 = QPoint(a[0].x, a[0].y);
-        for(size_t i=1; i<a.size(); ++i)
-        {
-            p2 = QPoint(a[i].x, a[i].y);
-            p.drawLine(p1,p2);
-            p1=p2;
-        }
-    }
+    draw(im,th,c,closed);
     return im;
 }
+
 double* SScContour::huMoments()
 {
     if (!m_done)
@@ -111,7 +110,8 @@ double* SScContour::huMoments()
     }
     return m_hu;
 }
-std::vector<cv::Point>  SScContour::norm(double w) const
+
+SScContour SScContour::norm(double w) const
 {
     const auto xr = xRange(), yr = yRange();
     const int width = xr.second-xr.first, height = yr.second-yr.first,
@@ -130,8 +130,10 @@ std::vector<cv::Point>  SScContour::norm(double w) const
         p.y = qRound(scy*(double)(m_data[i].y-yr.first));
         ret.insert(ret.end(),p);
     }
-    return ret;
+    return SScContour(ret);
 }
+
+
 
 double SScContour::area() const
 {
@@ -139,15 +141,11 @@ double SScContour::area() const
 }
 double SScContour::convexHullArea() const
 {
-    std::vector<cv::Point> data;
-    cv::convexHull(m_data,data);
-    return cv::contourArea(data);
+    return convexHull().area();
 }
 double SScContour::hullArea(double epsilon) const
 {
-    std::vector<cv::Point> data;
-    cv::approxPolyDP(m_data,data,epsilon,true);
-    return cv::contourArea(data);
+    return hull(epsilon).area();
 }
 double SScContour::minEnclosingCircleRadius() const
 {
@@ -163,6 +161,51 @@ int SScContour::diag() const
     return qRound(qSqrt(qPow(xr.second-xr.first,2.0)+qPow(yr.second-yr.first,2.0)));
 }
 
+SScContour SScContour::hull(double epsilon) const
+{
+    std::vector<cv::Point> data;
+    cv::approxPolyDP(m_data,data,epsilon,true);
+    return SScContour(data);
+}
+
+SScContour SScContour::convexHull() const
+{
+    std::vector<cv::Point> data;
+    cv::convexHull(m_data,data);
+    return SScContour(data);
+}
+
+SScContour SScContour::approxHull(int nr, int steps) const
+{
+    Q_ASSERT(nr>2);
+    if (nr>2)
+    {
+        double p = perimeter();
+        for (int i=1; i<=steps; ++i)
+        {
+            const double epsilon = (p*(double)i)/(double)steps;
+            auto c = hull(epsilon);
+            if (c.size()<=(size_t)nr) return c;
+        }
+    }
+    return SScContour();
+}
+
+SScContour SScContour::approxConvexHull(int nr, int steps) const
+{
+    Q_ASSERT(nr>2);
+    if (nr>2)
+    {
+        double p = perimeter();
+        for (int i=1; i<=steps; ++i)
+        {
+            const double epsilon = (p*(double)i)/(double)steps;
+            auto c = hull(epsilon).convexHull();
+            if (c.size()<=(size_t)nr) return c;
+        }
+    }
+    return SScContour();
+}
 
 QPair<int,int> SScContour::xRange() const
 {
@@ -179,7 +222,6 @@ QPair<int,int> SScContour::xRange() const
     return ret;
 }
 
-
 QPair<int,int> SScContour::yRange() const
 {
     QPair<int,int> ret(0,0);
@@ -195,3 +237,36 @@ QPair<int,int> SScContour::yRange() const
     return ret;
 }
 
+QList<QLineF> SScContour::lines(bool closed) const
+{
+    QList<QLineF> ret;
+    if (isEmpty()) return ret;
+    QPoint p1 = QPoint(m_data[0].x, m_data[0].y), p2, pfirst = p1;
+
+
+    for(size_t i=1; i<size(); ++i)
+    {
+        p2 = QPoint(m_data[i].x, m_data[i].y);
+        ret << QLineF(p1,p2);
+        p1 = p2;
+    }
+    if (closed) ret << QLineF(pfirst,p1);
+    return ret;
+}
+
+bool SScContour::isSelfIntersected(bool closed) const
+{
+    if (isEmpty()) return false;
+    QList<QLineF> ll = lines(closed), donell;
+
+    foreach(auto l, ll)
+    {
+        foreach(auto other, donell)
+        {
+            QPointF p;
+            if (l.intersect(other,&p) == QLineF::BoundedIntersection) return true;
+        }
+        donell << l;
+    }
+    return false;
+}

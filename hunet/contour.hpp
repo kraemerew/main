@@ -13,18 +13,29 @@ public:
     inline size_t   size    () const { return m_data.size(); }
     inline bool     isEmpty () const { return size()==0; }
     inline bool     isValid () const { return size()>1; }
-    QImage draw(int w = 255, double th = 2.0) const;
-    bool draw(QImage&, double th = 1.5) const;
+    QImage draw(int w = 255, double th = 2.0, const QColor& c = Qt::white, bool closed = false) const;
+    bool draw(QImage& im, double th = 2.0, const QColor& c = Qt::white, bool closed = false) const;
+    bool mark(QImage&, double th = 1.5) const;
     double* huMoments();
+    double perimeter() const;
+    inline double convexity() const { return isEmpty() ? -1 : convexHull().perimeter()/perimeter(); }
     int diag() const;
     QPair<int,int> xRange() const;
     QPair<int,int> yRange() const;
+    bool isSelfIntersected(bool closed=true) const;
+
 
     static QStringList labels();
     QStringList values();
 
+    SScContour convexHull() const;
+    SScContour hull(double epsion = 1.0) const;
+    SScContour approxHull(int nr, int steps = 10000) const;
+    SScContour approxConvexHull(int nr, int steps = 10000) const;
+
 private:
-    std::vector<cv::Point>  norm(double w = 255.0) const;
+    QList<QLineF> lines(bool closed) const;
+    SScContour norm(double w) const;
     double minEnclosingCircleRadius () const;
     double convexHullArea           () const;
     double area                     () const;
