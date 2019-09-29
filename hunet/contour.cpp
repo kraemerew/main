@@ -5,6 +5,7 @@
 
 SScContour::SScContour() : m_done(false)
 {}
+
 SScContour::SScContour(const std::vector<cv::Point>& v) : m_data(v), m_done(false)
 {}
 
@@ -12,6 +13,7 @@ QStringList SScContour::contourLabels()
 {
     QStringList ret;
     ret << "ConvexHull";
+    ret << "FitEllipse";
     for (int i=3; i<15; ++i) ret << QString("Convex_Approx_%1").arg(i);
     return ret;
 }
@@ -19,7 +21,11 @@ QStringList SScContour::contourLabels()
 SScContour SScContour::contour(const QString& id) const
 {
     SScContour ret;
-    if (id.startsWith("Convex_Approx_"))
+    if (id.startsWith("FitEllipse"))
+    {
+        ret = fitEllipse();
+    }
+    else if (id.startsWith("Convex_Approx_"))
     {
         bool ok = false;
         const int edges = id.right(id.length()-14).toInt(&ok);
@@ -102,9 +108,11 @@ double* SScContour::huMoments()
     {
         cv::Moments m = cv::moments(m_data);
         cv::HuMoments(m,m_hu);
-        for (int i=0; i<7; ++i) if (m_hu[i]<0) m_hu[i]=-log(qAbs(m_hu[i]));
-        else                                   m_hu[i]= log(m_hu[i]);
-
+        for (int i=0; i<7; ++i)
+        {
+            const double sign = (m_hu[i]<0) ? -1 : 1;
+            m_hu[i]=-sign*log(qAbs(m_hu[i]));
+        }
         m_done = true;
     }
     return m_hu;
@@ -132,7 +140,22 @@ SScContour SScContour::norm(double w) const
     return SScContour(ret);
 }
 
-
+SScContour SScContour::fitEllipse() const
+{
+    cv::RotatedRect rr = cv::fitEllipse(m_data);
+    cv::Point2f pts[4];
+    rr.points(pts);
+    std::vector<cv::Point> pv;
+    for (int i=0; i<4; ++i)
+    {
+        cv::Point p;
+        p.x= qRound(pts[i].x);
+        p.y= qRound(pts[i].y);
+        pv.insert(pv.end(),p);
+    }
+    pv.insert(pv.end(),*pv.begin());
+    return SScContour(pv);
+}
 
 double SScContour::area() const
 {

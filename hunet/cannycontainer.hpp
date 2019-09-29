@@ -14,10 +14,17 @@ public:
      * \param median    Median in percentage of diagonal (0..100)
      * \param eq        Use histogram equalisation
      */
-    SScCannySetting(double median = 1.0, bool eq = false)
-        : m_median(qBound(0.0,median,100.0)), m_eq(eq) {}
-    double m_median;
-    bool    m_eq;
+    SScCannySetting(double median = 1.0, bool eq = false, bool bil = true, int d = 1, double csigma=1, double sigma = 2)
+        :   m_eq(eq),
+            m_bil(bil),
+            m_bil_d(d),
+            m_median(qBound(0.0,median,100.0)),
+            m_bil_csigma(csigma),
+            m_bil_sigma(sigma) {}
+    bool    m_eq, m_bil;
+    int     m_bil_d;
+    double  m_median;
+    double  m_bil_csigma, m_bil_sigma;
 };
 
 class SScCannyContainer

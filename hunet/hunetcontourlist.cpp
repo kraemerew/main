@@ -7,6 +7,9 @@ HuNetContourList::HuNetContourList(QWidget* parent) : QTableWidget(parent)
     qRegisterMetaType<SScContour>("SScContour");
     setIconSize(QSize(32,32));
     setSortingEnabled(true);
+    setSelectionBehavior(QAbstractItemView::SelectRows);
+    setSelectionMode(QAbstractItemView::SingleSelection);
+
     const bool ok = connect(this, SIGNAL(currentItemChanged(QTableWidgetItem*,QTableWidgetItem*)),
                             this, SLOT(selectedSlot(QTableWidgetItem*,QTableWidgetItem*)));
     Q_ASSERT(ok);

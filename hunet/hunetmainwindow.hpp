@@ -41,9 +41,13 @@ private:
     SScContourContainer*  m_contourdisplay;
 
     QDoubleSpinBox*     m_mediansb;
+    QDoubleSpinBox*     m_bilcsigma;
+    QDoubleSpinBox*     m_bilsigma;
     QCheckBox*          m_eqcb;
+    QCheckBox*          m_bilcb;
     QSpinBox*           m_cannymin;
     QSpinBox*           m_cannymax;
+    QSpinBox*           m_bild;
 
     QTimer              m_recalctimer, m_cannytimer;
     SScCannyContainer   m_cc;

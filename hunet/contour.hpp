@@ -30,6 +30,7 @@ public:
     static QStringList featureLabels();
     QStringList featureValues();
 
+    SScContour fitEllipse() const;
     SScContour convexHull() const;
     SScContour hull(double epsilon = 1.0) const;
     SScContour approxHull(int nr, int steps = 10000) const;

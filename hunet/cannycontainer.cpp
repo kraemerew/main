@@ -7,7 +7,16 @@
 SScCannyContainer::SScCannyContainer() : m_valid(false) {}
 SScCannyContainer::SScCannyContainer(const QString& filename, const SScCannySetting& setting) : m_valid(false)
 {
-    m_mat = cv::imread(filename.toUtf8().constData(),cv::IMREAD_GRAYSCALE);
+    cv::Mat orig = cv::imread(filename.toUtf8().constData(),cv::IMREAD_COLOR);
+    if (setting.m_bil)
+    {
+        cv::bilateralFilter(orig,m_mat,setting.m_bil_d,setting.m_bil_csigma,setting.m_bil_sigma);
+        cv::cvtColor(m_mat,m_mat,CV_BGR2GRAY);
+    }
+    else
+    {
+        cv::cvtColor(orig,m_mat,CV_BGR2GRAY);
+    }
     m_valid = (m_mat.cols>0) && (m_mat.rows>0);
     if (m_valid)
     {
@@ -54,7 +63,7 @@ QList<SScContour> SScCannyContainer::contours(double min, double max)
     if ((min<max) && (min>=0) && (max<=255))
     {
         cv::Canny(m_mat,m_cmat,min,max,3,true);
-        cv::morphologyEx(m_cmat,m_cmat,cv::MORPH_CLOSE, cv::getStructuringElement(cv::MORPH_ELLIPSE,cv::Size(5,5)));
+        //cv::morphologyEx(m_cmat,m_cmat,cv::MORPH_CLOSE, cv::getStructuringElement(cv::MORPH_ELLIPSE,cv::Size(5,5)));
 
         std::vector<std::vector<cv::Point> > contours;
         std::vector<cv::Vec4i> hierarchy;
