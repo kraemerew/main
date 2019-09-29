@@ -1,6 +1,7 @@
 #include "hunetcontourlist.hpp"
 #include <QHeaderView>
 #include <QTableWidgetItem>
+#include <QFile>
 
 HuNetContourList::HuNetContourList(QWidget* parent) : QTableWidget(parent)
 {
@@ -73,4 +74,30 @@ SScContour HuNetContourList::currentContour() const
     SScContour c;
     if (it && m_it2idx.contains(it)) c = m_contours[m_it2idx[it]];
     return c;
+}
+
+bool HuNetContourList::save(const QString &filename)
+{
+    const QByteArray data = SScContour::toJson(m_contours).toUtf8();
+    QFile f(filename);
+    if (f.open(QIODevice::WriteOnly))
+    {
+        f.write(data);
+        f.close();
+        return true;
+    }
+    return false;
+}
+
+bool HuNetContourList::load(const QString &filename)
+{
+    QFile f(filename);
+    if (f.open(QIODevice::ReadOnly))
+    {
+        const auto data = f.readAll();
+        auto cl = SScContour::fromJson(data);
+        m_contours = cl;
+        return true;
+    }
+    return false;
 }

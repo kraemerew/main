@@ -1,8 +1,12 @@
 #include "contour.hpp"
+#include "sscvm.hpp"
 #include <opencv2/imgproc.hpp>
 #include <QPainter>
+#include <QDataStream>
 #include <QtMath>
-#include "sscvm.hpp"
+#include <QCryptographicHash>
+#include <QJsonObject>
+#include <QJsonDocument>
 
 SScContour::SScContour() : m_done(false)
 {}
@@ -319,3 +323,42 @@ bool SScContour::isSelfIntersected(bool closed) const
     return false;
 }
 
+QString SScContour::md5() const
+{
+    QByteArray data;
+    QDataStream ds(&data,QIODevice::WriteOnly);
+    for (size_t i=0; i<m_data.size(); ++i)
+    {
+        ds << m_data[i].x;
+        ds << m_data[i].y;
+    }
+    QCryptographicHash hash(QCryptographicHash::Md5);
+    hash.addData(data);
+    return hash.result();
+}
+
+QVariantMap SScContour::toVM(const QList<SScContour> &cl)
+{
+    QVariantMap ret;
+    foreach(auto c, cl) ret[c.md5()] = c.vm();
+    return ret;
+}
+
+QString SScContour::toJson(const QList<SScContour>& cl)
+{
+    QJsonDocument jd;
+    jd.setObject(QJsonObject::fromVariantMap(toVM(cl)));
+    return jd.toJson();
+}
+
+QList<SScContour> SScContour::fromJson(const QString &data)
+{
+    QList<SScContour> ret;
+    QJsonDocument jd = QJsonDocument::fromJson(data.toUtf8());
+    foreach(auto v, jd.object().toVariantMap()) if (v.type()==QVariant::Map)
+    {
+        SScContour c(v.toMap());
+        ret << c;
+    }
+    return ret;
+}

@@ -14,6 +14,8 @@ public:
     SScContour(const QVariantMap& vm);
     QVariantMap vm() const;
 
+    QString md5() const;
+
     inline size_t   size    () const { return m_data.size(); }
     inline bool     isEmpty () const { return size()==0; }
     inline bool     isValid () const { return size()>1; }
@@ -39,6 +41,10 @@ public:
     SScContour hull(double epsilon = 1.0) const;
     SScContour approxHull(int nr, int steps = 10000) const;
     SScContour approxConvexHull(int nr, int steps = 10000) const;
+
+    static QVariantMap toVM(const QList<SScContour>& cl);
+    static QString toJson(const QList<SScContour>& cl);
+    static QList<SScContour> fromJson(const QString&);
 
 private:
     QList<QLineF> lines(bool closed) const;

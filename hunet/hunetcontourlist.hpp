@@ -15,6 +15,9 @@ public:
     void clear();
     SScContour currentContour() const;
 
+    bool save(const QString& filename);
+    bool load(const QString& filename);
+
 signals:
     void selected(const SScContour&);
 
