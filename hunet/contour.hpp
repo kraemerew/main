@@ -13,7 +13,8 @@ public:
     SScContour(const std::vector<cv::Point>& v);
     SScContour(const QVariantMap& vm);
     QVariantMap vm() const;
-
+    QString tag() const;
+    void setTag(const QString& newtag);
     QString md5() const;
 
     inline size_t   size    () const { return m_data.size(); }
@@ -57,6 +58,7 @@ private:
     std::vector<cv::Point>  m_data;
     bool                    m_done;
     double                  m_hu[7];
+    QString                 m_tag;
 };
 
 #endif // CONTOUR_HPP

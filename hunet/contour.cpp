@@ -21,6 +21,7 @@ SScContour::SScContour(const QVariantMap &data)
                  yl = vm.vlToken("Y");
     if (xl.size()==yl.size())
     {
+        m_tag = vm.stringToken("TAG");
         m_data.reserve(xl.size());
         for (int i=0; i<xl.size(); ++i) if (xl[i].canConvert<int>() && yl[i].canConvert<int>())
         {
@@ -42,6 +43,7 @@ QVariantMap SScContour::vm() const
     for (size_t i = 0; i<m_data.size(); ++i) { xl << m_data[i].x; yl << m_data[i].y; }
     ret["X"] = xl;
     ret["Y"] = yl;
+    ret["TAG"] = m_tag;
     return ret;
 }
 
@@ -362,3 +364,6 @@ QList<SScContour> SScContour::fromJson(const QString &data)
     }
     return ret;
 }
+
+QString SScContour::tag     () const                { return m_tag; }
+void    SScContour::setTag  (const QString &newtag) { m_tag=newtag; }
