@@ -2,12 +2,44 @@
 #include <opencv2/imgproc.hpp>
 #include <QPainter>
 #include <QtMath>
+#include "sscvm.hpp"
 
 SScContour::SScContour() : m_done(false)
 {}
 
 SScContour::SScContour(const std::vector<cv::Point>& v) : m_data(v), m_done(false)
 {}
+
+SScContour::SScContour(const QVariantMap &data)
+{
+    SScVM vm(data);
+    QVariantList xl = vm.vlToken("X"),
+                 yl = vm.vlToken("Y");
+    if (xl.size()==yl.size())
+    {
+        m_data.reserve(xl.size());
+        for (int i=0; i<xl.size(); ++i) if (xl[i].canConvert<int>() && yl[i].canConvert<int>())
+        {
+            cv::Point p;
+            p.x = xl[i].toInt();
+            p.y = yl[i].toInt();
+
+            m_data.insert(m_data.end(), p);
+        }
+    }
+}
+
+QVariantMap SScContour::vm() const
+{
+    QVariantMap ret;
+    QVariantList xl, yl;
+    xl.reserve(m_data.size());
+    yl.reserve(m_data.size());
+    for (size_t i = 0; i<m_data.size(); ++i) { xl << m_data[i].x; yl << m_data[i].y; }
+    ret["X"] = xl;
+    ret["Y"] = yl;
+    return ret;
+}
 
 QStringList SScContour::contourLabels()
 {

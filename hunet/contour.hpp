@@ -1,6 +1,7 @@
 #ifndef CONTOUR_HPP
 #define CONTOUR_HPP
 
+#include <QVariantMap>
 #include <QImage>
 #include <vector>
 #include <opencv2/core.hpp>
@@ -10,6 +11,9 @@ class SScContour
 public:
     SScContour();
     SScContour(const std::vector<cv::Point>& v);
+    SScContour(const QVariantMap& vm);
+    QVariantMap vm() const;
+
     inline size_t   size    () const { return m_data.size(); }
     inline bool     isEmpty () const { return size()==0; }
     inline bool     isValid () const { return size()>1; }
