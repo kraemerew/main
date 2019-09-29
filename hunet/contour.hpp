@@ -15,7 +15,7 @@ public:
     QVariantMap vm() const;
     QString tag() const;
     void setTag(const QString& newtag);
-    QString md5() const;
+    QString md5();
 
     inline size_t   size    () const { return m_data.size(); }
     inline bool     isEmpty () const { return size()==0; }
@@ -53,12 +53,12 @@ private:
     double minEnclosingCircleRadius () const;
     double convexHullArea           () const;
     double area                     () const;
-    double hullArea                 (double epsilon = 2.0) const;
+    double hullArea                 (double epsilon = 1.0) const;
 
     std::vector<cv::Point>  m_data;
     bool                    m_done;
     double                  m_hu[7];
-    QString                 m_tag;
+    QString                 m_md5, m_tag;
 };
 
 #endif // CONTOUR_HPP

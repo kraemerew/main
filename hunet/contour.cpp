@@ -325,18 +325,23 @@ bool SScContour::isSelfIntersected(bool closed) const
     return false;
 }
 
-QString SScContour::md5() const
+QString SScContour::md5()
 {
-    QByteArray data;
-    QDataStream ds(&data,QIODevice::WriteOnly);
-    for (size_t i=0; i<m_data.size(); ++i)
+
+    if (m_md5.isEmpty())
     {
-        ds << m_data[i].x;
-        ds << m_data[i].y;
+        QByteArray data;
+        QDataStream ds(&data,QIODevice::WriteOnly);
+        for (size_t i=0; i<m_data.size(); ++i)
+        {
+            ds << m_data[i].x;
+            ds << m_data[i].y;
+        }
+        QCryptographicHash hash(QCryptographicHash::Md5);
+        hash.addData(data);
+        m_md5=hash.result();
     }
-    QCryptographicHash hash(QCryptographicHash::Md5);
-    hash.addData(data);
-    return hash.result();
+    return m_md5;
 }
 
 QVariantMap SScContour::toVM(const QList<SScContour> &cl)
