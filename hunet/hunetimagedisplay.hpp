@@ -7,6 +7,8 @@ class QTabWidget;
 
 class HuNetImageDisplay : public QLabel
 {
+    Q_OBJECT
+
 public:
     explicit HuNetImageDisplay(QWidget* parent = NULL, const QSize& sz = QSize(512,512));
     virtual ~HuNetImageDisplay();
@@ -14,12 +16,14 @@ public:
     void set(const QImage&);
     QImage get() const;
 
-    virtual bool allowDrops() const { return false; }
-    virtual bool dropped(const QString& file) { Q_UNUSED(file); return false; }
+    virtual bool allowDrops() const { return true; }
 
     void insertInto(QTabWidget*,const QString&);
     void insert(QWidget*);
     void insertStretch();
+
+signals:
+    void dropped(const QString&);
 
 protected:
     void dragEnterEvent (QDragEnterEvent*);

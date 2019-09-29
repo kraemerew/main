@@ -9,7 +9,7 @@
 class QCheckBox;
 class QSpinBox;
 class QDoubleSpinBox;
-class HuNetImageDropper;
+class HuNetImageLoader;
 class HuNetImageDisplay;
 class QTabWidget;
 
@@ -35,7 +35,7 @@ private:
     inline void recalcCanny () { if (!m_cannytimer. isActive()) m_cannytimer. start(100); }
 
     QTabWidget*             m_tab;
-    HuNetImageDropper*      m_dropper;
+    HuNetImageLoader*      m_loader;
     HuNetImageDisplay*      m_procdisplay;
     HuNetImageDisplay*      m_cannydisplay;
     SScContourContainer*  m_contourdisplay;

@@ -1,5 +1,5 @@
 #include "hunetmainwindow.hpp"
-#include "imagedropper.hpp"
+#include "imageloader.hpp"
 #include "hunetimagedisplay.hpp"
 
 #include <QTabWidget>
@@ -12,7 +12,7 @@
 HuNetMainWindow::HuNetMainWindow()
     : QWidget           (0),
       m_tab             (new (std::nothrow) QTabWidget(this)),
-      m_dropper         (new (std::nothrow) HuNetImageDropper   ()),
+      m_loader         (new (std::nothrow) HuNetImageLoader   ()),
       m_procdisplay     (new (std::nothrow) HuNetImageDisplay   ()),
       m_cannydisplay    (new (std::nothrow) HuNetImageDisplay   ()),
       m_contourdisplay  (new (std::nothrow) SScContourContainer ()),
@@ -22,7 +22,7 @@ HuNetMainWindow::HuNetMainWindow()
       m_cannymax        (new (std::nothrow) QSpinBox            ())
 {    
     Q_CHECK_PTR(m_tab);
-    Q_CHECK_PTR(m_dropper);
+    Q_CHECK_PTR(m_loader);
     Q_CHECK_PTR(m_procdisplay);
     Q_CHECK_PTR(m_cannydisplay);
     Q_CHECK_PTR(m_contourdisplay);
@@ -45,7 +45,7 @@ HuNetMainWindow::HuNetMainWindow()
     m_cannydisplay->insert(m_cannymax);
     m_cannydisplay->insertStretch();
 
-    m_dropper       ->insertInto(m_tab,"Original");
+    m_loader       ->insertInto(m_tab,"Original");
     m_procdisplay   ->insertInto(m_tab,"Processing");
     m_cannydisplay  ->insertInto(m_tab,"Canny");
     m_contourdisplay->insertInto(m_tab,"Contours");
@@ -68,14 +68,17 @@ HuNetMainWindow::HuNetMainWindow()
 
     bool ok;
     Q_UNUSED(ok);
-    ok = connect(m_dropper,                 SIGNAL(loaded(const QString&)),     this,   SLOT(stringSlot(const QString&)));  Q_ASSERT(ok);
-    ok = connect(m_mediansb,                SIGNAL(valueChanged(double)),       this,   SLOT(doubleSlot(double)));          Q_ASSERT(ok);
-    ok = connect(m_cannymin,                SIGNAL(valueChanged(int)),          this,   SLOT(intSlot(int)));                Q_ASSERT(ok);
-    ok = connect(m_cannymax,                SIGNAL(valueChanged(int)),          this,   SLOT(intSlot(int)));                Q_ASSERT(ok);
-    ok = connect(m_eqcb,                    SIGNAL(toggled(bool)),              this,   SLOT(boolSlot(bool)));              Q_ASSERT(ok);
-    ok = connect(&m_recalctimer,            SIGNAL(timeout()),                  this,   SLOT(recalcSlot()));                Q_ASSERT(ok);
-    ok = connect(&m_cannytimer,             SIGNAL(timeout()),                  this,   SLOT(recalcCannySlot()));           Q_ASSERT(ok);
-    ok = connect(m_contourdisplay->list(),  SIGNAL(selected(const SScContour&)),this,   SLOT(contourSlot(SScContour)));     Q_ASSERT(ok);
+    ok = connect(m_loader,                 SIGNAL(loaded(const QString&)),     this,       SLOT(stringSlot(const QString&)));  Q_ASSERT(ok);
+    ok = connect(m_mediansb,                SIGNAL(valueChanged(double)),       this,       SLOT(doubleSlot(double)));          Q_ASSERT(ok);
+    ok = connect(m_cannymin,                SIGNAL(valueChanged(int)),          this,       SLOT(intSlot(int)));                Q_ASSERT(ok);
+    ok = connect(m_cannymax,                SIGNAL(valueChanged(int)),          this,       SLOT(intSlot(int)));                Q_ASSERT(ok);
+    ok = connect(m_eqcb,                    SIGNAL(toggled(bool)),              this,       SLOT(boolSlot(bool)));              Q_ASSERT(ok);
+    ok = connect(&m_recalctimer,            SIGNAL(timeout()),                  this,       SLOT(recalcSlot()));                Q_ASSERT(ok);
+    ok = connect(&m_cannytimer,             SIGNAL(timeout()),                  this,       SLOT(recalcCannySlot()));           Q_ASSERT(ok);
+    ok = connect(m_contourdisplay->list(),  SIGNAL(selected(const SScContour&)),this,       SLOT(contourSlot(SScContour)));     Q_ASSERT(ok);
+    ok = connect(m_loader,                  SIGNAL(dropped(const QString&)),    m_loader,   SLOT(tryLoad(const QString&)));     Q_ASSERT(ok);
+    ok = connect(m_cannydisplay,            SIGNAL(dropped(const QString&)),    m_loader,   SLOT(tryLoad(const QString&)));     Q_ASSERT(ok);
+    ok = connect(m_contourdisplay,          SIGNAL(dropped(const QString&)),    m_loader,   SLOT(tryLoad(const QString&)));     Q_ASSERT(ok);
 }
 
 HuNetMainWindow::~HuNetMainWindow()
@@ -119,7 +122,7 @@ void HuNetMainWindow::boolSlot(bool)
 
 void HuNetMainWindow::stringSlot(const QString&)
 {
-    m_orig = m_dropper->get();
+    m_orig = m_loader->get();
     recalc();
 }
 
@@ -128,7 +131,7 @@ void HuNetMainWindow::recalcSlot()
     m_recalctimer.stop();
     m_cannytimer. stop();
     SScCannySetting sc(m_mediansb->value(), m_eqcb->isChecked());
-    SScCannyContainer cc(m_dropper->filename(),sc);
+    SScCannyContainer cc(m_loader->filename(),sc);
     if (cc.isValid())
     {
         m_cc = cc;

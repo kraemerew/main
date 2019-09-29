@@ -1,19 +1,21 @@
-#ifndef IMAGEDROPPER_HPP
-#define IMAGEDROPPER_HPP
+#ifndef IMAGELOADER_HPP
+#define IMAGELOADER_HPP
 
 #include "hunetimagedisplay.hpp"
 
-class HuNetImageDropper : public HuNetImageDisplay
+class HuNetImageLoader : public HuNetImageDisplay
 {
     Q_OBJECT
 
 public:
-    explicit HuNetImageDropper(QWidget* parent = NULL);
-    virtual ~HuNetImageDropper();
+    explicit HuNetImageLoader(QWidget* parent = NULL);
+    virtual ~HuNetImageLoader();
     inline QString filename() const { return m_filename; }
 
     virtual bool allowDrops() const { return true; }
-    virtual bool dropped(const QString &filename);
+
+public slots:
+    bool tryLoad(const QString& filename);
 
 signals:
     void loaded(const QString&);
@@ -23,4 +25,4 @@ private:
     QLabel* m_label;
 };
 
-#endif // IMAGEDROPPER_HPP
+#endif // IMAGELOADER_HPP

@@ -1,23 +1,25 @@
-#include "imagedropper.hpp"
+#include "imageloader.hpp"
 
 #include "opencv2/core.hpp"
 #include "opencv2/imgcodecs.hpp"
 #include "imageconverter.h"
 
-HuNetImageDropper::HuNetImageDropper(QWidget* parent) : HuNetImageDisplay(parent), m_label(new (std::nothrow) QLabel)
+HuNetImageLoader::HuNetImageLoader(QWidget* parent)
+    : HuNetImageDisplay(parent),
+      m_label(new (std::nothrow) QLabel)
 {
     setText("Drop image here");
     Q_CHECK_PTR(m_label);
     insert(m_label);
     m_label->setAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
 }
-HuNetImageDropper::~HuNetImageDropper() { delete m_label; }
+HuNetImageLoader::~HuNetImageLoader() { delete m_label; }
 
-bool HuNetImageDropper::dropped(const QString& filename)
+bool HuNetImageLoader::tryLoad(const QString& filename)
 {
     if (filename!=m_filename)
     {
-        cv::Mat im = cv::imread(filename.toUtf8().constData(),cv::IMREAD_GRAYSCALE);
+        cv::Mat im = cv::imread(filename.toUtf8().constData(),cv::IMREAD_COLOR);
         if ((im.cols>0) && (im.rows>0))
         {
             m_filename = filename;
@@ -30,3 +32,4 @@ bool HuNetImageDropper::dropped(const QString& filename)
     }
     return false;
 }
+

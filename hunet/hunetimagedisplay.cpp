@@ -52,7 +52,11 @@ void HuNetImageDisplay::dropEvent(QDropEvent* ev)
     if (allowDrops())
     {
         const QUrl url(ev->mimeData()->text());
-        if (url.isLocalFile() && dropped(url.toLocalFile().trimmed())) ev->accept();
+        if (url.isLocalFile())
+        {
+            ev->accept();
+            emit dropped(url.toLocalFile().trimmed());
+        }
         else ev->ignore();
     }
     else ev->ignore();
