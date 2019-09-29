@@ -27,8 +27,9 @@ void HuNetContourList::set(const QList<SScContour>& cl)
 
     verticalHeader()->hide();
 
-    setColumnCount(SScContour::labels().size()+1);
-    setHorizontalHeaderLabels(QStringList() << "" << SScContour::labels());
+    auto labels = SScContour::featureLabels();
+    setColumnCount(labels.size()+1);
+    setHorizontalHeaderLabels(QStringList() << "" << labels);
     setRowCount(cl.size());
 
     m_contours = cl;
@@ -42,7 +43,7 @@ void HuNetContourList::set(const QList<SScContour>& cl)
         m_it2idx[it]=++row;
         it->setIcon(QIcon(pm));
         setItem(row,++col,it);
-        foreach(const QString& s, c.values())
+        foreach(const QString& s, c.featureValues())
         {
             it = new (std::nothrow) QTableWidgetItem;
             Q_CHECK_PTR(it);
@@ -61,4 +62,12 @@ void HuNetContourList::selectedSlot(QTableWidgetItem *newit, QTableWidgetItem *)
     SScContour c;
     if (newit && m_it2idx.contains(newit)) c = m_contours[m_it2idx[newit]];
     emit selected (c);
+}
+
+SScContour HuNetContourList::currentContour() const
+{
+    auto it = currentItem();
+    SScContour c;
+    if (it && m_it2idx.contains(it)) c = m_contours[m_it2idx[it]];
+    return c;
 }

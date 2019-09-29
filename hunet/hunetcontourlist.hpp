@@ -13,6 +13,7 @@ public:
 
     void set(const QList<SScContour>& cl);
     void clear();
+    SScContour currentContour() const;
 
 signals:
     void selected(const SScContour&);

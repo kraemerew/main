@@ -1,6 +1,8 @@
 #include "hunetmainwindow.hpp"
 #include "imagedropper.hpp"
 #include "hunetimagedisplay.hpp"
+
+#include <QTabWidget>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QSpinBox>
@@ -8,7 +10,8 @@
 #include <QCheckBox>
 
 HuNetMainWindow::HuNetMainWindow()
-    : QTabWidget        (0),
+    : QWidget           (0),
+      m_tab             (new (std::nothrow) QTabWidget(this)),
       m_dropper         (new (std::nothrow) HuNetImageDropper   ()),
       m_procdisplay     (new (std::nothrow) HuNetImageDisplay   ()),
       m_cannydisplay    (new (std::nothrow) HuNetImageDisplay   ()),
@@ -18,6 +21,7 @@ HuNetMainWindow::HuNetMainWindow()
       m_cannymin        (new (std::nothrow) QSpinBox            ()),
       m_cannymax        (new (std::nothrow) QSpinBox            ())
 {    
+    Q_CHECK_PTR(m_tab);
     Q_CHECK_PTR(m_dropper);
     Q_CHECK_PTR(m_procdisplay);
     Q_CHECK_PTR(m_cannydisplay);
@@ -27,6 +31,12 @@ HuNetMainWindow::HuNetMainWindow()
     Q_CHECK_PTR(m_cannymin);
     Q_CHECK_PTR(m_cannymax);
 
+    setLayout(new QHBoxLayout);
+    Q_CHECK_PTR(layout());
+    layout()->addWidget(m_tab);
+    layout()->addWidget(m_contourdisplay->list());
+
+    m_contourdisplay->insertStretch();
     m_procdisplay->insert(m_mediansb);
     m_procdisplay->insert(m_eqcb);
     m_procdisplay->insertStretch();
@@ -35,17 +45,17 @@ HuNetMainWindow::HuNetMainWindow()
     m_cannydisplay->insert(m_cannymax);
     m_cannydisplay->insertStretch();
 
-    m_dropper       ->insertInto(this,"Original");
-    m_procdisplay   ->insertInto(this,"Processing");
-    m_cannydisplay  ->insertInto(this,"Canny");
-    m_contourdisplay->insertInto(this,"Contours");
+    m_dropper       ->insertInto(m_tab,"Original");
+    m_procdisplay   ->insertInto(m_tab,"Processing");
+    m_cannydisplay  ->insertInto(m_tab,"Canny");
+    m_contourdisplay->insertInto(m_tab,"Contours");
 
-    m_mediansb->setSingleStep(0.1);
-    m_mediansb  ->setPrefix("Median: ");
-    m_mediansb  ->setSuffix(("%"));
-    m_eqcb      ->setText("Histogram Eq.");
-    m_cannymin  ->setPrefix("Canny lower ");
-    m_cannymax  ->setPrefix("Canny upper ");
+    m_mediansb  ->setSingleStep(0.1);
+    m_mediansb  ->setPrefix ("Median: ");
+    m_mediansb  ->setSuffix (("%"));
+    m_eqcb      ->setText   ("Histogram Eq.");
+    m_cannymin  ->setPrefix ("Canny lower ");
+    m_cannymax  ->setPrefix ("Canny upper ");
 
     m_mediansb->setRange(0,99);
     m_cannymin->setRange(0,254);

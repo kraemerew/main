@@ -8,54 +8,53 @@ SScContour::SScContour() : m_done(false)
 SScContour::SScContour(const std::vector<cv::Point>& v) : m_data(v), m_done(false)
 {}
 
-QStringList SScContour::labels()
+QStringList SScContour::contourLabels()
 {
-    return QStringList() << "Hu1" << "Hu2" << "Hu3" << "Hu4" << "Hu5" << "Hu6" << "Hu7" << "ECRad" << "Convexity";
+    QStringList ret;
+    ret << "ConvexHull";
+    for (int i=3; i<15; ++i) ret << QString("Convex_Approx_%1").arg(i);
+    return ret;
 }
-QStringList SScContour::values()
+
+SScContour SScContour::contour(const QString& id) const
+{
+    SScContour ret;
+    if (id.startsWith("Convex_Approx_"))
+    {
+        bool ok = false;
+        const int edges = id.right(id.length()-14).toInt(&ok);
+        if (ok) ret = approxConvexHull(edges);
+    }
+    else
+    if (id=="ConvexHull")
+    {
+        ret = convexHull();
+    }
+    return ret;
+}
+
+QStringList SScContour::featureLabels()
+{
+    return QStringList() << "Hu1" << "Hu2" << "Hu3" << "Hu4" << "Hu5" << "Hu6" << "Hu7" << "Convexity" << "Circularity";
+}
+QStringList SScContour::featureValues()
 {
     QString s;
     QStringList ret;
     double *dl = huMoments();
     for (int i=0; i<7; ++i) { s.sprintf("%.4lf",dl[i]); ret << s; }
-    s.sprintf("%.4lf",minEnclosingCircleRadius()); ret << s;
     s.sprintf("%.4lf",convexity()); ret << s;
-
+    s.sprintf("%.4lf",circularity()); ret << s;
     return ret;
 }
-/*
-QString SScContour::label()
+
+double SScContour::circularity() const
 {
-
-    const double  r = minEnclosingCircleRadius(), a = area(), ha = hullArea(), cva = convexHullArea();
-    if (a>0)
-    {
-        QString s;
-        s.sprintf("Area %.2lf",a);
-        sl << s;
-    }
-    if (ha>0)
-    {
-        QString s;
-        s.sprintf("HullArea %.2lf",ha);
-        sl << s;
-    }
-  if (r>0)
-    {
-       const double ca = (r*r*3.14159265);
-        QString s;
-        s.sprintf("CircleArea %.2lf",ca);
-        sl << s;
-    }
-    if (cva>0)
-    {
-        QString s;
-        s.sprintf("ConvHullArea %.2lf",cva);
-        sl << s;
-    }
-
-    return sl.join(" ");
-}*/
+    cv::RotatedRect r = cv::fitEllipse(m_data);
+    const auto w = r.size.width, h = r.size.height;
+    if ((w==0) || (h==0)) return -1;
+    return w>h ? h/w : w/h;
+}
 
 double SScContour::perimeter() const { return cv::arcLength(m_data,true); }
 
@@ -153,12 +152,6 @@ double SScContour::minEnclosingCircleRadius() const
     float radius = 0.0;
     cv::minEnclosingCircle(m_data,center,radius);
     return radius;
-}
-
-int SScContour::diag() const
-{
-    const auto xr = xRange(), yr = yRange();
-    return qRound(qSqrt(qPow(xr.second-xr.first,2.0)+qPow(yr.second-yr.first,2.0)));
 }
 
 SScContour SScContour::hull(double epsilon) const
@@ -270,3 +263,4 @@ bool SScContour::isSelfIntersected(bool closed) const
     }
     return false;
 }
+

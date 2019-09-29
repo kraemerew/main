@@ -58,11 +58,11 @@ QList<SScContour> SScCannyContainer::contours(double min, double max)
 
         std::vector<std::vector<cv::Point> > contours;
         std::vector<cv::Vec4i> hierarchy;
-        cv::findContours(m_cmat,contours,hierarchy,CV_RETR_LIST,CV_CHAIN_APPROX_SIMPLE);
+        cv::findContours(m_cmat,contours,hierarchy,CV_RETR_LIST,CV_CHAIN_APPROX_NONE);
         for (unsigned int i=0; i<contours.size(); ++i)
         {
             const SScContour c(contours[i]);
-            if ((c.size()>10) && (c.diag()>=diag()/50)) ret << c;
+            if (c.size()>5) ret << c;
         }
     }
     return ret;

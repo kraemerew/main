@@ -4,6 +4,7 @@
 #include "contour.hpp"
 #include "hunetimagedisplay.hpp"
 
+class QComboBox;
 class HuNetContourList;
 
 class SScContourContainer : public HuNetImageDisplay
@@ -15,13 +16,16 @@ public:
     virtual ~SScContourContainer();
 
     void setContours(const QList<SScContour>& cl);
-    QObject* list() const;
+    QWidget* list() const;
 
-public slots:
-    void selectionSlot(const SScContour&);
+private slots:
+    void cbSlot         (int);
+    void selectionSlot  (const SScContour&);
 
 private:
-    HuNetContourList* m_contourlist;
+    void updateDisplay();
+    HuNetContourList*   m_contourlist;
+    QComboBox*          m_cb;
 };
 
 #endif

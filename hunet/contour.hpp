@@ -19,17 +19,19 @@ public:
     double* huMoments();
     double perimeter() const;
     inline double convexity() const { return isEmpty() ? -1 : convexHull().perimeter()/perimeter(); }
-    int diag() const;
+
     QPair<int,int> xRange() const;
     QPair<int,int> yRange() const;
     bool isSelfIntersected(bool closed=true) const;
+    double circularity() const;
 
-
-    static QStringList labels();
-    QStringList values();
+    static QStringList contourLabels();
+    SScContour contour(const QString& id) const;
+    static QStringList featureLabels();
+    QStringList featureValues();
 
     SScContour convexHull() const;
-    SScContour hull(double epsion = 1.0) const;
+    SScContour hull(double epsilon = 1.0) const;
     SScContour approxHull(int nr, int steps = 10000) const;
     SScContour approxConvexHull(int nr, int steps = 10000) const;
 
