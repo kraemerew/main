@@ -33,7 +33,7 @@ SScCannyContainer::SScCannyContainer(const QString& filename, const SScCannySett
         {
             cv::equalizeHist(m_mat,m_mat);
         }
-        else
+        else if (setting.m_clip)
         {
             uchar min=255, max=0;
             for (int y=0; y<m_mat.rows; ++y) for (int x=0; x<m_mat.cols; ++x) for (int c=0; c<m_mat.channels(); ++c)

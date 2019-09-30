@@ -29,6 +29,10 @@ private slots:
     void recalcCannySlot();
     void stringSlot     (const QString&);
     void contourSlot    (SScContour);
+    void loadSlot       ();
+    void saveSlot       ();
+    void tagSlot        (bool);
+
 private:
 
     inline void recalc      () { if (!m_recalctimer.isActive()) m_recalctimer.start(100); }
@@ -44,6 +48,7 @@ private:
     QDoubleSpinBox*     m_bilcsigma;
     QDoubleSpinBox*     m_bilsigma;
     QCheckBox*          m_eqcb;
+    QCheckBox*          m_clipcb;
     QCheckBox*          m_bilcb;
     QSpinBox*           m_cannymin;
     QSpinBox*           m_cannymax;

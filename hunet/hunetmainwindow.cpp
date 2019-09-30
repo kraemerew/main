@@ -8,6 +8,7 @@
 #include <QSpinBox>
 #include <QDoubleSpinBox>
 #include <QCheckBox>
+#include <QPushButton>
 
 HuNetMainWindow::HuNetMainWindow()
     : QWidget           (0),
@@ -20,6 +21,7 @@ HuNetMainWindow::HuNetMainWindow()
       m_bilcsigma       (new (std::nothrow) QDoubleSpinBox      ()),
       m_bilsigma        (new (std::nothrow) QDoubleSpinBox      ()),
       m_eqcb            (new (std::nothrow) QCheckBox           ()),
+      m_clipcb          (new (std::nothrow) QCheckBox           ()),
       m_bilcb           (new (std::nothrow) QCheckBox           ()),
       m_cannymin        (new (std::nothrow) QSpinBox            ()),
       m_cannymax        (new (std::nothrow) QSpinBox            ()),
@@ -32,6 +34,7 @@ HuNetMainWindow::HuNetMainWindow()
     Q_CHECK_PTR(m_contourdisplay);
     Q_CHECK_PTR(m_mediansb);
     Q_CHECK_PTR(m_eqcb);
+    Q_CHECK_PTR(m_clipcb);
     Q_CHECK_PTR(m_cannymin);
     Q_CHECK_PTR(m_cannymax);
     Q_CHECK_PTR(m_bilcb);
@@ -42,7 +45,33 @@ HuNetMainWindow::HuNetMainWindow()
     setLayout(new QHBoxLayout);
     Q_CHECK_PTR(layout());
     layout()->addWidget(m_tab);
-    layout()->addWidget(m_contourdisplay->list());
+
+    QWidget* w = new (std::nothrow) QWidget(this);
+    w->setLayout(new (std::nothrow) QVBoxLayout(w));
+    layout()->addWidget(w);
+
+    QWidget* ctlgroup = new (std::nothrow) QWidget(w);
+    ctlgroup->setLayout(new (std::nothrow) QHBoxLayout);
+    QWidget* taggroup = new (std::nothrow) QWidget(w);
+    taggroup->setLayout(new (std::nothrow) QHBoxLayout);
+
+    QPushButton* lb = new QPushButton(ctlgroup);
+    QPushButton* sb = new QPushButton(ctlgroup);
+    lb->setText("Load");
+    sb->setText("Save");
+    ctlgroup->layout()->addWidget(lb);
+    ctlgroup->layout()->addWidget(sb);
+
+    QPushButton* pos = new QPushButton(taggroup); pos->setCheckable(true);
+    QPushButton* neg = new QPushButton(taggroup); neg->setCheckable(true);
+    pos->setText("Tag positive");
+    neg->setText("Tag negative");
+    taggroup->layout()->addWidget(pos);
+    taggroup->layout()->addWidget(neg);
+
+    w->layout()->addWidget(ctlgroup);
+    w->layout()->addWidget(m_contourdisplay->list());
+    w->layout()->addWidget(taggroup);
 
     m_contourdisplay->insertStretch();
     m_procdisplay->insert(m_bilcb);
@@ -50,6 +79,7 @@ HuNetMainWindow::HuNetMainWindow()
     m_procdisplay->insert(m_bilcsigma);
     m_procdisplay->insert(m_bilsigma);
     m_procdisplay->insert(m_mediansb);
+    m_procdisplay->insert(m_clipcb);
     m_procdisplay->insert(m_eqcb);
     m_procdisplay->insertStretch();
 
@@ -69,6 +99,8 @@ HuNetMainWindow::HuNetMainWindow()
     m_mediansb  ->setSingleStep(0.1);
     m_mediansb  ->setPrefix ("Median: ");
     m_mediansb  ->setSuffix (("%"));
+    m_clipcb      ->setText   ("Histogram Clip");
+
     m_eqcb      ->setText   ("Histogram Eq.");
     m_cannymin  ->setPrefix ("Canny lower ");
     m_cannymax  ->setPrefix ("Canny upper ");
@@ -82,6 +114,8 @@ HuNetMainWindow::HuNetMainWindow()
     m_bilcb->setChecked(true);
     m_cannymin  ->setValue  (50);
     m_cannymax  ->setValue  (250);
+    m_clipcb   ->setChecked(true);
+
     m_eqcb      ->setChecked(false);
     m_mediansb  ->setValue(1.0);
 
@@ -96,12 +130,17 @@ HuNetMainWindow::HuNetMainWindow()
     ok = connect(m_bilsigma,                SIGNAL(valueChanged(double)),       this,       SLOT(doubleSlot(double)));          Q_ASSERT(ok);
     ok = connect(m_bilcsigma,               SIGNAL(valueChanged(double)),       this,       SLOT(doubleSlot(double)));          Q_ASSERT(ok);
     ok = connect(m_eqcb,                    SIGNAL(toggled(bool)),              this,       SLOT(boolSlot(bool)));              Q_ASSERT(ok);
+    ok = connect(m_clipcb,                  SIGNAL(toggled(bool)),              this,       SLOT(boolSlot(bool)));              Q_ASSERT(ok);
     ok = connect(&m_recalctimer,            SIGNAL(timeout()),                  this,       SLOT(recalcSlot()));                Q_ASSERT(ok);
     ok = connect(&m_cannytimer,             SIGNAL(timeout()),                  this,       SLOT(recalcCannySlot()));           Q_ASSERT(ok);
     ok = connect(m_contourdisplay->list(),  SIGNAL(selected(const SScContour&)),this,       SLOT(contourSlot(SScContour)));     Q_ASSERT(ok);
     ok = connect(m_loader,                  SIGNAL(dropped(const QString&)),    m_loader,   SLOT(tryLoad(const QString&)));     Q_ASSERT(ok);
     ok = connect(m_cannydisplay,            SIGNAL(dropped(const QString&)),    m_loader,   SLOT(tryLoad(const QString&)));     Q_ASSERT(ok);
     ok = connect(m_contourdisplay,          SIGNAL(dropped(const QString&)),    m_loader,   SLOT(tryLoad(const QString&)));     Q_ASSERT(ok);
+    ok = connect(lb,                        SIGNAL(clicked()),                  this,       SLOT(loadSlot()));                  Q_ASSERT(ok);
+    ok = connect(sb,                        SIGNAL(clicked()),                  this,       SLOT(saveSlot()));                  Q_ASSERT(ok);
+    ok = connect(pos,                       SIGNAL(toggled(bool)),              this,       SLOT(tagSlot(bool)));               Q_ASSERT(ok);
+    ok = connect(neg,                       SIGNAL(toggled(bool)),              this,       SLOT(tagSlot(bool)));               Q_ASSERT(ok);
 }
 
 HuNetMainWindow::~HuNetMainWindow()
@@ -158,7 +197,7 @@ void HuNetMainWindow::recalcSlot()
 {
     m_recalctimer.stop();
     m_cannytimer. stop();
-    SScCannySetting sc(m_mediansb->value(), m_eqcb->isChecked(), m_bilcb->isChecked(), m_bild->value(), m_bilcsigma->value(),m_bilsigma->value());
+    SScCannySetting sc(m_mediansb->value(), m_eqcb->isChecked(), m_clipcb->isChecked(), m_bilcb->isChecked(), m_bild->value(), m_bilcsigma->value(),m_bilsigma->value());
     SScCannyContainer cc(m_loader->filename(),sc);
     if (cc.isValid())
     {
@@ -187,5 +226,20 @@ void HuNetMainWindow::contourSlot(SScContour c)
     if (c.mark(im,3))
     {
        m_cannydisplay->set(im);
+    }
+}
+
+void HuNetMainWindow::loadSlot()
+{}
+
+void HuNetMainWindow::saveSlot()
+{}
+
+void HuNetMainWindow::tagSlot(bool b)
+{
+    if (b)
+    {
+
+
     }
 }
