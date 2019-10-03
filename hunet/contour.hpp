@@ -73,6 +73,9 @@ public:
     inline QList<SScContour> toList() const { return values(); }
     void fromJson(const QString& data, bool merge = false);
     QString toJSon() const;
+
+    bool tag(const QString& md5, const QString& tag);
+    QString tag(const QString& md5) const;
 };
 
 #endif // CONTOUR_HPP

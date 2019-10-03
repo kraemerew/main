@@ -43,6 +43,9 @@ QList<SScContour> SScContourContainer::getContours() const
     return m_contourlist->get();
 }
 
+bool    SScContourContainer::setTag(const QString& tag) { return m_contourlist->setTag(tag); }
+QString SScContourContainer::tag() const { return m_contourlist->currentTag(); }
+
 void SScContourContainer::selectionSlot(const SScContour&)
 {
     updateDisplay();

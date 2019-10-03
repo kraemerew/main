@@ -18,6 +18,8 @@ public:
     void setContours(const QList<SScContour>& cl);
     QWidget* list() const;
     QList<SScContour> getContours() const;
+    bool setTag(const QString& tag);
+    QString tag() const;
 
 private slots:
     void cbSlot         (int);

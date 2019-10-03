@@ -20,84 +20,91 @@ HuNetContourList::HuNetContourList(QWidget* parent) : QTableWidget(parent)
 void HuNetContourList::clear()
 {
     QTableWidget::clear();
-    m_contours.   clear();
-    m_it2idx.     clear();
+    m_cs.         clear();
+    m_it2line.    clear();
+    m_line2md5.   clear();
 }
 
 void HuNetContourList::set(const QList<SScContour>& cl)
 {
-    blockSignals(true);
     clear();
+    m_cs = SScContourSet(cl);
+    blockSignals(true);
 
     verticalHeader()->hide();
 
     auto labels = SScContour::featureLabels();
     setColumnCount(labels.size()+1);
     setHorizontalHeaderLabels(QStringList() << "" << labels);
-    setRowCount(cl.size());
+    setRowCount(m_cs.size());
 
-    m_contours = cl;
     int row = -1;
-    foreach(auto c, cl)
+    foreach(const QString& md5, m_cs.keys())
     {
+        SScContour c = m_cs[md5];
         int col = -1;
         const QPixmap pm = QPixmap::fromImage(c.draw(32));
         QTableWidgetItem* it = new (std::nothrow) QTableWidgetItem;
         Q_CHECK_PTR(it);
-        m_it2idx[it]=++row;
+
+        ++row;
+        m_it2line[it]=row;
+        m_line2md5[row]=md5;
+
         it->setIcon(QIcon(pm));
         setItem(row,++col,it);
         foreach(const QString& s, c.featureValues())
         {
             it = new (std::nothrow) QTableWidgetItem;
             Q_CHECK_PTR(it);
-            m_it2idx[it]=row;
+            m_it2line[it]=row;
             it->setText(s);
             setItem(row,++col,it);
         }
     }
-    if (cl.isEmpty()) hide(); else show();
     blockSignals(false);
-    if (!m_contours.isEmpty()) setCurrentCell(0,0);
+    if (m_cs.isEmpty()) hide(); else show();
+    if (!m_cs.isEmpty()) setCurrentCell(0,0);
 }
 
 void HuNetContourList::selectedSlot(QTableWidgetItem *newit, QTableWidgetItem *)
 {
     SScContour c;
-    if (newit && m_it2idx.contains(newit)) c = m_contours[m_it2idx[newit]];
+    if (newit && m_it2line.contains(newit))
+    {
+        const int line = m_it2line[newit];
+        c = contourForLine(line);
+    }
     emit selected (c);
+}
+
+SScContour HuNetContourList::contourForLine(int line) const
+{
+    SScContour c;
+    if (m_line2md5.contains(line))
+    {
+        c = m_cs[m_line2md5[line]];
+    }
+    return c;
 }
 
 SScContour HuNetContourList::currentContour() const
 {
     auto it = currentItem();
     SScContour c;
-    if (it && m_it2idx.contains(it)) c = m_contours[m_it2idx[it]];
+    if (it && m_it2line.contains(it))
+    {
+        c = contourForLine(m_it2line[it]);
+    }
     return c;
 }
 
-bool HuNetContourList::save(const QString &filename)
+bool HuNetContourList::setTag(const QString &tag)
 {
-    const QByteArray data = SScContour::toJson(m_contours).toUtf8();
-    QFile f(filename);
-    if (f.open(QIODevice::WriteOnly))
+    auto c = currentContour();
+    if (!c.isEmpty())
     {
-        f.write(data);
-        f.close();
-        return true;
-    }
-    return false;
-}
-
-bool HuNetContourList::load(const QString &filename)
-{
-    QFile f(filename);
-    if (f.open(QIODevice::ReadOnly))
-    {
-        const auto data = f.readAll();
-        auto cl = SScContour::fromJson(data);
-        m_contours = cl;
-        return true;
+        return m_cs.tag(c.md5(),tag);
     }
     return false;
 }

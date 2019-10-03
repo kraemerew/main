@@ -26,7 +26,9 @@ HuNetMainWindow::HuNetMainWindow()
       m_bilcb           (new (std::nothrow) QCheckBox           ()),
       m_cannymin        (new (std::nothrow) QSpinBox            ()),
       m_cannymax        (new (std::nothrow) QSpinBox            ()),
-      m_bild            (new (std::nothrow) QSpinBox            ())
+      m_bild            (new (std::nothrow) QSpinBox            ()),
+      m_tagpos          (new (std::nothrow) QPushButton         ()),
+      m_tagneg          (new (std::nothrow) QPushButton         ())
 {    
     Q_CHECK_PTR(m_tab);
     Q_CHECK_PTR(m_loader);
@@ -42,6 +44,8 @@ HuNetMainWindow::HuNetMainWindow()
     Q_CHECK_PTR(m_bilsigma);
     Q_CHECK_PTR(m_bilcsigma);
     Q_CHECK_PTR(m_bild);
+    Q_CHECK_PTR(m_tagpos);
+    Q_CHECK_PTR(m_tagneg);
 
     setLayout(new QHBoxLayout);
     Q_CHECK_PTR(layout());
@@ -63,12 +67,13 @@ HuNetMainWindow::HuNetMainWindow()
     ctlgroup->layout()->addWidget(lb);
     ctlgroup->layout()->addWidget(sb);
 
-    QPushButton* pos = new QPushButton(taggroup); pos->setCheckable(true);
-    QPushButton* neg = new QPushButton(taggroup); neg->setCheckable(true);
-    pos->setText("Tag positive");
-    neg->setText("Tag negative");
-    taggroup->layout()->addWidget(pos);
-    taggroup->layout()->addWidget(neg);
+    m_tagpos->setText("Pos");
+    m_tagneg->setText("Neg");
+    m_tagpos->setCheckable(true);
+    m_tagneg->setCheckable(true);
+    taggroup->layout()->addWidget(new QLabel("Tagging"));
+    taggroup->layout()->addWidget(m_tagpos);
+    taggroup->layout()->addWidget(m_tagneg);
 
     w->layout()->addWidget(ctlgroup);
     w->layout()->addWidget(m_contourdisplay->list());
@@ -140,8 +145,8 @@ HuNetMainWindow::HuNetMainWindow()
     ok = connect(m_contourdisplay,          SIGNAL(dropped(const QString&)),    m_loader,   SLOT(tryLoad(const QString&)));     Q_ASSERT(ok);
     ok = connect(lb,                        SIGNAL(clicked()),                  this,       SLOT(loadSlot()));                  Q_ASSERT(ok);
     ok = connect(sb,                        SIGNAL(clicked()),                  this,       SLOT(saveSlot()));                  Q_ASSERT(ok);
-    ok = connect(pos,                       SIGNAL(toggled(bool)),              this,       SLOT(tagSlot(bool)));               Q_ASSERT(ok);
-    ok = connect(neg,                       SIGNAL(toggled(bool)),              this,       SLOT(tagSlot(bool)));               Q_ASSERT(ok);
+    ok = connect(m_tagpos,                  SIGNAL(toggled(bool)),              this,       SLOT(tagSlot(bool)));               Q_ASSERT(ok);
+    ok = connect(m_tagneg,                  SIGNAL(toggled(bool)),              this,       SLOT(tagSlot(bool)));               Q_ASSERT(ok);
 }
 
 HuNetMainWindow::~HuNetMainWindow()
@@ -227,6 +232,12 @@ void HuNetMainWindow::contourSlot(SScContour c)
     if (c.mark(im,3))
     {
        m_cannydisplay->set(im);
+       if (c.tag()=="Pos") m_tagpos->setChecked(true); else
+       if (c.tag()=="Neg") m_tagneg->setChecked(true); else
+       {
+           m_tagpos->setChecked(false);
+           m_tagneg->setChecked(false);
+       }
     }
 }
 
@@ -261,9 +272,9 @@ void HuNetMainWindow::saveSlot()
 
 void HuNetMainWindow::tagSlot(bool b)
 {
-    if (b)
+    if (b && sender())
     {
-
-
+        if (sender()==m_tagpos) { m_contourdisplay->setTag("Pos"); m_tagneg->setChecked(false); } else
+        if (sender()==m_tagneg) { m_contourdisplay->setTag("Neg"); m_tagpos->setChecked(false); }
     }
 }

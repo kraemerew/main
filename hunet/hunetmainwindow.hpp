@@ -12,6 +12,7 @@ class QDoubleSpinBox;
 class HuNetImageLoader;
 class HuNetImageDisplay;
 class QTabWidget;
+class QPushButton;
 
 class HuNetMainWindow : public QWidget
 {
@@ -53,7 +54,8 @@ private:
     QSpinBox*           m_cannymin;
     QSpinBox*           m_cannymax;
     QSpinBox*           m_bild;
-
+    QPushButton*        m_tagpos;
+    QPushButton*        m_tagneg;
     QTimer              m_recalctimer, m_cannytimer;
     SScCannyContainer   m_cc;
     QImage              m_orig;

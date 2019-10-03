@@ -391,7 +391,9 @@ bool SScContourSet::add(const SScContour& c)
     (*this)[md5]=c;
     return true;
 }
-void    SScContourSet::add      (const SScContourSet& other)        { add(other.toList()); }
-void    SScContourSet::add      (const QList<SScContour>& cl)       { foreach(const auto& c, cl) add(c); }
-QString SScContourSet::toJSon   () const                            { return SScContour::toJson(values()); }
-void    SScContourSet::fromJson (const QString &data, bool merge)   { if (!merge) clear(); add(SScContour::fromJson(data)); }
+void    SScContourSet::add      (const SScContourSet& other)            { add(other.toList()); }
+void    SScContourSet::add      (const QList<SScContour>& cl)           { foreach(const auto& c, cl) add(c); }
+QString SScContourSet::toJSon   () const                                { return SScContour::toJson(values()); }
+void    SScContourSet::fromJson (const QString &data, bool merge)       { if (!merge) clear(); add(SScContour::fromJson(data)); }
+bool    SScContourSet::tag      (const QString &md5, const QString &tag){ if (!contains(md5)) return false; (*this)[md5].setTag(tag); return true; }
+QString SScContourSet::tag      (const QString &md5) const              { return contains(md5) ? (*this)[md5].tag() : QString(); }
