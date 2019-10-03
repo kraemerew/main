@@ -339,7 +339,7 @@ QString SScContour::md5()
         }
         QCryptographicHash hash(QCryptographicHash::Md5);
         hash.addData(data);
-        m_md5=hash.result();
+        m_md5=hash.result().toHex();
     }
     return m_md5;
 }
@@ -372,3 +372,26 @@ QList<SScContour> SScContour::fromJson(const QString &data)
 
 QString SScContour::tag     () const                { return m_tag; }
 void    SScContour::setTag  (const QString &newtag) { m_tag=newtag; }
+
+
+
+
+SScContourSet::SScContourSet(const QList<SScContour>& cl)
+{
+    foreach(SScContour c, cl) add(c);
+}
+SScContourSet::SScContourSet(const QString &jsondata)
+{
+    fromJson(jsondata);
+}
+bool SScContourSet::add(const SScContour& c)
+{
+    const QString md5 = SScContour(c).md5();
+    if (contains(md5)) return false;
+    (*this)[md5]=c;
+    return true;
+}
+void    SScContourSet::add      (const SScContourSet& other)        { add(other.toList()); }
+void    SScContourSet::add      (const QList<SScContour>& cl)       { foreach(const auto& c, cl) add(c); }
+QString SScContourSet::toJSon   () const                            { return SScContour::toJson(values()); }
+void    SScContourSet::fromJson (const QString &data, bool merge)   { if (!merge) clear(); add(SScContour::fromJson(data)); }

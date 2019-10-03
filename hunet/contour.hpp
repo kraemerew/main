@@ -13,6 +13,7 @@ public:
     SScContour(const std::vector<cv::Point>& v);
     SScContour(const QVariantMap& vm);
     QVariantMap vm() const;
+    inline bool isTagged() const { return !tag().isEmpty(); }
     QString tag() const;
     void setTag(const QString& newtag);
     QString md5();
@@ -59,6 +60,19 @@ private:
     bool                    m_done;
     double                  m_hu[7];
     QString                 m_md5, m_tag;
+};
+
+class SScContourSet : public QMap<QString,SScContour>
+{
+public:
+    explicit SScContourSet(const QList<SScContour>& cl = QList<SScContour>());
+    explicit SScContourSet(const QString& jsondata);
+    bool add(const SScContour& c);
+    void add(const QList<SScContour>& cl);
+    void add(const SScContourSet& other);
+    inline QList<SScContour> toList() const { return values(); }
+    void fromJson(const QString& data, bool merge = false);
+    QString toJSon() const;
 };
 
 #endif // CONTOUR_HPP

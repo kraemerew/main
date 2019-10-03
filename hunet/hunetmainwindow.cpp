@@ -2,6 +2,7 @@
 #include "imageloader.hpp"
 #include "hunetimagedisplay.hpp"
 
+#include <QFileDialog>
 #include <QTabWidget>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -230,10 +231,33 @@ void HuNetMainWindow::contourSlot(SScContour c)
 }
 
 void HuNetMainWindow::loadSlot()
-{}
+{
+    const QString fn = QFileDialog::getOpenFileName(NULL,"*.cnt");
+    QFile f(fn);
+    if (f.open(QIODevice::ReadOnly))
+    {
+        SScContourSet cc(f.readAll());
+        m_contourdisplay->setContours(cc.toList());
+    }
+}
 
 void HuNetMainWindow::saveSlot()
-{}
+{
+    const QString fn = QFileDialog::getSaveFileName(NULL,"*.cnt");
+    QFile f(fn);
+    SScContourSet cc;
+    if (f.open(QIODevice::ReadOnly))
+    {
+        cc = SScContourSet(f.readAll());
+        f.close();
+    }
+    if (f.open(QIODevice::WriteOnly))
+    {
+        cc.add(m_contourdisplay->getContours());
+        f.write(cc.toJSon().toUtf8());
+        f.close();
+    }
+}
 
 void HuNetMainWindow::tagSlot(bool b)
 {

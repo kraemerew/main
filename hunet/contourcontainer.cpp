@@ -38,6 +38,11 @@ void SScContourContainer::setContours(const QList<SScContour> &cl)
     m_contourlist->setEnabled(!cl.isEmpty());
 }
 
+QList<SScContour> SScContourContainer::getContours() const
+{
+    return m_contourlist->get();
+}
+
 void SScContourContainer::selectionSlot(const SScContour&)
 {
     updateDisplay();

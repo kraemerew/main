@@ -12,6 +12,7 @@ public:
     HuNetContourList(QWidget* parent = NULL);
 
     void set(const QList<SScContour>& cl);
+    inline QList<SScContour> get() const { return m_contours; }
     void clear();
     SScContour currentContour() const;
 
@@ -25,8 +26,8 @@ private slots:
     void selectedSlot(QTableWidgetItem* oldit, QTableWidgetItem* newit);
 
 private:
-    QMap<QTableWidgetItem*, int> m_it2idx;
-    QList<SScContour> m_contours;
+    QMap<QTableWidgetItem*, int>    m_it2idx;
+    QList<SScContour>               m_contours;
 };
 
 #endif // HUNETCONTOURLIST_HPP

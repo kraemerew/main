@@ -17,6 +17,7 @@ public:
 
     void setContours(const QList<SScContour>& cl);
     QWidget* list() const;
+    QList<SScContour> getContours() const;
 
 private slots:
     void cbSlot         (int);

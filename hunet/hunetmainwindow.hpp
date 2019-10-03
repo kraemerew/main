@@ -39,10 +39,10 @@ private:
     inline void recalcCanny () { if (!m_cannytimer. isActive()) m_cannytimer. start(100); }
 
     QTabWidget*             m_tab;
-    HuNetImageLoader*      m_loader;
+    HuNetImageLoader*       m_loader;
     HuNetImageDisplay*      m_procdisplay;
     HuNetImageDisplay*      m_cannydisplay;
-    SScContourContainer*  m_contourdisplay;
+    SScContourContainer*    m_contourdisplay;
 
     QDoubleSpinBox*     m_mediansb;
     QDoubleSpinBox*     m_bilcsigma;
