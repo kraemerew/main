@@ -228,16 +228,16 @@ void HuNetMainWindow::recalcCannySlot()
 
 void HuNetMainWindow::contourSlot(SScContour c)
 {
+    if (c.tag()=="Pos") m_tagpos->setChecked(true); else
+    if (c.tag()=="Neg") m_tagneg->setChecked(true); else
+    {
+        m_tagpos->setChecked(false);
+        m_tagneg->setChecked(false);
+    }
     QImage im = m_orig;
     if (c.mark(im,3))
     {
        m_cannydisplay->set(im);
-       if (c.tag()=="Pos") m_tagpos->setChecked(true); else
-       if (c.tag()=="Neg") m_tagneg->setChecked(true); else
-       {
-           m_tagpos->setChecked(false);
-           m_tagneg->setChecked(false);
-       }
     }
 }
 
