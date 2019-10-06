@@ -67,8 +67,8 @@ HuNetMainWindow::HuNetMainWindow()
     ctlgroup->layout()->addWidget(lb);
     ctlgroup->layout()->addWidget(sb);
 
-    m_tagpos->setText("Pos");
-    m_tagneg->setText("Neg");
+    m_tagpos->setText("Positive");
+    m_tagneg->setText("Negaive");
     m_tagpos->setCheckable(true);
     m_tagneg->setCheckable(true);
     taggroup->layout()->addWidget(new QLabel("Tagging"));
@@ -228,8 +228,8 @@ void HuNetMainWindow::recalcCannySlot()
 
 void HuNetMainWindow::contourSlot(SScContour c)
 {
-    if (c.tag()=="Pos") m_tagpos->setChecked(true); else
-    if (c.tag()=="Neg") m_tagneg->setChecked(true); else
+    if (c.tag()=="+") m_tagpos->setChecked(true); else
+    if (c.tag()=="-") m_tagneg->setChecked(true); else
     {
         m_tagpos->setChecked(false);
         m_tagneg->setChecked(false);
@@ -260,6 +260,7 @@ void HuNetMainWindow::saveSlot()
     if (f.open(QIODevice::ReadOnly))
     {
         cc = SScContourSet(f.readAll());
+
         f.close();
     }
     if (f.open(QIODevice::WriteOnly))
@@ -272,9 +273,16 @@ void HuNetMainWindow::saveSlot()
 
 void HuNetMainWindow::tagSlot(bool b)
 {
-    if (b && sender())
+    if (sender())
     {
-        if (sender()==m_tagpos) { m_contourdisplay->setTag("Pos"); m_tagneg->setChecked(false); } else
-        if (sender()==m_tagneg) { m_contourdisplay->setTag("Neg"); m_tagpos->setChecked(false); }
+        if (b)
+        {
+            if (sender()==m_tagpos) { m_contourdisplay->setTag("+"); m_tagneg->setChecked(false); } else
+            if (sender()==m_tagneg) { m_contourdisplay->setTag("-"); m_tagpos->setChecked(false); }
+        }
+        else
+        {
+            if (!m_tagpos->isChecked() && !m_tagneg->isChecked()) m_contourdisplay->setTag(QString());
+        }
     }
 }
