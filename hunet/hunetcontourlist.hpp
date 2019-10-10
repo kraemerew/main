@@ -14,7 +14,6 @@ public:
     void set(const QList<SScContour>& cl);
     inline QList<SScContour> get() const { return m_cs.toList(); }
     SScContour currentContour() const;
-    SScContour contourForLine(int) const;
     inline QString currentTag() const { return currentContour().tag(); }
     bool setTag(const QString& tag);
     void clear();
@@ -27,9 +26,9 @@ private slots:
 
 private:
     void updateTag(const QString& md5);
-    int md52line(const QString& md5) const;
-    QMap<QTableWidgetItem*, int>    m_it2line;
-    QMap<int,QString>               m_line2md5;
+
+    QMap<QTableWidgetItem*,QString> m_it2md5;
+    QMap<QString,QTableWidgetItem*> m_md52tagit;
     SScContourSet                   m_cs;
 };
 

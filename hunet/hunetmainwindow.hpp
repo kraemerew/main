@@ -36,8 +36,8 @@ private slots:
 
 private:
 
-    inline void recalc      () { if (!m_recalctimer.isActive()) m_recalctimer.start(100); }
-    inline void recalcCanny () { if (!m_cannytimer. isActive()) m_cannytimer. start(100); }
+    inline void recalc      () { if (!m_recalctimer.isActive()) m_recalctimer.start(10); }
+    inline void recalcCanny () { if (!m_cannytimer. isActive()) m_cannytimer. start(10); }
 
     QTabWidget*             m_tab;
     HuNetImageLoader*       m_loader;

@@ -8,6 +8,14 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 
+#include <pcl/ModelCoefficients.h>
+#include <pcl/point_types.h>
+#include <pcl/sample_consensus/method_types.h>
+#include <pcl/sample_consensus/model_types.h>
+#include <pcl/filters/project_inliers.h>
+#include <pcl/segmentation/sac_segmentation.h>
+#include <pcl/surface/concave_hull.h>
+
 SScContour::SScContour() : m_done(false)
 {}
 
@@ -50,8 +58,9 @@ QVariantMap SScContour::vm() const
 QStringList SScContour::contourLabels()
 {
     QStringList ret;
+    ret << "ConcaveHull";
     ret << "ConvexHull";
-    ret << "FitEllipse";
+    ret << "FitEllipse";    
     for (int i=3; i<15; ++i) ret << QString("Convex_Approx_%1").arg(i);
     return ret;
 }
@@ -59,6 +68,7 @@ QStringList SScContour::contourLabels()
 SScContour SScContour::contour(const QString& id) const
 {
     SScContour ret;
+
     if (id.startsWith("FitEllipse"))
     {
         ret = fitEllipse();
@@ -74,12 +84,19 @@ SScContour SScContour::contour(const QString& id) const
     {
         ret = convexHull();
     }
+    else
+    if (id=="ConcaveHull")
+    {
+        ret = concaveHull();
+    }
+
     return ret;
 }
 
 QStringList SScContour::featureLabels()
 {
-    return QStringList() << "Hu1" << "Hu2" << "Hu3" << "Hu4" << "Hu5" << "Hu6" << "Hu7" << "Convexity" << "Circularity";
+    return QStringList() << "Hu1" << "Hu2" << "Hu3" << "Hu4" << "Hu5" << "Hu6" << "Hu7"
+                         << "Convexity" << "Circularity" << "ElongationFactor" << "HeywoodCFact" << "Compactness" << "HydrRadius";
 }
 QStringList SScContour::featureValues()
 {
@@ -89,6 +106,12 @@ QStringList SScContour::featureValues()
     for (int i=0; i<7; ++i) { s.sprintf("%.4lf",dl[i]); ret << s; }
     s.sprintf("%.4lf",convexity()); ret << s;
     s.sprintf("%.4lf",circularity()); ret << s;
+    s.sprintf("%.4f",elongationFactor()); ret << s;
+    s.sprintf("%.4f",heywoodCFact()); ret << s;
+    s.sprintf("%.4f",compactnessFactor()); ret << s;
+    s.sprintf("%.4f",hydraulicRadius()); ret << s;
+
+
     return ret;
 }
 
@@ -99,9 +122,29 @@ double SScContour::circularity() const
     if ((w==0) || (h==0)) return -1;
     return w>h ? h/w : w/h;
 }
-
+double SScContour::compactnessFactor() const
+{
+    cv::RotatedRect r = cv::minAreaRect(m_data);
+    const double ra = r.size.width*r.size.height;
+    return ra>0 ? area()/ra : 0.0;
+}
+double SScContour::elongationFactor() const
+{
+    cv::RotatedRect r = cv::minAreaRect(m_data);
+    if ((r.size.width==0) || (r.size.height==0)) return 0;
+    if (r.size.width>r.size.height) return r.size.width/r.size.height;
+    return r.size.height/r.size.width;
+}
 double SScContour::perimeter() const { return cv::arcLength(m_data,true); }
-
+double SScContour::heywoodCFact() const
+{
+    const double a = area();
+    return a == 0 ? 0.0 : perimeter() / (2*qSqrt(area()*3.14159265));
+}
+double SScContour::waddelDiskRadius() const
+{
+    return qSqrt(area()/3.14159265);
+}
 bool SScContour::mark(QImage& im, double th) const
 {
     if (isValid() && !im.isNull())
@@ -149,7 +192,7 @@ double* SScContour::huMoments()
         for (int i=0; i<7; ++i)
         {
             const double sign = (m_hu[i]<0) ? -1 : 1;
-            m_hu[i]=-sign*log(qAbs(m_hu[i]));
+            m_hu[i]=-sign*log(qAbs(m_hu[i])+1e-200);
         }
         m_done = true;
     }
@@ -227,6 +270,65 @@ SScContour SScContour::convexHull() const
     std::vector<cv::Point> data;
     cv::convexHull(m_data,data);
     return SScContour(data);
+}
+
+SScContour SScContour::concaveHull() const
+{
+    SScContour ret;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud           (new pcl::PointCloud<pcl::PointXYZ>),
+                                        cloud_projected (new pcl::PointCloud<pcl::PointXYZ>);
+    cloud->reserve(m_data.size()+1);
+    for (size_t i=0; i<m_data.size(); ++i)
+    {
+        const pcl::PointXYZ p(m_data[i].x,m_data[i].y,0.0);
+        cloud->push_back(p);
+    }
+    if (!m_data.size()==0)
+    {
+        const pcl::PointXYZ p(m_data[0].x,m_data[0].y,0.0);
+        cloud->push_back(p);
+    }
+
+
+    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
+    pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+
+    // Create the segmentation object
+    pcl::SACSegmentation<pcl::PointXYZ> seg;
+
+    // Optional
+    seg.setOptimizeCoefficients (true);
+
+    // Mandatory
+    seg.setModelType (pcl::SACMODEL_PLANE);
+    seg.setMethodType (pcl::SAC_RANSAC);
+    seg.setDistanceThreshold (0.01);
+    seg.setInputCloud (cloud);
+    seg.segment (*inliers, *coefficients);
+
+
+    // Project the model inliers
+    pcl::ProjectInliers<pcl::PointXYZ> proj;
+    proj.setModelType (pcl::SACMODEL_PLANE);
+    proj.setIndices (inliers);
+    proj.setInputCloud (cloud);
+    proj.setModelCoefficients (coefficients);
+    proj.filter (*cloud_projected);
+
+    ret.reserve(cloud_projected->size());
+    for (size_t i=0; i<cloud_projected->size(); ++i)
+    {
+        pcl::PointXYZ p = (*cloud_projected)[i];
+        ret.append(cv::Point(p.x,p.y));
+    }
+    // Create a Concave Hull representation of the projected inliers
+/*    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_hull (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::ConcaveHull<pcl::PointXYZ> chull;
+    chull.setInputCloud (cloud_projected);
+    chull.setAlpha (0.1);
+    chull.reconstruct (*cloud_hull);
+*/
+    return ret;
 }
 
 SScContour SScContour::approxHull(int nr, int steps) const

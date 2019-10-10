@@ -8,10 +8,11 @@ TARGET = hunet
 CONFIG += console
 CONFIG -= app_bundle
 
-INCLUDEPATH += hunet nnhelpers blas highwaynn highwaynn/neurons
+INCLUDEPATH += hunet nnhelpers blas highwaynn highwaynn/neurons /usr/local/include/pcl-1.9/ /usr/include/eigen3
 TEMPLATE = app
 
 LIBS += -lcblas -lopencv_core -lopencv_imgcodecs -lopencv_imgproc
+LIBS += -lpcl_surface -lpcl_segmentation -lpcl_common -lpcl_filters
 
 SOURCES += hunet/main.cpp \
     nnhelpers/sscactivation.cpp \

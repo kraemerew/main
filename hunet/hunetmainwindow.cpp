@@ -132,15 +132,16 @@ HuNetMainWindow::HuNetMainWindow()
     ok = connect(m_cannymin,                SIGNAL(valueChanged(int)),          this,       SLOT(intSlot(int)));                Q_ASSERT(ok);
     ok = connect(m_cannymax,                SIGNAL(valueChanged(int)),          this,       SLOT(intSlot(int)));                Q_ASSERT(ok);
     ok = connect(m_bild,                    SIGNAL(valueChanged(int)),          this,       SLOT(intSlot(int)));                Q_ASSERT(ok);
-    ok = connect(m_bilcb,                   SIGNAL(toggled(bool)),              this,       SLOT(boolSlot(bool)));              Q_ASSERT(ok);
     ok = connect(m_bilsigma,                SIGNAL(valueChanged(double)),       this,       SLOT(doubleSlot(double)));          Q_ASSERT(ok);
     ok = connect(m_bilcsigma,               SIGNAL(valueChanged(double)),       this,       SLOT(doubleSlot(double)));          Q_ASSERT(ok);
+    ok = connect(m_bilcb,                   SIGNAL(toggled(bool)),              this,       SLOT(boolSlot(bool)));              Q_ASSERT(ok);
     ok = connect(m_eqcb,                    SIGNAL(toggled(bool)),              this,       SLOT(boolSlot(bool)));              Q_ASSERT(ok);
     ok = connect(m_clipcb,                  SIGNAL(toggled(bool)),              this,       SLOT(boolSlot(bool)));              Q_ASSERT(ok);
     ok = connect(&m_recalctimer,            SIGNAL(timeout()),                  this,       SLOT(recalcSlot()));                Q_ASSERT(ok);
     ok = connect(&m_cannytimer,             SIGNAL(timeout()),                  this,       SLOT(recalcCannySlot()));           Q_ASSERT(ok);
     ok = connect(m_contourdisplay->list(),  SIGNAL(selected(const SScContour&)),this,       SLOT(contourSlot(SScContour)));     Q_ASSERT(ok);
     ok = connect(m_loader,                  SIGNAL(dropped(const QString&)),    m_loader,   SLOT(tryLoad(const QString&)));     Q_ASSERT(ok);
+    ok = connect(m_procdisplay,             SIGNAL(dropped(const QString&)),    m_loader,   SLOT(tryLoad(const QString&)));     Q_ASSERT(ok);
     ok = connect(m_cannydisplay,            SIGNAL(dropped(const QString&)),    m_loader,   SLOT(tryLoad(const QString&)));     Q_ASSERT(ok);
     ok = connect(m_contourdisplay,          SIGNAL(dropped(const QString&)),    m_loader,   SLOT(tryLoad(const QString&)));     Q_ASSERT(ok);
     ok = connect(lb,                        SIGNAL(clicked()),                  this,       SLOT(loadSlot()));                  Q_ASSERT(ok);
@@ -186,31 +187,34 @@ void HuNetMainWindow::intSlot(int v)
 
 void HuNetMainWindow::boolSlot(bool)
 {
-    m_bilsigma->setEnabled(m_bilcb->isChecked());
-    m_bilcsigma->setEnabled(m_bilcb->isChecked());
-    m_bild->setEnabled(m_bilcb->isChecked());
-
-    recalc();
+    m_bilsigma  ->setEnabled(m_bilcb->isChecked());
+    m_bilcsigma ->setEnabled(m_bilcb->isChecked());
+    m_bild      ->setEnabled(m_bilcb->isChecked());
+    recalcSlot();
 }
 
 void HuNetMainWindow::stringSlot(const QString&)
 {
     m_orig = m_loader->get();
-    recalc();
+    recalcSlot();
 }
 
 void HuNetMainWindow::recalcSlot()
 {
     m_recalctimer.stop();
-    m_cannytimer. stop();
+    m_cannytimer. stop();    
     SScCannySetting sc(m_mediansb->value(), m_eqcb->isChecked(), m_clipcb->isChecked(), m_bilcb->isChecked(), m_bild->value(), m_bilcsigma->value(),m_bilsigma->value());
+
+    qWarning(">>>>>>>> EQ %s CLIP %s BIL %s", m_eqcb->isChecked() ? "ON":"OFF", m_clipcb->isChecked() ?"ON":"OFF", m_bilcb->isChecked() ? "ON":"OFF");
     SScCannyContainer cc(m_loader->filename(),sc);
     if (cc.isValid())
     {
+        qWarning(">>>>SETTING");
         m_cc = cc;
-        m_procdisplay->set(m_cc.orig());
+        m_procdisplay->set(cc.orig());
         recalcCannySlot();
     }
+    else qWarning(">>>>>NOT VALID");
 }
 
 void HuNetMainWindow::recalcCannySlot()
@@ -218,6 +222,7 @@ void HuNetMainWindow::recalcCannySlot()
     m_cannytimer.stop();
     if (m_cc.isValid())
     {
+        qWarning(">>>>DOING CANNY");
         auto c = m_cc.contours(m_cannymin->value(), m_cannymax->value());
         m_cannydisplay->set(m_cc.canny());
         m_orig = m_cannydisplay->get();
