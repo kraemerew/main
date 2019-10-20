@@ -278,16 +278,22 @@ SScContour SScContour::concaveHull() const
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud           (new pcl::PointCloud<pcl::PointXYZ>),
                                         cloud_projected (new pcl::PointCloud<pcl::PointXYZ>);
     cloud->reserve(m_data.size()+1);
+    //int sumx=0, sumy=0;
     for (size_t i=0; i<m_data.size(); ++i)
     {
         const pcl::PointXYZ p(m_data[i].x,m_data[i].y,0.0);
+        //sumx+=m_data[i].x;
+        //sumy+=m_data[i].y;
         cloud->push_back(p);
     }
-    if (!m_data.size()==0)
+    /*if (m_data.size()!=0)
     {
-        const pcl::PointXYZ p(m_data[0].x,m_data[0].y,0.0);
+        const double cx = (double)sumx / (double)m_data.size(),
+                     cy = (double)sumy / (double)m_data.size();
+        const pcl::PointXYZ p(cx,cy,0.0);
         cloud->push_back(p);
-    }
+    }*/
+
 
 
     pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);

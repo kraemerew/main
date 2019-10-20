@@ -11,7 +11,7 @@ CONFIG -= app_bundle
 INCLUDEPATH += hunet nnhelpers blas highwaynn highwaynn/neurons /usr/local/include/pcl-1.9/ /usr/include/eigen3
 TEMPLATE = app
 
-LIBS += -lcblas -lopencv_core -lopencv_imgcodecs -lopencv_imgproc
+LIBS += -lcblas -lopencv_core -lopencv_imgcodecs -lopencv_imgproc -lopencv_highgui
 LIBS += -lpcl_surface -lpcl_segmentation -lpcl_common -lpcl_filters
 
 SOURCES += hunet/main.cpp \
@@ -40,7 +40,8 @@ SOURCES += hunet/main.cpp \
     hunet/hunetcontourlist.cpp \
     hunet/imageconverter.cpp \
     hunet/hunetimagedisplay.cpp \
-    hunet/contourcontainer.cpp
+    hunet/contourcontainer.cpp \
+    hunet/watershed.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -80,5 +81,6 @@ HEADERS += \
     hunet/hunetcontourlist.hpp \
     hunet/imageconverter.h \
     hunet/hunetimagedisplay.hpp \
-    hunet/contourcontainer.hpp
+    hunet/contourcontainer.hpp \
+    hunet/watershed.hpp
 

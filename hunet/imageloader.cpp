@@ -1,9 +1,8 @@
 #include "imageloader.hpp"
-
 #include "opencv2/core.hpp"
 #include "opencv2/imgcodecs.hpp"
 #include "imageconverter.h"
-
+#include "watershed.hpp"
 HuNetImageLoader::HuNetImageLoader(QWidget* parent)
     : HuNetImageDisplay(parent),
       m_label(new (std::nothrow) QLabel)
@@ -22,6 +21,9 @@ bool HuNetImageLoader::tryLoad(const QString& filename)
         cv::Mat im = cv::imread(filename.toUtf8().constData(),cv::IMREAD_COLOR);
         if ((im.cols>0) && (im.rows>0))
         {
+            cv::Mat trg;
+            SSnWatershed::execute(im,trg,40);
+
             m_filename = filename;
             setText(QString());
             set(SSnImageConverter::image(im));
