@@ -2,6 +2,8 @@
 #define WATERSHED_HPP
 
 #include <opencv2/core.hpp>
+#include <QList>
+#include "contour.hpp"
 
 namespace SSnWatershed
 {
@@ -22,6 +24,6 @@ namespace SSnWatershed
         int     m_binthr;
         bool    m_inv;
     };
-    void execute(cv::Mat& src, cv::Mat& trg, const Pars& p = Pars());
+    QList<SScContour> execute(cv::Mat& src, cv::Mat& trg, const Pars& p = Pars());
 }
 #endif // WATERSHED_HPP

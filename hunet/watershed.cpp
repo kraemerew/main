@@ -3,6 +3,7 @@
 #include <opencv2/highgui.hpp>
 #include <Qt>
 #include <QtMath>
+#include <QHash>
 using namespace SSnWatershed;
 
 
@@ -23,7 +24,7 @@ int Pars::oddKernel(int w, int h, double perc) const
 double Pars::diag(int w, int h) const { return qSqrt(w*w+h*h); }
 
 
-void SSnWatershed::execute(cv::Mat &src, cv::Mat &trg, const Pars& p)
+QList<SScContour> SSnWatershed::execute(cv::Mat &src, cv::Mat &trg, const Pars& p)
 {    
     int k = p.median(src.size().width,src.size().height);
     if (k>2) cv::medianBlur(src,src,k);
@@ -125,6 +126,7 @@ void SSnWatershed::execute(cv::Mat &src, cv::Mat &trg, const Pars& p)
     // Create the result image
     cv::Mat dst = cv::Mat::zeros(markers.size(), CV_8UC3);
     // Fill labeled objects with random colors
+    QHash<int,std::vector<cv::Point> > hash;
     for (int i = 0; i < markers.rows; i++)
     {
         for (int j = 0; j < markers.cols; j++)
@@ -133,9 +135,15 @@ void SSnWatershed::execute(cv::Mat &src, cv::Mat &trg, const Pars& p)
             if (index > 0 && index <= static_cast<int>(contours.size()))
             {
                 dst.at<cv::Vec3b>(i,j) = colors[index-1];
+                hash[index].push_back(cv::Point(i,j));
             }
         }
     }
     // Visualize the final image
     imshow("Final Result", dst);
+
+    QList<SScContour> ret;
+    ret.reserve(hash.size());
+    foreach(auto c, hash.values()) ret << SScContour(c);
+    return ret;
 }
