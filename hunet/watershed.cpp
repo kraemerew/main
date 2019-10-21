@@ -59,7 +59,7 @@ void SSnWatershed::execute(cv::Mat &src, cv::Mat &trg, const Pars& p)
         cv::morphologyEx(bw,bw,cv::MORPH_CLOSE,element);
     }
     cv::threshold(bw, bw, p.thr(), 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
-    //imshow("Binary Image", bw);
+    imshow("Binary Image", bw);
 
 
     // Perform the distance transform algorithm
@@ -83,6 +83,8 @@ void SSnWatershed::execute(cv::Mat &src, cv::Mat &trg, const Pars& p)
     cv::Mat kernel1 = cv::Mat::ones(3, 3, CV_8U);
     cv::dilate(dist, dist, kernel1);
     cv::imshow("Peaks", dist*255);
+
+
     // Create the CV_8U version of the distance image
     // It is needed for findContours()
     cv::Mat dist_8u;
@@ -136,5 +138,4 @@ void SSnWatershed::execute(cv::Mat &src, cv::Mat &trg, const Pars& p)
     }
     // Visualize the final image
     imshow("Final Result", dst);
-
 }
