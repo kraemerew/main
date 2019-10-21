@@ -22,7 +22,8 @@ bool HuNetImageLoader::tryLoad(const QString& filename)
         if ((im.cols>0) && (im.rows>0))
         {
             cv::Mat trg;
-            SSnWatershed::execute(im,trg,40);
+
+            SSnWatershed::execute(im,trg,SSnWatershed::Pars(0.0,1,40,true,.6));
 
             m_filename = filename;
             setText(QString());

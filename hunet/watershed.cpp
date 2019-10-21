@@ -2,12 +2,31 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 #include <Qt>
+#include <QtMath>
+using namespace SSnWatershed;
 
-void SSnWatershed::execute(cv::Mat &src, cv::Mat &trg, int thr)
+
+Pars::Pars(double median, double close, int binthr, bool inv, double dthr)
+    : m_median  (qBound(0.0,median,100.0)),
+      m_close   (qBound(0.0,close,100.0)),
+      m_dthr    (qBound(0.0,dthr,1.0)),
+      m_binthr  (qBound(0,binthr,255)),
+      m_inv     (inv)
+{}
+
+int Pars::oddKernel(int w, int h, double perc) const
 {
-    Q_ASSERT(thr>0);
-    Q_ASSERT(thr<=255);
+    int ret = qRound(diag(w,h)*perc)/100.0;
+    if (ret%2==0) ++ret;
+    return ret;
+}
+double Pars::diag(int w, int h) const { return qSqrt(w*w+h*h); }
 
+
+void SSnWatershed::execute(cv::Mat &src, cv::Mat &trg, const Pars& p)
+{    
+    int k = p.median(src.size().width,src.size().height);
+    if (k>2) cv::medianBlur(src,src,k);
     // Create a kernel that we will use to sharpen our image
     cv::Mat kernel = (cv::Mat_<float>(3,3) <<
                   1,  1, 1,
@@ -28,35 +47,42 @@ void SSnWatershed::execute(cv::Mat &src, cv::Mat &trg, int thr)
     trg.convertTo(trg, CV_8UC3);
     //imgLaplacian.convertTo(imgLaplacian, CV_8UC3);
     // imshow( "Laplace Filtered Image", imgLaplacian );
-    cv::imshow( "New Sharped Image", trg);
+   // cv::imshow( "New Sharped Image", trg);
     // Create binary image from source image
     cv::Mat bw;
     cv::cvtColor(trg, bw, cv::COLOR_BGR2GRAY);
-    bw=255-bw;
-    cv::Mat element = cv::getStructuringElement( cv::MORPH_RECT, cv::Size( 7,7 ) );
-
-    cv::morphologyEx(bw,bw,cv::MORPH_CLOSE,element);
-
-
-            cv::threshold(bw, bw, thr, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
-    imshow("Binary Image", bw);
+    if (p.inv()) bw=255-bw;
+    k = p.close(src.size().width,src.size().height);
+    if (k>2)
+    {
+        cv::Mat element = cv::getStructuringElement( cv::MORPH_RECT, cv::Size(k,k) );
+        cv::morphologyEx(bw,bw,cv::MORPH_CLOSE,element);
+    }
+    cv::threshold(bw, bw, p.thr(), 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+    //imshow("Binary Image", bw);
 
 
     // Perform the distance transform algorithm
     cv::Mat dist;
     cv::distanceTransform(bw, dist, cv::DIST_L2, 3);
+     cv::normalize(dist, dist, 0, 255.0, cv::NORM_MINMAX);
+    dist.convertTo(dist, CV_8UC3);
+
+    cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE();
+    clahe->apply(dist,dist);
+    cv::imshow("Distance Transform Image", dist);
+
     // Normalize the distance image for range = {0.0, 1.0}
     // so we can visualize and threshold it
     cv::normalize(dist, dist, 0, 1.0, cv::NORM_MINMAX);
-    cv::imshow("Distance Transform Image", dist);
     // Threshold to obtain the peaks
     // This will be the markers for the foreground objects
-    cv::threshold(dist, dist, 0.2, 1.0, cv::THRESH_BINARY);
+    cv::threshold(dist, dist, p.dthr(), 1.0, cv::THRESH_BINARY);
 
     // Dilate a bit the dist image
     cv::Mat kernel1 = cv::Mat::ones(3, 3, CV_8U);
     cv::dilate(dist, dist, kernel1);
-    cv::imshow("Peaks", dist);
+    cv::imshow("Peaks", dist*255);
     // Create the CV_8U version of the distance image
     // It is needed for findContours()
     cv::Mat dist_8u;
