@@ -24,6 +24,9 @@ namespace SSnWatershed
         int     m_binthr;
         bool    m_inv;
     };
-    QList<SScContour> execute(cv::Mat& src, cv::Mat& trg, const Pars& p = Pars());
+
+    QList<SScContour> execute(cv::Mat& src, const Pars& p = Pars());
+
+    QList<SScContour> execute(cv::Mat& src, const Pars& p, cv::Mat& bw, cv::Mat& dist, cv::Mat& result);
 }
 #endif // WATERSHED_HPP

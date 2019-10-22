@@ -23,8 +23,13 @@ int Pars::oddKernel(int w, int h, double perc) const
 }
 double Pars::diag(int w, int h) const { return qSqrt(w*w+h*h); }
 
+QList<SScContour> SSnWatershed::execute(cv::Mat &src, const Pars& p)
+{
+    cv::Mat bw, dist, markers;
+    return execute(src,p,bw,dist,markers);
+}
 
-QList<SScContour> SSnWatershed::execute(cv::Mat &src, cv::Mat &trg, const Pars& p)
+QList<SScContour> SSnWatershed::execute(cv::Mat &src, const Pars& p, cv::Mat& bw, cv::Mat& dist, cv::Mat& markers)
 {    
     int k = p.median(src.size().width,src.size().height);
     if (k>2) cv::medianBlur(src,src,k);
@@ -43,14 +48,16 @@ QList<SScContour> SSnWatershed::execute(cv::Mat &src, cv::Mat &trg, const Pars& 
     cv::filter2D(src, imgLaplacian, CV_32F, kernel);
     cv::Mat sharp;
     src.convertTo(sharp, CV_32F);
+    cv::Mat trg;
     trg = sharp - imgLaplacian;
     // convert back to 8bits gray scale
     trg.convertTo(trg, CV_8UC3);
+
     //imgLaplacian.convertTo(imgLaplacian, CV_8UC3);
     // imshow( "Laplace Filtered Image", imgLaplacian );
    // cv::imshow( "New Sharped Image", trg);
     // Create binary image from source image
-    cv::Mat bw;
+
     cv::cvtColor(trg, bw, cv::COLOR_BGR2GRAY);
     if (p.inv()) bw=255-bw;
     k = p.close(src.size().width,src.size().height);
@@ -64,7 +71,7 @@ QList<SScContour> SSnWatershed::execute(cv::Mat &src, cv::Mat &trg, const Pars& 
 
 
     // Perform the distance transform algorithm
-    cv::Mat dist;
+
     cv::distanceTransform(bw, dist, cv::DIST_L2, 3);
      cv::normalize(dist, dist, 0, 255.0, cv::NORM_MINMAX);
     dist.convertTo(dist, CV_8UC3);
@@ -95,7 +102,7 @@ QList<SScContour> SSnWatershed::execute(cv::Mat &src, cv::Mat &trg, const Pars& 
     std::vector<std::vector<cv::Point> > contours;
     cv::findContours(dist_8u, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
     // Create the marker image for the watershed algorithm
-    cv::Mat markers = cv::Mat::zeros(dist.size(), CV_32S);
+    markers = cv::Mat::zeros(dist.size(), CV_32S);
     // Draw the foreground markers
     for (size_t i = 0; i < contours.size(); i++)
     {
@@ -103,16 +110,18 @@ QList<SScContour> SSnWatershed::execute(cv::Mat &src, cv::Mat &trg, const Pars& 
     }
     // Draw the background marker
     cv::circle(markers, cv::Point(5,5), 3, cv::Scalar(255), -1);
+
+
     cv::imshow("Markers", markers*10000);
-
-
     cv::watershed(trg,markers);
+    cv::imshow("Watershed", markers*10000);
 
 
-    cv::Mat mark;
+    /*cv::Mat mark;
     markers.convertTo(mark, CV_8U);
     cv::bitwise_not(mark, mark);
-    //    imshow("Markers_v2", mark); // uncomment this if you want to see how the mark
+    imshow("Markers_v2", mark); // uncomment this if you want to see how the mark
+    */
     // image looks like at that point
     // Generate random colors
     std::vector<cv::Vec3b> colors;

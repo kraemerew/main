@@ -23,7 +23,7 @@ bool HuNetImageLoader::tryLoad(const QString& filename)
         {
             cv::Mat trg;
 
-            SSnWatershed::execute(im,trg,SSnWatershed::Pars(0.0,1,40,true,.4));
+            SSnWatershed::execute(im,SSnWatershed::Pars(0.0,1,40,true,.4));
 
             m_filename = filename;
             setText(QString());
