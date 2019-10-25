@@ -145,7 +145,8 @@ double SScContour::waddelDiskRadius() const
 {
     return qSqrt(area()/3.14159265);
 }
-bool SScContour::mark(QImage& im, double th) const
+
+bool SScContour::mark(QImage& im, double th, bool drawLines) const
 {
     if (isValid() && !im.isNull())
     {
@@ -153,33 +154,44 @@ bool SScContour::mark(QImage& im, double th) const
         QPen pen(Qt::red);
         pen.setWidthF(th);
         p.setPen(pen);
-        foreach(auto l, lines(false)) p.drawLine(l);
+        if (drawLines) foreach(auto l, lines(false)) p.drawLine(l);
+        else for (auto it = m_data.begin(); it!=m_data.end(); ++it) p.drawPoint(it->x,it->y);
         return true;
     }
     return false;
 }
 
-bool SScContour::draw(QImage& im, double th, const QColor& c, bool closed) const
+bool SScContour::draw(QImage& im, double th, const QColor& c, bool closed, bool drawLines) const
 {
     if (isEmpty() || im.isNull()) return false;
 
-    auto ll = norm(qMin(im.width(),im.height())).lines(closed);
-    if (!ll.isEmpty())
+    const auto normcnt = norm(qMin(im.width(),im.height()));
+    QPainter p(&im);
+    QPen pen(c);
+    if (drawLines)
     {
-        QPainter p(&im);
-        QPen pen(c);
-        pen.setWidthF(th);
+        const auto ll = normcnt.lines(closed);
+        if (!ll.isEmpty())
+        {
+            pen.setWidthF(th);
+            p.setPen(pen);
+            foreach(auto l, ll) p.drawLine(l);
+        }
+    }
+    else
+    {
         p.setPen(pen);
-        foreach(auto l, ll) p.drawLine(l);
+        for (auto it = normcnt.m_data.begin(); it!=normcnt.m_data.end(); ++it)
+            p.drawPoint(it->x,it->y);
     }
     return true;
 }
 
-QImage SScContour::draw(int w, double th, const QColor& c, bool closed) const
+QImage SScContour::draw(int w, double th, const QColor& c, bool closed, bool drawLines) const
 {
     QImage im(w,w,QImage::Format_RGB32);
     im.fill(Qt::black);
-    draw(im,th,c,closed);
+    draw(im,th,c,closed,drawLines);
     return im;
 }
 
@@ -266,7 +278,7 @@ SScContour SScContour::hull(double epsilon) const
 }
 
 SScContour SScContour::convexHull() const
-{
+{    
     std::vector<cv::Point> data;
     cv::convexHull(m_data,data);
     return SScContour(data);
