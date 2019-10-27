@@ -16,10 +16,10 @@
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/surface/concave_hull.h>
 
-SScContour::SScContour() : m_done(false)
+SScContour::SScContour(bool lines) : m_done(false), m_lines(lines)
 {}
 
-SScContour::SScContour(const std::vector<cv::Point>& v) : m_data(v), m_done(false)
+SScContour::SScContour(const std::vector<cv::Point>& v, bool lines) : m_data(v), m_done(false), m_lines(lines)
 {}
 
 SScContour::SScContour(const QVariantMap &data)
@@ -146,7 +146,7 @@ double SScContour::waddelDiskRadius() const
     return qSqrt(area()/3.14159265);
 }
 
-bool SScContour::mark(QImage& im, double th, bool drawLines) const
+bool SScContour::mark(QImage& im, double th) const
 {
     if (isValid() && !im.isNull())
     {
@@ -154,19 +154,19 @@ bool SScContour::mark(QImage& im, double th, bool drawLines) const
         QPen pen(Qt::red);
         pen.setWidthF(th);
         p.setPen(pen);
-        if (drawLines) foreach(auto l, lines(false)) p.drawLine(l);
+        if (m_lines) foreach(auto l, lines(false)) p.drawLine(l);
         else for (auto it = m_data.begin(); it!=m_data.end(); ++it) p.drawPoint(it->x,it->y);
         return true;
     }
     return false;
 }
 
-bool SScContour::draw(QImage& im, double th, const QColor& c, bool closed, bool drawLines) const
+bool SScContour::draw(QImage& im, double th, const QColor& c, bool closed) const
 {
     if (isEmpty() || im.isNull()) return false;
 
     QPen pen(c);
-    if (drawLines)
+    if (m_lines)
     {
         const auto normcnt = norm(qMin(im.width(),im.height()));
         QPainter p(&im);
@@ -200,11 +200,11 @@ bool SScContour::draw(QImage& im, double th, const QColor& c, bool closed, bool 
     return true;
 }
 
-QImage SScContour::draw(int w, double th, const QColor& c, bool closed, bool drawLines) const
+QImage SScContour::draw(int w, double th, const QColor& c, bool closed) const
 {
     QImage im(w,w,QImage::Format_RGB32);
     im.fill(Qt::black);
-    draw(im,th,c,closed,drawLines);
+    draw(im,th,c,closed);
     return im;
 }
 
@@ -299,7 +299,7 @@ SScContour SScContour::convexHull() const
 
 SScContour SScContour::concaveHull() const
 {
-    SScContour ret;
+    SScContour ret(false);
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud           (new pcl::PointCloud<pcl::PointXYZ>),
                                         cloud_projected (new pcl::PointCloud<pcl::PointXYZ>);
     cloud->reserve(m_data.size()+1);

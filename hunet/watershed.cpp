@@ -161,6 +161,6 @@ QList<SScContour> SSnWatershed::execute(cv::Mat &src, const Pars& p, cv::Mat& bw
 
     QList<SScContour> ret;
     ret.reserve(hash.size());
-    foreach(auto c, hash.values()) ret << SScContour(c);
+    foreach(auto c, hash.values()) ret << SScContour(c,false);
     return ret;
 }

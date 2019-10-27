@@ -1,5 +1,4 @@
 #include "hunetmainwindow.hpp"
-#include "imageloader.hpp"
 #include "hunetimagedisplay.hpp"
 #include "watershed.hpp"
 
@@ -16,7 +15,6 @@
 HuNetMainWindow::HuNetMainWindow()
     : QWidget           (0),
       m_tab             (new (std::nothrow) QTabWidget      (this)),
-     // m_loader          (new (std::nothrow) HuNetImageLoader    ()),
       m_procdisplay     (new (std::nothrow) HuNetImageDisplay   ()),
       m_contourdisplay  (new (std::nothrow) SScContourContainer ()),
       m_imgsel          (new (std::nothrow) QComboBox           ()),
@@ -101,7 +99,7 @@ HuNetMainWindow::HuNetMainWindow()
     m_closesb  ->setValue(2);
 
     m_distsb  ->setRange(0,1);
-    m_distsb  ->setSingleStep(0.1);
+    m_distsb  ->setSingleStep(0.01);
     m_distsb  ->setPrefix ("Distance thr: ");
     m_distsb  ->setValue(.4);
     m_invcb   ->setText("Invert");

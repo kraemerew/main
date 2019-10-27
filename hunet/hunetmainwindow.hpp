@@ -9,7 +9,6 @@
 class QCheckBox;
 class QSpinBox;
 class QDoubleSpinBox;
-class HuNetImageLoader;
 class HuNetImageDisplay;
 class QTabWidget;
 class QPushButton;

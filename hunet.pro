@@ -33,8 +33,8 @@ SOURCES += hunet/main.cpp \
     highwaynn/convhelpers.cpp \
     image/convimageconverter.cpp \
     highwaynn/imageprovider.cpp \
-    hunet/imageloader.cpp \
-    hunet/cannycontainer.cpp \
+    #hunet/imageloader.cpp \
+    #hunet/cannycontainer.cpp \
     hunet/contour.cpp \
     hunet/hunetmainwindow.cpp \
     hunet/hunetcontourlist.cpp \
@@ -75,8 +75,8 @@ HEADERS += \
     highwaynn/convhelpers.hpp \
     image/convimageconverter.hpp \
     highwaynn/imageprovider.hpp \
-    hunet/imageloader.hpp \
-    hunet/cannycontainer.hpp \
+    #hunet/imageloader.hpp \
+    #hunet/cannycontainer.hpp \
     hunet/contour.hpp \
     hunet/hunetmainwindow.hpp \
     hunet/hunetcontourlist.hpp \

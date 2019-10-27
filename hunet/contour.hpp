@@ -9,8 +9,8 @@
 class SScContour
 {
 public:
-    SScContour();
-    SScContour(const std::vector<cv::Point>& v);
+    SScContour(bool lines = true);
+    SScContour(const std::vector<cv::Point>& v, bool lines = true);
     SScContour(const QVariantMap& vm);
 
     QVariantMap vm() const;
@@ -24,9 +24,9 @@ public:
     inline bool     isEmpty () const { return size()==0; }
     inline bool     isValid () const { return size()>1; }
     inline void     append(const cv::Point& p) { m_data.insert(m_data.end(), p); }
-    QImage draw(int w = 255, double th = 2.0, const QColor& c = Qt::white, bool closed = false, bool drawLines = false) const;
-    bool draw(QImage& im, double th = 2.0, const QColor& c = Qt::white, bool closed = false, bool drawLines = false) const;
-    bool mark(QImage&, double th = 1.5, bool drawLines = false) const;
+    QImage draw(int w = 255, double th = 2.0, const QColor& c = Qt::white, bool closed = false) const;
+    bool draw(QImage& im, double th = 2.0, const QColor& c = Qt::white, bool closed = false) const;
+    bool mark(QImage&, double th = 1.5) const;
     double* huMoments();
     double perimeter() const;
     /*!
@@ -89,7 +89,7 @@ private:
     double hullArea                 (double epsilon = 1.0) const;
 
     std::vector<cv::Point>  m_data;
-    bool                    m_done;
+    bool                    m_done, m_lines;
     double                  m_hu[7];
     QString                 m_md5, m_tag;
 };
