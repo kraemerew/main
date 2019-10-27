@@ -8,12 +8,20 @@ using namespace SSnWatershed;
 
 
 Pars::Pars(double median, double close, int binthr, bool inv, double dthr)
-    : m_median  (qBound(0.0,median,100.0)),
-      m_close   (qBound(0.0,close,100.0)),
-      m_dthr    (qBound(0.0,dthr,1.0)),
-      m_binthr  (qBound(0,binthr,255)),
-      m_inv     (inv)
-{}
+    : SScVM()
+{
+    insert("MEDIAN",qBound(0.0,median,100.0));
+    insert("CLOSE", qBound(0.0,close,100.0));
+    insert("DTHR",  qBound(0.0,dthr,1.0));
+    insert("BINTHR",qBound(0,binthr,255));
+    insert("INVERT",inv);
+}
+
+int     Pars::close () const { return doubleToken("CLOSE", 1); }
+int     Pars::median() const { return doubleToken("MEDIAN",.1); }
+bool    Pars::inv   () const { return boolToken("INVERT",false); }
+int     Pars::thr   () const { return intToken("BINTHR",40); }
+double  Pars::dthr  () const { return doubleToken("DTHR",.4); }
 
 int Pars::oddKernel(int w, int h, double perc) const
 {
@@ -67,18 +75,18 @@ QList<SScContour> SSnWatershed::execute(cv::Mat &src, const Pars& p, cv::Mat& bw
         cv::morphologyEx(bw,bw,cv::MORPH_CLOSE,element);
     }
     cv::threshold(bw, bw, p.thr(), 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
-    imshow("Binary Image", bw);
+    //imshow("Binary Image", bw);
 
 
     // Perform the distance transform algorithm
 
     cv::distanceTransform(bw, dist, cv::DIST_L2, 3);
-     cv::normalize(dist, dist, 0, 255.0, cv::NORM_MINMAX);
-    dist.convertTo(dist, CV_8UC3);
+    //cv::normalize(dist, dist, 0, 255.0, cv::NORM_MINMAX);
+    //dist.convertTo(dist, CV_8UC3);
 
-    cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE();
-    clahe->apply(dist,dist);
-    cv::imshow("Distance Transform Image", dist);
+    //cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE();
+    //clahe->apply(dist,dist);
+    //cv::imshow("Distance Transform Image", dist);
 
     // Normalize the distance image for range = {0.0, 1.0}
     // so we can visualize and threshold it
@@ -90,7 +98,7 @@ QList<SScContour> SSnWatershed::execute(cv::Mat &src, const Pars& p, cv::Mat& bw
     // Dilate a bit the dist image
     cv::Mat kernel1 = cv::Mat::ones(3, 3, CV_8U);
     cv::dilate(dist, dist, kernel1);
-    cv::imshow("Peaks", dist*255);
+    //cv::imshow("Peaks", dist*255);
 
 
     // Create the CV_8U version of the distance image
@@ -112,9 +120,9 @@ QList<SScContour> SSnWatershed::execute(cv::Mat &src, const Pars& p, cv::Mat& bw
     cv::circle(markers, cv::Point(5,5), 3, cv::Scalar(255), -1);
 
 
-    cv::imshow("Markers", markers*10000);
+    //cv::imshow("Markers", markers*10000);
     cv::watershed(trg,markers);
-    cv::imshow("Watershed", markers*10000);
+    //cv::imshow("Watershed", markers*10000);
 
 
     /*cv::Mat mark;
@@ -140,16 +148,16 @@ QList<SScContour> SSnWatershed::execute(cv::Mat &src, const Pars& p, cv::Mat& bw
     {
         for (int j = 0; j < markers.cols; j++)
         {
-            int index = markers.at<int>(i,j);
+            const int index = markers.at<int>(cv::Point(j,i));
             if (index > 0 && index <= static_cast<int>(contours.size()))
             {
                 dst.at<cv::Vec3b>(i,j) = colors[index-1];
-                hash[index].push_back(cv::Point(i,j));
+                hash[index].push_back(cv::Point(j,i));
             }
         }
     }
     // Visualize the final image
-    imshow("Final Result", dst);
+    //imshow("Final Result", dst);
 
     QList<SScContour> ret;
     ret.reserve(hash.size());

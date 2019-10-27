@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include <QTimer>
-#include "cannycontainer.hpp"
+#include "watershedcontainer.hpp"
 #include "contourcontainer.hpp"
 
 class QCheckBox;
@@ -27,38 +27,31 @@ private slots:
     void intSlot        (int);
     void boolSlot       (bool);
     void recalcSlot     ();
-    void recalcCannySlot();
-    void stringSlot     (const QString&);
     void contourSlot    (SScContour);
     void loadSlot       ();
     void saveSlot       ();
     void tagSlot        (bool);
+    void tryLoadSlot    (const QString&);
 
 private:
 
     inline void recalc      () { if (!m_recalctimer.isActive()) m_recalctimer.start(10); }
-    inline void recalcCanny () { if (!m_cannytimer. isActive()) m_cannytimer. start(10); }
 
     QTabWidget*             m_tab;
-    HuNetImageLoader*       m_loader;
     HuNetImageDisplay*      m_procdisplay;
-    HuNetImageDisplay*      m_cannydisplay;
     SScContourContainer*    m_contourdisplay;
+    QComboBox*              m_imgsel;
+    QDoubleSpinBox*         m_mediansb;
+    QDoubleSpinBox*         m_distsb;
+    QDoubleSpinBox*         m_closesb;
+    QCheckBox*              m_invcb;
+    QSpinBox*               m_binthr;
 
-    QDoubleSpinBox*     m_mediansb;
-    QDoubleSpinBox*     m_bilcsigma;
-    QDoubleSpinBox*     m_bilsigma;
-    QCheckBox*          m_eqcb;
-    QCheckBox*          m_clipcb;
-    QCheckBox*          m_bilcb;
-    QSpinBox*           m_cannymin;
-    QSpinBox*           m_cannymax;
-    QSpinBox*           m_bild;
-    QPushButton*        m_tagpos;
-    QPushButton*        m_tagneg;
-    QTimer              m_recalctimer, m_cannytimer;
-    SScCannyContainer   m_cc;
-    QImage              m_orig;
+    QPushButton*            m_tagpos;
+    QPushButton*            m_tagneg;
+    QTimer                  m_recalctimer;
+    SScWatershedContainer   m_wc;
+    QString                 m_filename;
 };
 
 #endif // HUNETMAINWINDOW_HPP

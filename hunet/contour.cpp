@@ -165,11 +165,11 @@ bool SScContour::draw(QImage& im, double th, const QColor& c, bool closed, bool 
 {
     if (isEmpty() || im.isNull()) return false;
 
-    const auto normcnt = norm(qMin(im.width(),im.height()));
-    QPainter p(&im);
     QPen pen(c);
     if (drawLines)
     {
+        const auto normcnt = norm(qMin(im.width(),im.height()));
+        QPainter p(&im);
         const auto ll = normcnt.lines(closed);
         if (!ll.isEmpty())
         {
@@ -180,9 +180,22 @@ bool SScContour::draw(QImage& im, double th, const QColor& c, bool closed, bool 
     }
     else
     {
-        p.setPen(pen);
-        for (auto it = normcnt.m_data.begin(); it!=normcnt.m_data.end(); ++it)
-            p.drawPoint(it->x,it->y);
+        const auto xr = xRange(), yr = yRange();
+        const int minx = xr.first, maxx = xr.second, miny = yr.first, maxy = yr.second, w = maxx-minx, h = maxy-miny, sz = qMax(w,h);
+        QImage im2(sz,sz,QImage::Format_RGB32);
+        im2.fill(Qt::black);
+        {
+            QPainter p(&im2);
+            p.setPen(pen);
+
+            const cv::Point dlt(minx,miny);
+            for (auto it = m_data.begin(); it!=m_data.end(); ++it)
+            {
+                const cv::Point pnt = *it-dlt;
+                p.drawPoint(pnt.x,pnt.y);
+            }
+        }
+        im=im2.scaled(im.width(),im.height(),Qt::KeepAspectRatio);
     }
     return true;
 }

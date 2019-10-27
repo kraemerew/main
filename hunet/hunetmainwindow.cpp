@@ -1,6 +1,7 @@
 #include "hunetmainwindow.hpp"
 #include "imageloader.hpp"
 #include "hunetimagedisplay.hpp"
+#include "watershed.hpp"
 
 #include <QFileDialog>
 #include <QTabWidget>
@@ -10,40 +11,33 @@
 #include <QDoubleSpinBox>
 #include <QCheckBox>
 #include <QPushButton>
+#include <QComboBox>
 
 HuNetMainWindow::HuNetMainWindow()
     : QWidget           (0),
       m_tab             (new (std::nothrow) QTabWidget      (this)),
-      m_loader          (new (std::nothrow) HuNetImageLoader    ()),
+     // m_loader          (new (std::nothrow) HuNetImageLoader    ()),
       m_procdisplay     (new (std::nothrow) HuNetImageDisplay   ()),
-      m_cannydisplay    (new (std::nothrow) HuNetImageDisplay   ()),
       m_contourdisplay  (new (std::nothrow) SScContourContainer ()),
+      m_imgsel          (new (std::nothrow) QComboBox           ()),
       m_mediansb        (new (std::nothrow) QDoubleSpinBox      ()),
-      m_bilcsigma       (new (std::nothrow) QDoubleSpinBox      ()),
-      m_bilsigma        (new (std::nothrow) QDoubleSpinBox      ()),
-      m_eqcb            (new (std::nothrow) QCheckBox           ()),
-      m_clipcb          (new (std::nothrow) QCheckBox           ()),
-      m_bilcb           (new (std::nothrow) QCheckBox           ()),
-      m_cannymin        (new (std::nothrow) QSpinBox            ()),
-      m_cannymax        (new (std::nothrow) QSpinBox            ()),
-      m_bild            (new (std::nothrow) QSpinBox            ()),
+      m_distsb          (new (std::nothrow) QDoubleSpinBox      ()),
+      m_closesb         (new (std::nothrow) QDoubleSpinBox      ()),
+      m_invcb           (new (std::nothrow) QCheckBox           ()),
+      m_binthr          (new (std::nothrow) QSpinBox            ()),
       m_tagpos          (new (std::nothrow) QPushButton         ()),
       m_tagneg          (new (std::nothrow) QPushButton         ())
 {    
     Q_CHECK_PTR(m_tab);
-    Q_CHECK_PTR(m_loader);
+    //Q_CHECK_PTR(m_loader);
     Q_CHECK_PTR(m_procdisplay);
-    Q_CHECK_PTR(m_cannydisplay);
     Q_CHECK_PTR(m_contourdisplay);
+    Q_CHECK_PTR(m_imgsel);
     Q_CHECK_PTR(m_mediansb);
-    Q_CHECK_PTR(m_eqcb);
-    Q_CHECK_PTR(m_clipcb);
-    Q_CHECK_PTR(m_cannymin);
-    Q_CHECK_PTR(m_cannymax);
-    Q_CHECK_PTR(m_bilcb);
-    Q_CHECK_PTR(m_bilsigma);
-    Q_CHECK_PTR(m_bilcsigma);
-    Q_CHECK_PTR(m_bild);
+    Q_CHECK_PTR(m_distsb);
+    Q_CHECK_PTR(m_closesb);
+    Q_CHECK_PTR(m_invcb);
+    Q_CHECK_PTR(m_binthr);
     Q_CHECK_PTR(m_tagpos);
     Q_CHECK_PTR(m_tagneg);
 
@@ -80,70 +74,58 @@ HuNetMainWindow::HuNetMainWindow()
     w->layout()->addWidget(taggroup);
 
     m_contourdisplay->insertStretch();
-    m_procdisplay->insert(m_bilcb);
-    m_procdisplay->insert(m_bild);
-    m_procdisplay->insert(m_bilcsigma);
-    m_procdisplay->insert(m_bilsigma);
+    m_procdisplay->insert(m_imgsel);
+
     m_procdisplay->insert(m_mediansb);
-    m_procdisplay->insert(m_clipcb);
-    m_procdisplay->insert(m_eqcb);
+    m_procdisplay->insert(m_invcb);
+    m_procdisplay->insert(m_closesb);
+    m_procdisplay->insert(m_binthr);
+    m_procdisplay->insert(m_distsb);
+
+
     m_procdisplay->insertStretch();
 
-    m_cannydisplay->insert(m_cannymin);
-    m_cannydisplay->insert(m_cannymax);
-    m_cannydisplay->insertStretch();
-
-    m_loader       ->insertInto(m_tab,"Original");
-    m_procdisplay   ->insertInto(m_tab,"Processing");
-    m_cannydisplay  ->insertInto(m_tab,"Canny");
+    m_procdisplay   ->insertInto(m_tab,"Souurce");
     m_contourdisplay->insertInto(m_tab,"Contours");
 
-    m_bild->setRange(1,5);
-    m_bilcsigma->setRange(1,1000);
-    m_bilsigma->setRange(1,1000);
-
+    m_mediansb  ->setRange(0,99);
     m_mediansb  ->setSingleStep(0.1);
     m_mediansb  ->setPrefix ("Median: ");
     m_mediansb  ->setSuffix (("%"));
-    m_clipcb      ->setText   ("Histogram Clip");
+    m_mediansb  ->setValue(0);
 
-    m_eqcb      ->setText   ("Histogram Eq.");
-    m_cannymin  ->setPrefix ("Canny lower ");
-    m_cannymax  ->setPrefix ("Canny upper ");
-    m_bilcb->setText("Bilateral Filter");
-    m_bild->setPrefix("Bil. Distance");
-    m_bilcsigma->setPrefix("Bil. Color Sigma");
-    m_bilsigma->setPrefix("Bil. Sigma");
-    m_mediansb->setRange(0,99);
-    m_cannymin->setRange(0,254);
-    m_cannymax->setRange(1,255);
-    m_bilcb->setChecked(true);
-    m_cannymin  ->setValue  (50);
-    m_cannymax  ->setValue  (250);
-    m_clipcb   ->setChecked(true);
+    m_closesb  ->setRange(0,99);
+    m_closesb  ->setSingleStep(0.1);
+    m_closesb  ->setPrefix ("Closing: ");
+    m_closesb  ->setSuffix (("%"));
+    m_closesb  ->setValue(2);
 
-    m_eqcb      ->setChecked(false);
-    m_mediansb  ->setValue(1.0);
+    m_distsb  ->setRange(0,1);
+    m_distsb  ->setSingleStep(0.1);
+    m_distsb  ->setPrefix ("Distance thr: ");
+    m_distsb  ->setValue(.4);
+    m_invcb   ->setText("Invert");
+
+    m_binthr  ->setRange(1,254);
+    m_binthr  ->setSingleStep(1);
+    m_binthr  ->setPrefix ("Bin Thr: ");
+    m_binthr  ->setValue(128);
+
+    m_imgsel->addItems(SScWatershedContainer::images());
 
     bool ok;
     Q_UNUSED(ok);
-    ok = connect(m_loader,                  SIGNAL(loaded(const QString&)),     this,       SLOT(stringSlot(const QString&)));  Q_ASSERT(ok);
     ok = connect(m_mediansb,                SIGNAL(valueChanged(double)),       this,       SLOT(doubleSlot(double)));          Q_ASSERT(ok);
-    ok = connect(m_cannymin,                SIGNAL(valueChanged(int)),          this,       SLOT(intSlot(int)));                Q_ASSERT(ok);
-    ok = connect(m_cannymax,                SIGNAL(valueChanged(int)),          this,       SLOT(intSlot(int)));                Q_ASSERT(ok);
-    ok = connect(m_bild,                    SIGNAL(valueChanged(int)),          this,       SLOT(intSlot(int)));                Q_ASSERT(ok);
-    ok = connect(m_bilsigma,                SIGNAL(valueChanged(double)),       this,       SLOT(doubleSlot(double)));          Q_ASSERT(ok);
-    ok = connect(m_bilcsigma,               SIGNAL(valueChanged(double)),       this,       SLOT(doubleSlot(double)));          Q_ASSERT(ok);
-    ok = connect(m_bilcb,                   SIGNAL(toggled(bool)),              this,       SLOT(boolSlot(bool)));              Q_ASSERT(ok);
-    ok = connect(m_eqcb,                    SIGNAL(toggled(bool)),              this,       SLOT(boolSlot(bool)));              Q_ASSERT(ok);
-    ok = connect(m_clipcb,                  SIGNAL(toggled(bool)),              this,       SLOT(boolSlot(bool)));              Q_ASSERT(ok);
+    ok = connect(m_closesb,                 SIGNAL(valueChanged(double)),       this,       SLOT(doubleSlot(double)));          Q_ASSERT(ok);
+    ok = connect(m_distsb,                  SIGNAL(valueChanged(double)),       this,       SLOT(doubleSlot(double)));          Q_ASSERT(ok);
+    ok = connect(m_binthr,                  SIGNAL(valueChanged(int)),          this,       SLOT(intSlot(int)));          Q_ASSERT(ok);
+    ok = connect(m_imgsel, SIGNAL(currentIndexChanged(int)), this, SLOT(intSlot(int))); Q_ASSERT(ok);
+    ok = connect(m_invcb,                   SIGNAL(toggled(bool)),              this,       SLOT(boolSlot(bool)));              Q_ASSERT(ok);
+
     ok = connect(&m_recalctimer,            SIGNAL(timeout()),                  this,       SLOT(recalcSlot()));                Q_ASSERT(ok);
-    ok = connect(&m_cannytimer,             SIGNAL(timeout()),                  this,       SLOT(recalcCannySlot()));           Q_ASSERT(ok);
     ok = connect(m_contourdisplay->list(),  SIGNAL(selected(const SScContour&)),this,       SLOT(contourSlot(SScContour)));     Q_ASSERT(ok);
-    ok = connect(m_loader,                  SIGNAL(dropped(const QString&)),    m_loader,   SLOT(tryLoad(const QString&)));     Q_ASSERT(ok);
-    ok = connect(m_procdisplay,             SIGNAL(dropped(const QString&)),    m_loader,   SLOT(tryLoad(const QString&)));     Q_ASSERT(ok);
-    ok = connect(m_cannydisplay,            SIGNAL(dropped(const QString&)),    m_loader,   SLOT(tryLoad(const QString&)));     Q_ASSERT(ok);
-    ok = connect(m_contourdisplay,          SIGNAL(dropped(const QString&)),    m_loader,   SLOT(tryLoad(const QString&)));     Q_ASSERT(ok);
+    ok = connect(m_procdisplay,             SIGNAL(dropped(const QString&)),    this,       SLOT(tryLoadSlot(const QString&)));     Q_ASSERT(ok);
+    ok = connect(m_contourdisplay,          SIGNAL(dropped(const QString&)),    this,       SLOT(tryLoadSlot(const QString&)));     Q_ASSERT(ok);
     ok = connect(lb,                        SIGNAL(clicked()),                  this,       SLOT(loadSlot()));                  Q_ASSERT(ok);
     ok = connect(sb,                        SIGNAL(clicked()),                  this,       SLOT(saveSlot()));                  Q_ASSERT(ok);
     ok = connect(m_tagpos,                  SIGNAL(toggled(bool)),              this,       SLOT(tagSlot(bool)));               Q_ASSERT(ok);
@@ -162,73 +144,41 @@ void HuNetMainWindow::doubleSlot(double)
 
 void HuNetMainWindow::intSlot(int v)
 {
-    if (sender()==m_cannymin)
+    if (sender()==m_imgsel)
     {
-        if (m_cannymax->value()<=v)
-        {
-            m_cannymax->blockSignals(true);
-            m_cannymax->setValue(v+1);
-            m_cannymax->blockSignals(false);
-        }
-        recalcCanny();
-    }
-    else if (sender()==m_cannymax)
-    {
-        if (m_cannymin->value()>=v)
-        {
-            m_cannymin->blockSignals(true);
-            m_cannymin->setValue(v-1);
-            m_cannymin->blockSignals(false);
-        }
-        recalcCanny();
+        m_procdisplay->set(m_wc.image(v));
     }
     else recalc();
 }
 
 void HuNetMainWindow::boolSlot(bool)
 {
-    m_bilsigma  ->setEnabled(m_bilcb->isChecked());
-    m_bilcsigma ->setEnabled(m_bilcb->isChecked());
-    m_bild      ->setEnabled(m_bilcb->isChecked());
-    recalcSlot();
+    recalc();
 }
 
-void HuNetMainWindow::stringSlot(const QString&)
+void HuNetMainWindow::tryLoadSlot(const QString& filename)
 {
-    m_orig = m_loader->get();
-    recalcSlot();
+    if (filename!=m_filename)
+    {
+        m_filename = filename;
+        recalcSlot();
+    }
 }
 
 void HuNetMainWindow::recalcSlot()
 {
     m_recalctimer.stop();
-    m_cannytimer. stop();    
-    SScCannySetting sc(m_mediansb->value(), m_eqcb->isChecked(), m_clipcb->isChecked(), m_bilcb->isChecked(), m_bild->value(), m_bilcsigma->value(),m_bilsigma->value());
+    const SSnWatershed::Pars p(m_mediansb->value(),m_closesb->value(),m_binthr->value(),m_invcb->isChecked(),m_distsb->value());
 
-    qWarning(">>>>>>>> EQ %s CLIP %s BIL %s", m_eqcb->isChecked() ? "ON":"OFF", m_clipcb->isChecked() ?"ON":"OFF", m_bilcb->isChecked() ? "ON":"OFF");
-    SScCannyContainer cc(m_loader->filename(),sc);
-    if (cc.isValid())
+    SScWatershedContainer wc(m_filename,p);
+    if (wc.isValid())
     {
         qWarning(">>>>SETTING");
-        m_cc = cc;
-        m_procdisplay->set(cc.orig());
-        recalcCannySlot();
+        m_wc = wc;
+        m_procdisplay->set(m_wc.image(m_imgsel->currentIndex()));
+        m_contourdisplay->setContours(m_wc.contours());
     }
     else qWarning(">>>>>NOT VALID");
-}
-
-void HuNetMainWindow::recalcCannySlot()
-{
-    m_cannytimer.stop();
-    if (m_cc.isValid())
-    {
-        qWarning(">>>>DOING CANNY");
-        auto c = m_cc.contours(m_cannymin->value(), m_cannymax->value());
-        m_cannydisplay->set(m_cc.canny());
-        m_orig = m_cannydisplay->get();
-        m_orig=m_orig.convertToFormat(QImage::Format_RGB32);
-        m_contourdisplay->setContours(c);
-    }
 }
 
 void HuNetMainWindow::contourSlot(SScContour c)
@@ -239,11 +189,11 @@ void HuNetMainWindow::contourSlot(SScContour c)
         m_tagpos->setChecked(false);
         m_tagneg->setChecked(false);
     }
-    QImage im = m_orig;
-    if (c.mark(im,3))
+    //QImage im = m_procdisplay->image(m_imgsel->currentIndex());
+    /*if (c.mark(im,3))
     {
        m_cannydisplay->set(im);
-    }
+    }*/
 }
 
 void HuNetMainWindow::loadSlot()

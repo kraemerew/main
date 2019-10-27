@@ -24,9 +24,9 @@ public:
     inline bool     isEmpty () const { return size()==0; }
     inline bool     isValid () const { return size()>1; }
     inline void     append(const cv::Point& p) { m_data.insert(m_data.end(), p); }
-    QImage draw(int w = 255, double th = 2.0, const QColor& c = Qt::white, bool closed = false, bool drawLines = true) const;
-    bool draw(QImage& im, double th = 2.0, const QColor& c = Qt::white, bool closed = false, bool drawLines = true) const;
-    bool mark(QImage&, double th = 1.5, bool drawLines = true) const;
+    QImage draw(int w = 255, double th = 2.0, const QColor& c = Qt::white, bool closed = false, bool drawLines = false) const;
+    bool draw(QImage& im, double th = 2.0, const QColor& c = Qt::white, bool closed = false, bool drawLines = false) const;
+    bool mark(QImage&, double th = 1.5, bool drawLines = false) const;
     double* huMoments();
     double perimeter() const;
     /*!

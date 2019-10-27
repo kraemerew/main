@@ -41,7 +41,8 @@ SOURCES += hunet/main.cpp \
     hunet/imageconverter.cpp \
     hunet/hunetimagedisplay.cpp \
     hunet/contourcontainer.cpp \
-    hunet/watershed.cpp
+    hunet/watershed.cpp \
+    hunet/watershedcontainer.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -82,5 +83,6 @@ HEADERS += \
     hunet/imageconverter.h \
     hunet/hunetimagedisplay.hpp \
     hunet/contourcontainer.hpp \
-    hunet/watershed.hpp
+    hunet/watershed.hpp \
+    hunet/watershedcontainer.hpp
 

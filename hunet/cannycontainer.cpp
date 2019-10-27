@@ -11,9 +11,9 @@ SScCannyContainer::SScCannyContainer(const QString& filename, const SScCannySett
     m_valid = (orig.cols>0) && (orig.rows>0);
     if (m_valid)
     {
-        if (setting.m_bil)
+        if (setting.bil())
         {
-            cv::bilateralFilter(orig,m_mat,setting.m_bil_d,setting.m_bil_csigma,setting.m_bil_sigma);
+            cv::bilateralFilter(orig,m_mat,setting.bil_d(),setting.bil_csigma(),setting.bil_sigma());
             cv::cvtColor(m_mat,m_mat,CV_BGR2GRAY);
         }
         else
@@ -23,7 +23,7 @@ SScCannyContainer::SScCannyContainer(const QString& filename, const SScCannySett
             clahe->apply(m_mat,m_mat);
         }
         const double diag = qSqrt(qPow(m_mat.rows,2)+qPow(m_mat.cols,2.0));
-        int median = qRound((setting.m_median*diag)/100.0);
+        int median = qRound((setting.median()*diag)/100.0);
         if (median%2==0) ++median;
 
         if (median>2)
@@ -31,11 +31,11 @@ SScCannyContainer::SScCannyContainer(const QString& filename, const SScCannySett
             if (median%2==0) ++median;
             cv::medianBlur(m_mat,m_mat,median);
         }
-        if (setting.m_eq)
+        if (setting.eq())
         {
             cv::equalizeHist(m_mat,m_mat);
         }
-        if (setting.m_clip)
+        if (setting.clip())
         {
             bool first = true;
             uchar min=255, max=0;
@@ -53,10 +53,8 @@ SScCannyContainer::SScCannyContainer(const QString& filename, const SScCannySett
                     if (gv<min) min=gv; else if (gv>max) max=gv;
                 }
             }
-            qWarning(">>>>TRY CLIP %d %d", (int)min,(int)max);
             if ((max-min)!=255)
             {
-                qWarning(">>>>>>CLIP %d %d", (int)min,(int)max);
                 const double alpha = (double)(255)/(double)(max-min), beta = -min;
 
                 m_mat.convertTo(m_mat,-1,alpha,beta);
