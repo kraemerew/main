@@ -94,8 +94,8 @@ QList<SScContour> SSnWatershed::execute(cv::Mat &src, const Pars& p, cv::Mat& bw
     // so we can visualize and threshold it
     cv::Mat distnorm;
     cv::normalize(dist, distnorm, 0, 1.0, cv::NORM_MINMAX);
-    cv::normalize(dist, dist, 0, 255, cv::NORM_MINMAX);
-    cv::imshow("Distance Transform Image", dist);
+    //cv::normalize(dist, dist, 0, 255, cv::NORM_MINMAX);
+    //cv::imshow("Distance Transform Image", dist);
 
 
     // Threshold to obtain the peaks
