@@ -152,7 +152,7 @@ bool SScContour::mark(QImage& im, double th) const
     {
         QPainter p(&im);
         QPen pen(Qt::red);
-        pen.setWidthF(th);
+        if (m_lines) pen.setWidthF(th);
         p.setPen(pen);
         if (m_lines) foreach(auto l, lines(false)) p.drawLine(l);
         else for (auto it = m_data.begin(); it!=m_data.end(); ++it) p.drawPoint(it->x,it->y);

@@ -22,16 +22,29 @@ HuNetImageDisplay::HuNetImageDisplay(QWidget* parent, const QSize& sz) : QLabel(
 
 HuNetImageDisplay::~HuNetImageDisplay() { if (m_ca) m_ca->deleteLater(); }
 
+
 void HuNetImageDisplay::set(const QImage& im)
 {
+    m_im = im.isGrayscale() ? im.convertToFormat(QImage::Format_ARGB32) : im;
+    update_priv();
+}
+void HuNetImageDisplay::set(const SScContour& cont)
+{
+    m_cont = cont;
+    update_priv();
+}
+
+/*QImage HuNetImageDisplay::get() const
+{
+    return m_im;
+}*/
+
+void HuNetImageDisplay::update_priv()
+{
+    QImage im = m_im;
+    m_cont.mark(im);
     setPixmap(QPixmap::fromImage(im));
 }
-
-QImage HuNetImageDisplay::get() const
-{
-    return pixmap()->toImage();
-}
-
 void HuNetImageDisplay::dragEnterEvent(QDragEnterEvent *event)
 {
     if (allowDrops()) event->accept();

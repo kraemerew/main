@@ -90,7 +90,7 @@ HuNetMainWindow::HuNetMainWindow()
     m_mediansb  ->setSingleStep(0.1);
     m_mediansb  ->setPrefix ("Median: ");
     m_mediansb  ->setSuffix (("%"));
-    m_mediansb  ->setValue(0);
+    m_mediansb  ->setValue(2);
 
     m_closesb  ->setRange(0,99);
     m_closesb  ->setSingleStep(0.1);
@@ -101,13 +101,13 @@ HuNetMainWindow::HuNetMainWindow()
     m_distsb  ->setRange(0,1);
     m_distsb  ->setSingleStep(0.01);
     m_distsb  ->setPrefix ("Distance thr: ");
-    m_distsb  ->setValue(.4);
+    m_distsb  ->setValue(.1);
     m_invcb   ->setText("Invert");
 
     m_binthr  ->setRange(1,254);
     m_binthr  ->setSingleStep(1);
     m_binthr  ->setPrefix ("Bin Thr: ");
-    m_binthr  ->setValue(128);
+    m_binthr  ->setValue(64);
 
     m_imgsel->addItems(SScWatershedContainer::images());
 
@@ -192,6 +192,7 @@ void HuNetMainWindow::contourSlot(SScContour c)
     {
        m_cannydisplay->set(im);
     }*/
+    m_procdisplay->set(c);
 }
 
 void HuNetMainWindow::loadSlot()
