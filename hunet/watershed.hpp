@@ -12,12 +12,13 @@ namespace SSnWatershed
     {
     public:
         explicit Pars(const SScVM& init = SScVM()) : SScVM(init) {}
-        explicit Pars(double median = 1.0, double close = 1.0, int binthr = 40, bool inv = false, double dthr = .30);
+        explicit Pars(double median = 1.0, double close = 1.0, int binthr = 40, bool inv = false, double dthr = .30, bool eqhist = false);
         inline int close(int w, int h)  const { return oddKernel(w,h,close()); }
         inline int median(int w, int h) const { return oddKernel(w,h,median()); }
 
         int     close   () const;
         int     median  () const;
+        bool    eqHist  () const;
         bool    inv     () const;
         int     thr     () const;
         double  dthr    () const;

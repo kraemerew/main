@@ -22,6 +22,7 @@ HuNetMainWindow::HuNetMainWindow()
       m_distsb          (new (std::nothrow) QDoubleSpinBox      ()),
       m_closesb         (new (std::nothrow) QDoubleSpinBox      ()),
       m_invcb           (new (std::nothrow) QCheckBox           ()),
+      m_eqcb            (new (std::nothrow) QCheckBox           ()),
       m_binthr          (new (std::nothrow) QSpinBox            ()),
       m_tagpos          (new (std::nothrow) QPushButton         ()),
       m_tagneg          (new (std::nothrow) QPushButton         ())
@@ -35,6 +36,7 @@ HuNetMainWindow::HuNetMainWindow()
     Q_CHECK_PTR(m_distsb);
     Q_CHECK_PTR(m_closesb);
     Q_CHECK_PTR(m_invcb);
+    Q_CHECK_PTR(m_eqcb);
     Q_CHECK_PTR(m_binthr);
     Q_CHECK_PTR(m_tagpos);
     Q_CHECK_PTR(m_tagneg);
@@ -75,6 +77,7 @@ HuNetMainWindow::HuNetMainWindow()
     m_procdisplay->insert(m_imgsel);
 
     m_procdisplay->insert(m_mediansb);
+    m_procdisplay->insert(m_eqcb);
     m_procdisplay->insert(m_invcb);
     m_procdisplay->insert(m_closesb);
     m_procdisplay->insert(m_binthr);
@@ -102,6 +105,7 @@ HuNetMainWindow::HuNetMainWindow()
     m_distsb  ->setSingleStep(0.01);
     m_distsb  ->setPrefix ("Distance thr: ");
     m_distsb  ->setValue(.1);
+    m_eqcb    ->setText("Equalize Histogram");
     m_invcb   ->setText("Invert");
 
     m_binthr  ->setRange(1,254);
@@ -119,6 +123,7 @@ HuNetMainWindow::HuNetMainWindow()
     ok = connect(m_binthr,                  SIGNAL(valueChanged(int)),          this,       SLOT(intSlot(int)));          Q_ASSERT(ok);
     ok = connect(m_imgsel, SIGNAL(currentIndexChanged(int)), this, SLOT(intSlot(int))); Q_ASSERT(ok);
     ok = connect(m_invcb,                   SIGNAL(toggled(bool)),              this,       SLOT(boolSlot(bool)));              Q_ASSERT(ok);
+    ok = connect(m_eqcb,                    SIGNAL(toggled(bool)),              this,       SLOT(boolSlot(bool)));              Q_ASSERT(ok);
 
     ok = connect(&m_recalctimer,            SIGNAL(timeout()),                  this,       SLOT(recalcSlot()));                Q_ASSERT(ok);
     ok = connect(m_contourdisplay->list(),  SIGNAL(selected(const SScContour&)),this,       SLOT(contourSlot(SScContour)));     Q_ASSERT(ok);
@@ -144,6 +149,7 @@ void HuNetMainWindow::intSlot(int v)
 {
     if (sender()==m_imgsel)
     {
+
         m_procdisplay->set(m_wc.image(v));
     }
     else recalc();
@@ -166,7 +172,7 @@ void HuNetMainWindow::tryLoadSlot(const QString& filename)
 void HuNetMainWindow::recalcSlot()
 {
     m_recalctimer.stop();
-    const SSnWatershed::Pars p(m_mediansb->value(),m_closesb->value(),m_binthr->value(),m_invcb->isChecked(),m_distsb->value());
+    const SSnWatershed::Pars p(m_mediansb->value(),m_closesb->value(),m_binthr->value(),m_invcb->isChecked(),m_distsb->value(), m_eqcb->isChecked());
 
     SScWatershedContainer wc(m_filename,p);
     if (wc.isValid())

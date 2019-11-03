@@ -44,6 +44,8 @@ private:
     QDoubleSpinBox*         m_distsb;
     QDoubleSpinBox*         m_closesb;
     QCheckBox*              m_invcb;
+    QCheckBox*              m_eqcb;
+
     QSpinBox*               m_binthr;
 
     QPushButton*            m_tagpos;
