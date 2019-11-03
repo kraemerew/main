@@ -31,8 +31,8 @@ QImage SScWatershedContainer::image(int idx) const
     {
         case 0: return SSnImageConverter::image(m_orig); break;
         case 1: return SSnImageConverter::image(m_bw); break;
-    case 2: return SSnImageConverter::image(m_dist*255); break;
-    case 3: return SSnImageConverter::image(m_markers); break;
+        case 2: return SSnImageConverter::image(m_dist); break;
+        case 3: return SSnImageConverter::image(m_markers); break;
     }
     return QImage();
 }

@@ -79,6 +79,9 @@ QList<SScContour> SSnWatershed::execute(cv::Mat &src, const Pars& p, cv::Mat& bw
         cv::morphologyEx(bw,bw,cv::MORPH_CLOSE,element);
     }
 
+    //cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE();
+    //clahe->apply(bw,bw);
+
     cv::threshold(bw, bw, p.thr(), 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
     //imshow("Binary Image", bw);
 
@@ -86,20 +89,19 @@ QList<SScContour> SSnWatershed::execute(cv::Mat &src, const Pars& p, cv::Mat& bw
     // Perform the distance transform algorithm
 
     cv::distanceTransform(bw, dist, cv::DIST_L2, 3);
-    //cv::normalize(dist, dist, 0, 255.0, cv::NORM_MINMAX);
-    //dist.convertTo(dist, CV_8UC3);
-
-    //cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE();
-    //clahe->apply(dist,dist);
-    //cv::imshow("Distance Transform Image", dist);
 
     // Normalize the distance image for range = {0.0, 1.0}
     // so we can visualize and threshold it
-    cv::normalize(dist, dist, 0, 1.0, cv::NORM_MINMAX);
+    cv::Mat distnorm;
+    cv::normalize(dist, distnorm, 0, 1.0, cv::NORM_MINMAX);
+    cv::normalize(dist, dist, 0, 255, cv::NORM_MINMAX);
+    cv::imshow("Distance Transform Image", dist);
+
+
     // Threshold to obtain the peaks
     // This will be the markers for the foreground objects
     cv::Mat distthr;
-    cv::threshold(dist, distthr, p.dthr(), 1.0, cv::THRESH_BINARY);
+    cv::threshold(distnorm, distthr, p.dthr(), 1.0, cv::THRESH_BINARY);
 
     // Dilate a bit the dist image
     cv::Mat kernel1 = cv::Mat::ones(3, 3, CV_8U);
