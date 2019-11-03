@@ -99,7 +99,7 @@ HuNetMainWindow::HuNetMainWindow()
     m_closesb  ->setSingleStep(0.1);
     m_closesb  ->setPrefix ("Closing: ");
     m_closesb  ->setSuffix (("%"));
-    m_closesb  ->setValue(2);
+    m_closesb  ->setValue(1.5);
 
     m_distsb  ->setRange(0,1);
     m_distsb  ->setSingleStep(0.01);
@@ -107,11 +107,12 @@ HuNetMainWindow::HuNetMainWindow()
     m_distsb  ->setValue(.1);
     m_eqcb    ->setText("Equalize Histogram");
     m_invcb   ->setText("Invert");
+    m_invcb   ->setChecked(true);
 
     m_binthr  ->setRange(1,254);
     m_binthr  ->setSingleStep(1);
     m_binthr  ->setPrefix ("Bin Thr: ");
-    m_binthr  ->setValue(64);
+    m_binthr  ->setValue(128);
 
     m_imgsel->addItems(SScWatershedContainer::images());
 
