@@ -1,5 +1,124 @@
 #include "convhelpers.hpp"
 
+QList<QPoint> SSnConvHelper::convPositions(const QSize &kernel, const QSize &stride, const QPoint &element)
+{
+    if (!isSane(kernel,stride)) return QList<QPoint>();
+    QList<QPoint> ret;
+    ret.reserve(kernel.width()*kernel.height());
+    const auto topl = topLeftPosition(stride,element);
+    for (int j=0; j<kernel.height(); ++j) for (int i=0; i<kernel.width(); ++i)
+        ret << topl+QPoint(i,j);
+    return ret;
+}
+QPoint SSnConvHelper::topLeftPosition(const QSize &stride, const QPoint &element)
+{
+    const int x = stride.width()*element.x(),
+              y = stride.height()*element.y();
+    return QPoint(x,y);
+}
+QSize SSnConvHelper::inputSize(const QSize &kernel, const QSize &stride, const QSize &outputsize)
+{
+    if (!isSane(kernel,stride)) return QSize();
+    const int w  = (outputsize.width ()-1)*stride.width (),
+              h  = (outputsize.height()-1)*stride.height(),
+              dw = kernel.width ()-stride.width (),
+              dh = kernel.height()-stride.height();
+    return QSize(w+dw,h+dh);
+}
+bool SSnConvHelper::isSane(const QSize &kernel, const QSize &stride)
+{
+    return (stride.width()>0)              && (stride.height()>0) &&
+           (kernel.width()>0)              && (kernel.height()>0) &&
+           (kernel.width()>stride.width()) && (kernel.height()>stride.height());
+}
+bool SSnConvHelper::isSane(const QSize &kernel, const QSize &stride, const QSize& outputsize)
+{
+    return isSane(kernel,stride) && (outputsize.width()>0) && (outputsize.height()>0);
+}
+
+QImage SSnConvHelper::scaledImage(const QImage &im, const QSize &kernel, const QSize &stride, const QSize &outputsize)
+{
+    if (isSane(kernel,stride,outputsize))
+    {
+        const auto sz = inputSize(kernel,stride,outputsize);
+        if (im.size()==sz) return im;
+        return im.scaled(sz,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+    }
+    return QImage();
+}
+QSize SSnConvHelper::stride2Overlap(const QSize &kernel, const QSize &stride)
+{
+    return QSize(kernel.width()-stride.width(),kernel.height()-stride.height());
+}
+QSize SSnConvHelper::overlap2Stride(const QSize &kernel, const QSize &overlap)
+{
+    return stride2Overlap(kernel,overlap);
+}
+QList<QList<QRgb> > SSnConvHelper::matrix(const QImage &im, const QSize &kernel, const QSize &stride, const QSize &outputsize)
+{
+    QList<QList<QRgb> > ret;
+    if (isSane(kernel,stride,outputsize))
+    {
+        const QImage im2 = scaledImage(im,kernel,stride,outputsize);
+        for (int j=0; j<outputsize.height(); ++j) for (int i=0; i<outputsize.width(); ++i)
+        {
+            QList<QRgb> l;
+            foreach(auto& p, convPositions(kernel,stride,QPoint(i,j)))
+                l << im2.pixel(p);
+            ret << l;
+        }
+    }
+    return ret;
+}
+
+
+QList<QList<uchar> > SSnConvHelper::colorValues(const QList<QList<QRgb> >& matrix)
+{
+    QList<QList<uchar> > ret;
+    QList<QRgb> line;
+    foreach(line, matrix)
+    {
+        QList<uchar> l;
+        foreach(auto c, line) l << (qRed   (c)&0xff);
+        foreach(auto c, line) l << (qGreen (c)&0xff);
+        foreach(auto c, line) l << (qBlue  (c)&0xff);
+        ret << l;
+    };
+    return ret;
+}
+QList<QList<uchar> > SSnConvHelper::grayValues(const QList<QList<QRgb> >& matrix)
+{
+    QList<QList<uchar> > ret;
+    QList<QRgb> line;
+    foreach(line, matrix)
+    {
+        QList<uchar> l;
+        foreach(auto c, line) l << (qGray(c)&0xff);
+        ret << l;
+    }
+    return ret;
+}
+
+
+
+QList<QImage> SSnConvHelper::images(const QImage& im, const QSize& kernel, const QSize& stride, const QSize& outputsize)
+{
+    QList<QImage> ret;
+    const QImage im2 = scaledImage(im,kernel,stride,outputsize);
+    for (int j=0; j<kernel.height(); ++j) for (int i=0; i<kernel.width(); ++i)
+    {
+         QImage im3 = QImage(kernel,im2.format());
+         foreach(auto p,  convPositions(kernel,stride,QPoint(i,j)))
+            im3.setPixel(p,im2.pixel(p));
+         ret << im3;
+    }
+    return ret;
+}
+
+
+
+
+
 QSize SSnConvHelpers::inputSize(int kx, int ky, int ovl, int xunits, int yunits)
 {
     if ((kx>0) && (ky>0) && (xunits>0) && (yunits>0) && (ovl>=0))
