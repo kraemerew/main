@@ -59,8 +59,7 @@ QList<QList<QRgb> > SSnConvHelper::matrix(const QImage &im, const QSize &kernel,
     QList<QList<QRgb> > ret;
     if (isSane(kernel,stride,outputsize))
     {
-        const QImage im2 = scaledImage(im,kernel,stride,outputsize);
-        foreach(const auto& ii, images(im2,kernel,stride,outputsize))
+        foreach(const auto& ii, images(im,kernel,stride,outputsize))
         {
             QList<QRgb> l;
             for (int j=0; j<ii.height(); ++j) for (int i=0; i<ii.width(); ++i) l << ii.pixel(i,j);
