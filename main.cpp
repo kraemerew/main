@@ -371,11 +371,33 @@ void convImageTest()
 
 #include "convhelpers.hpp"
 
+
+void convHelperTest()
+{
+    QImage im("/home/developer/1.png");
+    int idx=-1;
+    //foreach(const auto& i, SSnConvHelper::images(im,QSize(128,128),QSize(64,64),QSize(3,3))) i.save(QString("/home/developer/test%1.png").arg(++idx));
+    const auto ks = QSize(128,128);
+    foreach(auto line, SSnConvHelper::matrix(im,ks,ks,QSize(3,3)))
+    {
+        QImage im2(ks,QImage::Format_RGB32);
+        im2.setColorTable(im.colorTable());
+
+        for (int j=0; j<im2.height(); ++j) for (int i=0; i<im2.width(); ++i)
+        {
+            im2.setPixel(QPoint(i,j),line[(j*ks.height())+i]);
+        }
+        im2.save(QString("/home/developer/TEST%1.png").arg(++idx));
+    }
+
+}
 int main(int argc, char *argv[])
 {
     Q_UNUSED(argc);
     Q_UNUSED(argv);
 
+    convHelperTest();
+    std::exit(0);
     QVector<double> a, b;
     a << 1 << 2 << 3 <<
          4 << 5 << 6 <<

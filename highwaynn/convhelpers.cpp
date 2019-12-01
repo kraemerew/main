@@ -19,8 +19,8 @@ QPoint SSnConvHelper::topLeftPosition(const QSize &stride, const QPoint &element
 QSize SSnConvHelper::inputSize(const QSize &kernel, const QSize &stride, const QSize &outputsize)
 {
     if (!isSane(kernel,stride)) return QSize();
-    const int w  = (outputsize.width ()-1)*stride.width (),
-              h  = (outputsize.height()-1)*stride.height(),
+    const int w  = outputsize.width ()*stride.width (),
+              h  = outputsize.height()*stride.height(),
               dw = kernel.width ()-stride.width (),
               dh = kernel.height()-stride.height();
     return QSize(w+dw,h+dh);
@@ -29,7 +29,7 @@ bool SSnConvHelper::isSane(const QSize &kernel, const QSize &stride)
 {
     return (stride.width()>0)              && (stride.height()>0) &&
            (kernel.width()>0)              && (kernel.height()>0) &&
-           (kernel.width()>stride.width()) && (kernel.height()>stride.height());
+           (kernel.width()>=stride.width()) && (kernel.height()>=stride.height());
 }
 bool SSnConvHelper::isSane(const QSize &kernel, const QSize &stride, const QSize& outputsize)
 {
@@ -60,11 +60,10 @@ QList<QList<QRgb> > SSnConvHelper::matrix(const QImage &im, const QSize &kernel,
     if (isSane(kernel,stride,outputsize))
     {
         const QImage im2 = scaledImage(im,kernel,stride,outputsize);
-        for (int j=0; j<outputsize.height(); ++j) for (int i=0; i<outputsize.width(); ++i)
+        foreach(const auto& ii, images(im2,kernel,stride,outputsize))
         {
             QList<QRgb> l;
-            foreach(auto& p, convPositions(kernel,stride,QPoint(i,j)))
-                l << im2.pixel(p);
+            for (int j=0; j<ii.height(); ++j) for (int i=0; i<ii.width(); ++i) l << ii.pixel(i,j);
             ret << l;
         }
     }
@@ -100,18 +99,21 @@ QList<QList<uchar> > SSnConvHelper::grayValues(const QList<QList<QRgb> >& matrix
 }
 
 
-
+QImage SSnConvHelper::image(const QImage &im, const QSize &kernel, const QSize &stride, const QSize &outputsize, const QPoint &element)
+{
+    QImage ret(kernel,im.format());
+    const QImage im2 = scaledImage(im,kernel,stride,outputsize);
+    const auto tl = topLeftPosition(stride,element);
+    foreach(auto p, convPositions(kernel,stride,element))
+        ret.setPixel(p-tl,im2.pixel(p));
+    return ret;
+}
 QList<QImage> SSnConvHelper::images(const QImage& im, const QSize& kernel, const QSize& stride, const QSize& outputsize)
 {
     QList<QImage> ret;
     const QImage im2 = scaledImage(im,kernel,stride,outputsize);
-    for (int j=0; j<kernel.height(); ++j) for (int i=0; i<kernel.width(); ++i)
-    {
-         QImage im3 = QImage(kernel,im2.format());
-         foreach(auto p,  convPositions(kernel,stride,QPoint(i,j)))
-            im3.setPixel(p,im2.pixel(p));
-         ret << im3;
-    }
+    for (int j=0; j<outputsize.height(); ++j) for (int i=0; i<outputsize.width(); ++i)
+         ret << image(im2,kernel,stride,outputsize,QPoint(i,j));
     return ret;
 }
 

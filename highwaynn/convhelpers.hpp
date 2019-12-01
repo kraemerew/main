@@ -94,7 +94,17 @@ QList<QList<uchar> > colorValues(const QList<QList<QRgb> >& matrix);
  */
 QList<QList<uchar> > grayValues(const QList<QList<QRgb> >& matrix);
 /*!
- * \brief For testing purposes: returns a list of images as inputs for the output layer
+ * \brief Returns a cutout of an (rescaled) input image for a given neuron
+ * \param im
+ * \param kernel
+ * \param stride
+ * \param outputsize
+ * \param element       The output element
+ * \return Input cutout for the given element
+ */
+QImage image(const QImage& im, const QSize& kernel, const QSize& stride, const QSize& outputsize, const QPoint& element);
+/*!
+ * \brief Return a list of cutout images acting as input to the output array
  * \param im
  * \param kernel
  * \param stride
@@ -103,7 +113,12 @@ QList<QList<uchar> > grayValues(const QList<QList<QRgb> >& matrix);
  * \return
  */
 QList<QImage> images(const QImage& im, const QSize& kernel, const QSize& stride, const QSize& outputsize);
-
+/*!
+ * \brief Convert image to RGB list
+ * \param im
+ * \return
+ */
+QList<QRgb> im2List(QImage& im);
 }
 namespace SSnConvHelpers
 {
