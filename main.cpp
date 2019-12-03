@@ -374,6 +374,11 @@ void convImageTest()
 
 void convHelperTest()
 {
+
+
+    const auto f = SSnConvHelper::fitToInput(QSize(5,5),QSize(3,3), QSize(1,1));
+    qWarning(">>>>>%d %d",f.width(),f.height());
+   std::exit(0);
     QImage im("/home/developer/1.png");
     int idx=-1;
     //foreach(const auto& i, SSnConvHelper::images(im,QSize(128,128),QSize(64,64),QSize(3,3))) i.save(QString("/home/developer/test%1.png").arg(++idx));

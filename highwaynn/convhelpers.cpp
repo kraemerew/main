@@ -116,7 +116,20 @@ QList<QImage> SSnConvHelper::images(const QImage& im, const QSize& kernel, const
     return ret;
 }
 
-
+QSize SSnConvHelper::fitToInput(const QSize &input, const QSize &kernel, const QSize &stride)
+{
+    QSize ret(-1,-1);
+    if (isSane(kernel,stride) && (kernel.width()<=input.width()) && (kernel.height()<=input.height()))
+    {
+        if (((input.width()-kernel.width())%stride.width()==0) && ((input.height()-kernel.height())%stride.height()==0))
+        {
+            const int nw = 1+((input.width ()-kernel.width ())/stride.width()),
+                      nh = 1+((input.height()-kernel.height())/stride.height());
+            ret =QSize(nw,nh);
+        }
+    }
+    return ret;
+}
 
 
 

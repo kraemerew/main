@@ -119,6 +119,14 @@ QList<QImage> images(const QImage& im, const QSize& kernel, const QSize& stride,
  * \return
  */
 QList<QRgb> im2List(QImage& im);
+/*!
+ * \brief fitToInput
+ * \param input
+ * \param kernel
+ * \param stride
+ * \return Number of output elements or -1,-1 on failure
+ */
+QSize fitToInput(const QSize& input, const QSize& kernel, const QSize& stride);
 }
 namespace SSnConvHelpers
 {
