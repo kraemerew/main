@@ -339,7 +339,7 @@ void poolTest()
     std::exit(0);
 }
 #include "conv.hpp"
-void convTest()
+/*void convTest()
 {
     SScHighwayNetwork net;
     SScInputConvUnit cu(&net,3,3,5,5,1);
@@ -357,9 +357,9 @@ void convTest()
         for (int i=0; i<cu.units(); ++i) qWarning("Unit %d: %lf", i, cu.output(0,i)->out());
         if (++c>5) std::exit(1);
     }
-}
+}*/
 
-void convImageTest()
+/*void convImageTest()
 {
     SScConvImageConverter imcv(100,100,50,2,2,false,"/home/developer/2.jpg");
 
@@ -367,15 +367,13 @@ void convImageTest()
     imcv.cut(1,0).save("/home/developer/10.jpg");
     imcv.cut(0,1).save("/home/developer/01.jpg");
     imcv.cut(1,1).save("/home/developer/11.jpg");
-}
+}*/
 
 #include "convhelpers.hpp"
 
 
 void convHelperTest()
 {
-
-
     const auto f = SSnConvHelper::fitToInput(QSize(5,5),QSize(3,3), QSize(1,1));
     qWarning(">>>>>%d %d",f.width(),f.height());
    std::exit(0);
@@ -400,20 +398,21 @@ int main(int argc, char *argv[])
 {
     Q_UNUSED(argc);
     Q_UNUSED(argv);
+    SScBlasMatrix mx(3,3);
+    mx.at(0,0)=1;
+    mx.at(1,0)=2;
+    mx.at(2,0)=3;
+    mx.at(1,1)=1;
+    mx.at(2,2)=3;
+    mx.dump();
+    QVector<double> vx; vx << 1 << 2 << 3;
+    auto result = mx*vx;
+for (int i=0; i<result.size(); ++i) qWarning(">> %lf",result[i]);
 
     convHelperTest();
     std::exit(0);
-    QVector<double> a, b;
-    a << 1 << 2 << 3 <<
-         4 << 5 << 6 <<
-         7 <<8 << 9 <<
-         10 << 11 << 12;
-    b << 1 << 1 << 1;
-    auto c = SSnBlas::mxv(a,b);
-    for (int i=0; i<c.size(); ++i) qWarning(">>>>#%d: %lf", i, c[i]);
-    std::exit(0);
 
-    convImageTest();
+    //convImageTest();
 
 /*
     auto aaa = SSnConvHelpers::inputSize(3,4,2,2,1);
@@ -423,7 +422,7 @@ int main(int argc, char *argv[])
     foreach(auto i, ccc) qWarning("#%d",i);
     std::exit(0);*/
 
-    convTest();
+    //convTest();
     /*SScRBiasNeuron* bn = new (std::nothrow) SScRBiasNeuron();
     QList<SScRNeuron*> nl;
     for (int i=0; i<2; ++i) nl << new (std::nothrow) SScRNeuron();

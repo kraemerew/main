@@ -2,7 +2,7 @@
 #define HIGHWAYNETWORK_HPP
 #include "neuron.hpp"
 #include "../nnhelpers/sscnetworkbase.hpp"
-
+class SScImageProviderV2;
 #include <QVariantMap>
 #include <QMap>
 
@@ -11,7 +11,7 @@ class SScHighwayNetwork : public SScNetworkBase
 public:
     SScHighwayNetwork();
     virtual ~SScHighwayNetwork();
-
+    SScImageProviderV2* ip() const { return m_ip; }
     inline QString name() const { return m_name; }
     inline void setName(const QString& s) { m_name=s; }
 
@@ -85,6 +85,7 @@ private:
 
     QString                     m_name;
     QMap<int,SSiHighwayNeuron*> m_neurons;
+    SScImageProviderV2*         m_ip;
 };
 
 #endif // HIGHWAYNETWORK_HPP

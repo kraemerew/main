@@ -100,7 +100,7 @@ QString SScImageProviderV2::calcId(const QString& uuid, const QSize &kernel, con
                                    << (color ? "C":"M");
     return sl.join(" ");
 }
-
+/*
 SScImageProvider::SScImageProvider(int kx, int ky, int overlap, int outw, int outh, bool color)
   : m_kx    (kx),
     m_ky    (ky),
@@ -130,3 +130,4 @@ QString SScImageProvider::addPattern(const QImage &im)
     return QString();
 }
 
+*/

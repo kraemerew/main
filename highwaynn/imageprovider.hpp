@@ -80,7 +80,7 @@ private:
     QStringList                     m_seq;
     QString                         m_current, m_last;
 };
-
+/*
 class SScImageProvider
 {
 public:
@@ -108,5 +108,5 @@ private:
     QStringList                     m_pkeys;
     QMap<QString,QVector<double> >  m_patterns;
 };
-
+*/
 #endif // IMAGEPROVIDER_HPP

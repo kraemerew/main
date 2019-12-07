@@ -1,18 +1,20 @@
 #include "network.hpp"
 #include "neuron.hpp"
+#include "imageprovider.hpp"
 #include "../nnhelpers/ssccycledetector.hpp"
 #include "../nnhelpers/sscvm.hpp"
 #include "../nnhelpers/ssnjsonhandler.hpp"
 #include <QSet>
 #include <QFile>
 
-SScHighwayNetwork::SScHighwayNetwork() : SScNetworkBase()
+SScHighwayNetwork::SScHighwayNetwork() : SScNetworkBase(), m_ip(new SScImageProviderV2())
 {
 }
 SScHighwayNetwork::~SScHighwayNetwork()
 {
     foreach(SSiHighwayNeuron* n, m_neurons) delete n;
     m_neurons.clear();
+    delete m_ip;
 }
 
 int SScHighwayNetwork::addNeuron   (SSiHighwayNeuron::Type type, const QString& name)

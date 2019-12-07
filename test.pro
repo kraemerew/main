@@ -39,10 +39,10 @@ SOURCES += main.cpp \
     nnhelpers/ssnjsonhandler.cpp \
     highwaynn/gate.cpp \
     highwaynn/network.cpp \
-    highwaynn/convunit.cpp \
+    highwaynn/convunitv2.cpp \
     highwaynn/kernel.cpp \
     highwaynn/convhelpers.cpp \
-    image/convimageconverter.cpp \
+    #image/convimageconverter.cpp \
     highwaynn/imageprovider.cpp
 
 # The following define makes your compiler emit warnings if you use
@@ -88,10 +88,10 @@ HEADERS += \
     nnhelpers/ssnjsonhandler.hpp \
     highwaynn/gate.hpp \
     highwaynn/network.hpp \
-    highwaynn/convunit.hpp \
+    highwaynn/convunitv2.hpp \
     highwaynn/kernel.hpp \
-    highwaynn/convpatternprovider.hpp \
+   # highwaynn/convpatternprovider.hpp \
     highwaynn/convhelpers.hpp \
-    image/convimageconverter.hpp \
+    #image/convimageconverter.hpp \
     highwaynn/imageprovider.hpp
 

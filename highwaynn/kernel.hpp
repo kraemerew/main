@@ -83,7 +83,7 @@ protected:
     QHash<QPair<SScConvNeuron*,SScConvNeuron*>, SScTrainableParameter*> m_iconcache;
     QHash<SScConvNeuron*, QVector<SScConvNeuron*> >                     m_fwdcache;
     QHash<int,QVector<QPair<SScConvNeuron*,SScConvNeuron*> > >          m_wpcache;
-    QVector<QVector<double> > m_currentpattern;
+    QVector<QVector<double> >                                           m_currentpattern;
 };
 
 #endif // KERNEL_HPP
