@@ -34,6 +34,8 @@ public:
     inline  QSize   ksize           () const { return m_ksz; }
     inline  QSize   stride          () const { return m_str; }
     virtual int     weights         () const { return m_ksz.width()*m_ksz.height()*depth(); }
+    virtual int     osize           () const { return m_units.width()*m_units.height(); }
+
     virtual int     depth           () const = 0;
     virtual bool    isColor         () const { return depth()==3; }
 
@@ -47,7 +49,7 @@ public:
 
 protected:
     virtual void clearKernels       ();
-    virtual void createKernels      (int);
+    virtual void createKernels      ();
 
     SScHighwayNetwork*  m_network;
     QSize               m_ksz, m_str, m_units;

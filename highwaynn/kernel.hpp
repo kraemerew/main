@@ -5,7 +5,7 @@
 #include <QList>
 #include <QHash>
 
-class SScConvPatternProvider;
+class SScImageProviderV2;
 class SScTrainableParameter;
 class SScHighwayNetwork;
 class SScConvNeuron;
@@ -13,8 +13,26 @@ class SScConvNeuron;
 class SScKernel
 {
 public:
-    explicit SScKernel(SScHighwayNetwork* network, SScConvPatternProvider* pp, int weights, int neurons);
+    /*!
+     * \brief SScKernel
+     * \param network
+     * \param ksz
+     * \param str
+     * \param units
+     * \param depth
+     */
+    explicit SScKernel(SScHighwayNetwork* network, const QSize& ksz, const QSize& str, const QSize& units, int depth = 1);
+    /*!
+     * \brief ~SScKernel
+     */
     virtual ~SScKernel();
+    /*!
+     * \brief Return unit a column and row
+     * \param c
+     * \param r
+     * \return NULL for out of range cases
+     */
+    SScConvNeuron* unit(int c, int r) const;
     virtual void resetTraining()
     {
         m_iconcache.clear();
@@ -65,16 +83,17 @@ public:
 
 protected:
     bool transform();
-    bool activatePattern(const QVector<QVector<double> >& pattern);
+    bool activatePattern(const QVector<double> & pattern);
     void createNeurons();
     void createWeights();
     void clearNeurons();
     void clearWeights();
 
     SScHighwayNetwork*      m_network;
-    SScConvPatternProvider* m_pp;
-    bool                    m_netset;
+    bool                    m_netset, m_color;
     int                     m_nrw, m_nrn;
+    QSize                   m_ksz, m_str, m_units;
+
 
     QVector<SScTrainableParameter*>                                     m_w;
     QVector<double>                                                     m_n;
@@ -83,7 +102,6 @@ protected:
     QHash<QPair<SScConvNeuron*,SScConvNeuron*>, SScTrainableParameter*> m_iconcache;
     QHash<SScConvNeuron*, QVector<SScConvNeuron*> >                     m_fwdcache;
     QHash<int,QVector<QPair<SScConvNeuron*,SScConvNeuron*> > >          m_wpcache;
-    QVector<QVector<double> >                                           m_currentpattern;
 };
 
 #endif // KERNEL_HPP

@@ -7,16 +7,19 @@
 #include <QSet>
 #include <QFile>
 
-SScHighwayNetwork::SScHighwayNetwork() : SScNetworkBase(), m_ip(new SScImageProviderV2())
-{
-}
+SScHighwayNetwork::SScHighwayNetwork() : SScNetworkBase(), m_ip(NULL)
+{}
 SScHighwayNetwork::~SScHighwayNetwork()
 {
     foreach(SSiHighwayNeuron* n, m_neurons) delete n;
     m_neurons.clear();
-    delete m_ip;
+    if (m_ip) delete m_ip;
 }
-
+SScImageProviderV2* SScHighwayNetwork::ip()
+{
+    if (Q_UNLIKELY(!m_ip)) m_ip=new SScImageProviderV2();
+    return m_ip;
+}
 int SScHighwayNetwork::addNeuron   (SSiHighwayNeuron::Type type, const QString& name)
 {
     SSiHighwayNeuron* n = SSiHighwayNeuron::create(this,type,name);

@@ -3,17 +3,22 @@
 #include "conv.hpp"
 #include "ssctrainableparameter.hpp"
 #include "convpatternprovider.hpp"
+#include "imageprovider.hpp"
 
-SScKernel::SScKernel(SScHighwayNetwork* network, SScConvPatternProvider* pp, int weights, int neurons)
+SScKernel::SScKernel(SScHighwayNetwork* network, const QSize& k, const QSize& str, const QSize& units, int depth)
     : m_network (network),
-      m_pp      (pp),
       m_netset  (false),
-      m_nrw     (weights),
-      m_nrn     (neurons)
+      m_color   (depth==3),
+      m_nrw     (k.width()*k.height()*depth),
+      m_nrn     (units.width()*units.height()),
+      m_ksz     (k),
+      m_str     (str),
+      m_units   (units)
 {
     Q_CHECK_PTR(network);
     Q_ASSERT(m_nrn>0);
     Q_ASSERT(m_nrw>0);
+    Q_ASSERT(depth==1 || depth==3);
     createNeurons();
     createWeights();
 }
@@ -24,40 +29,37 @@ SScKernel::~SScKernel()
     clearWeights();
 }
 
+SScConvNeuron* SScKernel::unit(int c, int r) const
+{
+    const int idx = (r*m_units.width())+c;
+    return ((idx>=0) && (idx<m_neurons.size())) ? m_neurons[idx] : NULL;
+}
+
 void SScKernel::reset() { m_netset = false; foreach(auto n, m_neurons) n->reset(); }
 
-bool SScKernel::activatePattern(const QVector<QVector<double> > &pattern)
+bool SScKernel::activatePattern(const QVector<double> &pattern)
 {
-    m_currentpattern = pattern;
+    if (pattern.size()!=m_w.size()*m_units.width()*m_units.height()) return false;
     QVector<double> w;
     w.reserve(m_w.size());
     for (int i=0; i<m_w.size(); ++i) w << m_w[i]->value();
     m_n.clear();
     m_n.reserve(m_neurons.size());
-    bool ret = true;
-    foreach(const QVector<double>& dv, pattern)
-        if (dv.size()==w.size()) m_n << SSnBlas::vxv(w,dv);
-        else                  {  m_n << 0.0; ret = false; }
-    return ret;
+    m_n = SSnBlas::mxv(pattern,w);
+    return true;
 }
 
 bool SScKernel::transform()
 {
-    QVector<QVector<double> > pattern;
-    if (m_pp)
+    QVector<double>  pattern;
+    if (m_inputs.isEmpty())
     {
-        pattern = m_pp->currentPattern();
+       pattern = m_network->ip()->get(m_ksz,m_str,m_units,m_color);
     }
     else
     {
-        pattern.reserve(m_inputs.size());
-        foreach(const auto& field, m_inputs)
-        {
-            QVector<double> v;
-            v.reserve(field.size());
-            foreach(auto& n, field) v << n->out();
-            pattern << v;
-        }
+        foreach(const auto& field, m_inputs)                   
+            foreach(auto& n, field) pattern << n->out();
     }
 
     return activatePattern(pattern);
@@ -142,7 +144,7 @@ QVector<double> SScKernel::deltaw()
 {
     Q_ASSERT(!m_neurons.isEmpty());
     QVector<double> ret; ret.fill(0.0,m_w.size());
-    for (int n=0; n<m_neurons.size(); ++n)
+   /* for (int n=0; n<m_neurons.size(); ++n)
     {
         SScConvNeuron* neuron = m_neurons[n];
         const QVector<double>& pat = m_currentpattern[n];
@@ -151,7 +153,7 @@ QVector<double> SScKernel::deltaw()
     }
     const double scale = 1.0/(double)m_neurons.size();
     for (int i=0; i<ret.size(); ++i) ret[i]*=scale;
-    return ret;
+    */return ret;
 }
 
 void SScKernel::endOfCycle()

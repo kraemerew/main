@@ -22,10 +22,10 @@ SSiConvUnit::~SSiConvUnit()
     clearKernels();
 }
 
-void SSiConvUnit::reset             ()      { foreach(SScKernel* k, m_kernels) k->reset(); }
-void SSiConvUnit::resetTraining     ()      { foreach(SScKernel* k, m_kernels) k->resetTraining(); }
-void SSiConvUnit::clearKernels      ()      { foreach(SScKernel* k, m_kernels) delete k; m_kernels.clear(); }
-void SSiConvUnit::createKernels     (int nr){ }//while (m_kernels.size()<nr) m_kernels << new (std::nothrow) SScKernel(m_network, patternProvider(), weights(), units()); }
+void SSiConvUnit::reset             ()  { foreach(auto k, m_kernels) k->reset(); }
+void SSiConvUnit::resetTraining     ()  { foreach(auto k, m_kernels) k->resetTraining(); }
+void SSiConvUnit::clearKernels      ()  { foreach(auto k, m_kernels) delete k; m_kernels.clear(); }
+void SSiConvUnit::createKernels     ()  { while (m_kernels.size()>m_knr) m_kernels << new SScKernel(m_network,m_ksz,m_str,m_units,depth()); }
 
 SScConvNeuron* SSiConvUnit::output(quint32 k, quint32 nidx) const { return (k<(quint32)m_kernels.size()) ? m_kernels[k]->output(nidx) : NULL; }
 
@@ -67,7 +67,7 @@ bool SSiConvUnit::fromVM(const QVariantMap & vm)
     m_units =   QSize(ux,uy);
     m_ksz   =   QSize(kx,ky);
     m_knr   =   knr;
-    createKernels(knr);
+    createKernels();
     for (int i=0; i<knr; ++i) if (!m_kernels[i]->fromVM(sscvm.vmToken(QString("KERNEL_%1").arg(i)))) ret = false;
     return ret;
 }
@@ -78,7 +78,7 @@ SScInputConvUnit::SScInputConvUnit(SScHighwayNetwork *network, const QSize &kern
 {
     if (network) m_ip = network->ip();
     Q_CHECK_PTR(m_ip);
-    createKernels(qMax(1,knr));
+    createKernels();
 }
 
 SScInputConvUnit::~SScInputConvUnit()
@@ -99,7 +99,7 @@ QString SScInputConvUnit::addPattern(const QString& filename) { return m_ip->app
 SScColorInputConvUnit::SScColorInputConvUnit(SScHighwayNetwork *network, const QSize &kern, const QSize &stride, const QSize &elements, int knr)
     : SScInputConvUnit(network,kern,stride,elements,knr)
 {
-    createKernels(qMax(1,knr));
+    createKernels();
 }
 SScColorInputConvUnit::~SScColorInputConvUnit()
 {
