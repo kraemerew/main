@@ -4,9 +4,11 @@
 #include "ssctrainableparameter.hpp"
 #include "convpatternprovider.hpp"
 #include "imageprovider.hpp"
+#include "convhelpers.hpp"
 
 SScKernel::SScKernel(SScHighwayNetwork* network, const QSize& k, const QSize& str, const QSize& units, int depth)
     : m_network (network),
+      m_a       (SScActivation::create(SScActivation::SWISH)),
       m_netset  (false),
       m_color   (depth==3),
       m_nrw     (k.width()*k.height()*depth),
@@ -25,6 +27,7 @@ SScKernel::SScKernel(SScHighwayNetwork* network, const QSize& k, const QSize& st
 
 SScKernel::~SScKernel()
 {
+    delete m_a;
     clearNeurons();
     clearWeights();
 }
@@ -46,6 +49,9 @@ bool SScKernel::activatePattern(const QVector<double> &pattern)
     m_n.clear();
     m_n.reserve(m_neurons.size());
     m_n = SSnBlas::mxv(pattern,w);
+    m_o.clear();
+    m_o.reserve(m_n.size());
+    foreach(auto v, m_n) m_o << m_a->activate(v);
     return true;
 }
 
@@ -169,3 +175,5 @@ void SScKernel::trainingStep()
     foreach(auto n, m_neurons) n->act()->update(n->dedo(),0.0);
 }
 
+QImage SScKernel::imOut() const { return SSnConvHelper::toImage(m_o,m_units); }
+QImage SScKernel::imNet() const { return SSnConvHelper::toImage(m_n,m_units); }

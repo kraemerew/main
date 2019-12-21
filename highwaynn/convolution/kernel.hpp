@@ -4,6 +4,7 @@
 #include <QVector>
 #include <QList>
 #include <QHash>
+#include "../nnhelpers/sscactivation.hpp"
 
 class SScImageProviderV2;
 class SScTrainableParameter;
@@ -26,6 +27,16 @@ public:
      * \brief ~SScKernel
      */
     virtual ~SScKernel();
+    /*!
+     * \brief Return output activation image
+     * \return
+     */
+    QImage imOut() const;
+    /*!
+     * \brief Return potential image
+     * \return
+     */
+    QImage imNet() const;
     /*!
      * \brief Return unit a column and row
      * \param c
@@ -90,13 +101,14 @@ protected:
     void clearWeights();
 
     SScHighwayNetwork*      m_network;
+    SScActivation*          m_a;
     bool                    m_netset, m_color;
     int                     m_nrw, m_nrn;
     QSize                   m_ksz, m_str, m_units;
 
 
     QVector<SScTrainableParameter*>                                     m_w;
-    QVector<double>                                                     m_n;
+    QVector<double>                                                     m_n, m_o;
     QVector<SScConvNeuron*>                                             m_neurons;
     QVector<QVector<SScConvNeuron*> >                                   m_inputs;
     QHash<QPair<SScConvNeuron*,SScConvNeuron*>, SScTrainableParameter*> m_iconcache;
