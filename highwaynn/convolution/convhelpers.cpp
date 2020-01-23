@@ -1,5 +1,24 @@
 #include "convhelpers.hpp"
 
+SScConvSetting::SScConvSetting(const QSize &kernel, const QSize &stride, const QSize &io, bool isInput)
+    : m_k(kernel),
+      m_s(stride)
+{
+    if (kernelValid() && strideValid() && (io.width()>1) && (io.height()>0))
+    {
+        if (isInput)
+        {
+            m_i = io;
+            m_o = SSnConvHelper::fitToInput(io,m_k,m_s);
+        }
+        else
+        {
+            m_o = io;
+            m_i = SSnConvHelper::inputSize(m_k,m_s,m_o);
+        }
+    }
+}
+
 QList<QPoint> SSnConvHelper::convPositions(const QSize &kernel, const QSize &stride, const QPoint &element)
 {
     if (!isSane(kernel,stride)) return QList<QPoint>();

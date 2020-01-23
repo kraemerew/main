@@ -135,4 +135,38 @@ QList<QRgb> im2List(QImage& im);
  */
 QSize fitToInput(const QSize& input, const QSize& kernel, const QSize& stride);
 }
+
+
+
+class SScConvSetting
+{
+public:
+    /*!
+     * \brief SScConvSetting
+     * \param kernel    Kernel size
+     * \param stride    Kernel stride
+     * \param io        Input elements or output elements depending on isInput
+     * \param isInput   On true io is the input size (calcuate output size) on false the other way round
+     */
+    explicit SScConvSetting(const QSize& kernel, const QSize& stride, const QSize& io, bool isInput);
+
+    inline bool     isValid     () const { return kernelValid() && strideValid() && inputValid() && outputValid(); }
+    inline bool     kernelValid () const { return (m_k.width()>1) && (m_k.height()>1); }
+    inline bool     strideValid () const { return (m_s.width()>0) && (m_s.height()>0); }
+    inline bool     inputValid  () const { return (m_i.width()>0) && (m_i.height()>0); }
+    inline bool     outputValid () const { return (m_o.width()>0) && (m_o.height()>0); }
+
+    inline QSize    overlap     () const { return SSnConvHelper::stride2Overlap(kernel(),stride()); }
+    inline QSize    kernel      () const { return m_k; }
+    inline QSize    stride      () const { return m_s; }
+    inline QSize    input       () const { return m_i; }
+    inline QSize    output      () const { return m_o; }
+
+    inline bool     canInputFrom(const SScConvSetting& other) const { return input()==other.output(); }
+    inline bool     canOutputTo (const SScConvSetting& other) const { return output()==other.input(); }
+
+private:
+    QSize m_k, m_s, m_o, m_i;
+};
+
 #endif // CONVHELPERS_HPP
