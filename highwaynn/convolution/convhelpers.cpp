@@ -1,22 +1,12 @@
 #include "convhelpers.hpp"
 
-SScConvSetting::SScConvSetting(const QSize &kernel, const QSize &stride, const QSize &io, bool isInput)
+SScConvSetting::SScConvSetting(const QSize &kernel, const QSize &stride, const QSize &output)
     : m_k(kernel),
-      m_s(stride)
+      m_s(stride),
+      m_o(output)
 {
-    if (kernelValid() && strideValid() && (io.width()>1) && (io.height()>0))
-    {
-        if (isInput)
-        {
-            m_i = io;
-            m_o = SSnConvHelper::fitToInput(io,m_k,m_s);
-        }
-        else
-        {
-            m_o = io;
-            m_i = SSnConvHelper::inputSize(m_k,m_s,m_o);
-        }
-    }
+    if (kernelValid() && strideValid() && outputValid())
+        m_i = SSnConvHelper::inputSize(m_k,m_s,m_o);
 }
 
 SScConvSetting::SScConvSetting(const QSize &kernel, const QSize &stride, const SScConvSetting &input)

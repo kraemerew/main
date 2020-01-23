@@ -145,10 +145,9 @@ public:
      * \brief SScConvSetting
      * \param kernel    Kernel size
      * \param stride    Kernel stride
-     * \param io        Input elements or output elements depending on isInput
-     * \param isInput   On true io is the input size (calcuate output size) on false the other way round
+     * \param output    Output elements
      */
-    explicit SScConvSetting(const QSize& kernel, const QSize& stride, const QSize& io, bool isInput);
+    explicit SScConvSetting(const QSize& kernel, const QSize& stride, const QSize& output);
     /*!
      * \brief Create based on a kernel stride setting and another input convolution layer
      * \param kernel
