@@ -137,19 +137,22 @@ QSize fitToInput(const QSize& input, const QSize& kernel, const QSize& stride);
 }
 
 
-
+/*!
+ * \brief Create/fit valid convolution settings for input layer and hidden layers
+ *        In both cases kernel and kernel stride and either ouput size (for input layer case) or input size (for hidden layer) are needed
+ */
 class SScConvSetting
 {
 public:
     /*!
-     * \brief SScConvSetting
+     * \brief Create input convolution setting based o kernel stride and output size
      * \param kernel    Kernel size
      * \param stride    Kernel stride
      * \param output    Output elements
      */
     explicit SScConvSetting(const QSize& kernel, const QSize& stride, const QSize& output);
     /*!
-     * \brief Create based on a kernel stride setting and another input convolution layer
+     * \brief Create hidden convolution setting based on a input convolution setting
      * \param kernel
      * \param stride
      * \param input
