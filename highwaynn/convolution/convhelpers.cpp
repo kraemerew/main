@@ -19,6 +19,17 @@ SScConvSetting::SScConvSetting(const QSize &kernel, const QSize &stride, const Q
     }
 }
 
+SScConvSetting::SScConvSetting(const QSize &kernel, const QSize &stride, const SScConvSetting &input)
+
+    : m_k(kernel),
+      m_s(stride),
+      m_o(QSize(-1,-1)),
+      m_i(input.input())
+{
+    if (kernelValid() && strideValid() && inputValid())
+        m_o = SSnConvHelper::fitToInput(m_i,m_k,m_s);
+}
+
 QList<QPoint> SSnConvHelper::convPositions(const QSize &kernel, const QSize &stride, const QPoint &element)
 {
     if (!isSane(kernel,stride)) return QList<QPoint>();

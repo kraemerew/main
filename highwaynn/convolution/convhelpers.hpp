@@ -149,6 +149,13 @@ public:
      * \param isInput   On true io is the input size (calcuate output size) on false the other way round
      */
     explicit SScConvSetting(const QSize& kernel, const QSize& stride, const QSize& io, bool isInput);
+    /*!
+     * \brief Create based on a kernel stride setting and another input convolution layer
+     * \param kernel
+     * \param stride
+     * \param input
+     */
+    explicit SScConvSetting(const QSize& kernel, const QSize& stride, const SScConvSetting& input);
 
     inline bool     isValid     () const { return kernelValid() && strideValid() && inputValid() && outputValid(); }
     inline bool     kernelValid () const { return (m_k.width()>1) && (m_k.height()>1); }
