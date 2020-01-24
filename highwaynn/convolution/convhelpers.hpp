@@ -159,6 +159,9 @@ public:
      */
     explicit SScConvSetting(const QSize& kernel, const QSize& stride, const SScConvSetting& input);
 
+    explicit SScConvSetting(const QVariantMap& vm);
+    QVariantMap toVm() const;
+
     inline bool     isValid     () const { return kernelValid() && strideValid() && inputValid() && outputValid(); }
     inline bool     kernelValid () const { return (m_k.width()>1) && (m_k.height()>1); }
     inline bool     strideValid () const { return (m_s.width()>0) && (m_s.height()>0); }
@@ -175,6 +178,7 @@ public:
     inline bool     canOutputTo (const SScConvSetting& other) const { return output()==other.input(); }
 
 private:
+    bool m_inputtype;
     QSize m_k, m_s, m_o, m_i;
 };
 
