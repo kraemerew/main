@@ -42,6 +42,7 @@ SOURCES += main.cpp \
     highwaynn/convolution/convunitv2.cpp \
     highwaynn/convolution/kernel.cpp \
     highwaynn/convolution/convhelpers.cpp \
+    highwaynn/convolution/convsetting.cpp \
     highwaynn/convolution/imageprovider.cpp
 
 # The following define makes your compiler emit warnings if you use
@@ -91,6 +92,7 @@ HEADERS += \
     highwaynn/convolution/kernel.hpp \
    # highwaynn/convpatternprovider.hpp \
     highwaynn/convolution/convhelpers.hpp \
+    highwaynn/convolution/convsetting.hpp \
     #image/convimageconverter.hpp \
     highwaynn/convolution/imageprovider.hpp
 
